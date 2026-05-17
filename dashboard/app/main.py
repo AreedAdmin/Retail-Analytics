@@ -193,11 +193,6 @@ def main():
     app.launch(
         debug=True,
         show_error=True,
-        theme=gr.themes.Base(
-            primary_hue=gr.themes.colors.emerald,
-            neutral_hue=gr.themes.colors.slate,
-        ),
-        css=APP_CSS,
     )
 
 
