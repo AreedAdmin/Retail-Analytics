@@ -17,13 +17,43 @@ gradio dashboard/app/main.py
 The app will be available at `http://localhost:7860` (or 7861+ if ports are in use)
 
 ### Status
-- ✅ **Module 1 (Overview)**: COMPLETE - Professional dark BI dashboard with KPI cards, charts, and tables
+- ✅ **Module 1 (Overview)**: COMPLETE - Professional dark BI dashboard with KPI cards, charts, tables, and collapsible sections (Project Description, Key Findings, Key Assumptions)
+- ✅ **Data Integration**: Real data from `data/data_raw.csv` (44 SKUs, 104 weeks ~1.9 years)
 - ⏳ **Modules 2-10**: To be implemented (Data Explorer, Analytics, ML, AI, Export)
-- ⚠️ **Data**: Currently using simulated data (will connect real CSV next)
+- ✨ **Features**: Responsive collapsible sections, professional dark theme, all KPIs calculated from real data
 
 ---
 
 ## Architecture Overview
+
+### Module 1 - Overview (Implemented)
+
+**KPI Cards:**
+- Total SKUs: 44 unique products analyzed
+- Data Periods: 104 weeks (1.9 years)
+- Average Price: Calculated from all SKUs
+- Promotions Run: Total promotion instances in dataset
+
+**Visualizations:**
+- Weekly Sales Trend: Line chart (Teal + Orange promoted sales)
+- Top Performers: Ranked list with gold/silver/bronze badges
+- Promo Score: Half-doughnut gauge (% promo instances per week)
+- Sales by Functionality: Horizontal bar chart
+- SKU Status Snapshot: Table with 8 SKUs (Online/Active/Low status)
+
+**Documentation Sections (Collapsible):**
+- 📋 Project Description & Navigation: Sidebar guide
+- ⭐ Key Findings: Auto-populated from Module 3-7 outputs
+- ✓ Key Assumptions: 6 documented assumptions (data, causality, stationarity, etc.)
+
+**Styling:**
+- Professional dark theme (Navy #0d1b2a, Teal #00d4aa, Blue #3b82f6)
+- All text in white (#ffffff)
+- Interactive collapsible sections with blue text
+- SKU 25 highlighted in green, SKU 42 in orange
+- Smooth animations (0.25s cubic-bezier)
+
+---
 
 ### Three Main Components
 

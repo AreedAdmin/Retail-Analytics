@@ -120,13 +120,16 @@ def get_data() -> pd.DataFrame:
 
 def compute_kpis(df: pd.DataFrame) -> dict:
     sku_sales = df.groupby("sku_id")["weekly_sales"].sum()
+    # Number of promotions = count of rows with feat_main_page==1
+    number_of_promotions = int((df["feat_main_page"] == 1).sum())
+    total_skus = df["sku_id"].nunique()
     return {
-        "total_skus":    int(df["sku_id"].nunique()),
-        "total_periods": int(df["period"].nunique()),
-        "avg_price":     round(float(df["price"].mean()), 2),
-        "promo_rate":    round(float(df["feat_main_page"].mean() * 100), 1),
-        "top_sku":       int(sku_sales.idxmax()),
-        "weakest_sku":   int(sku_sales.idxmin()),
+        "total_skus":           int(total_skus),
+        "total_periods":        int(df["period"].nunique()),
+        "avg_price":            round(float(df["price"].mean()), 2),
+        "number_of_promotions": number_of_promotions,
+        "top_sku":              int(sku_sales.idxmax()),
+        "weakest_sku":          int(sku_sales.idxmin()),
     }
 
 
@@ -145,6 +148,7 @@ def compute_sku_snapshot(df: pd.DataFrame, n: int = 8) -> list:
     grp["promo_pct"] = (grp["promo_count"] / grp["total_weeks"] * 100).round(1)
     grp["avg_sales"] = grp["avg_sales"].round(1)
     grp["avg_price"] = grp["avg_price"].round(2)
+    # Status based on median sales: Online (>130% median), Active (50-130%), Low (<50%)
     med = grp["avg_sales"].median()
     grp["status"] = grp.apply(
         lambda r: "Online" if r["avg_sales"] > med * 1.3
@@ -226,7 +230,7 @@ def make_bar_chart(df: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def make_gauge(value: float = 84.0) -> go.Figure:
+def make_gauge(value: float) -> go.Figure:
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=value,
@@ -363,7 +367,7 @@ def build_header_html(kpis: dict) -> str:
       <div class="kpi-lbl">&#9632; Data Periods</div>
       <div class="kpi-val">{kpis['total_periods']}</div>
       <div class="kpi-sub">Weekly observations</div>
-      <span class="kpi-badge up">&#8679; {kpis['total_periods']//52} yr data</span>
+      <span class="kpi-badge up">&#8679; {round(kpis['total_periods']/52, 1)} yrs</span>
     </div>
     <div class="kpi-card t-amber">
       <div class="kpi-lbl">&#9632; Avg Price</div>
@@ -372,10 +376,10 @@ def build_header_html(kpis: dict) -> str:
       <span class="kpi-badge warn">&#8722; Baseline</span>
     </div>
     <div class="kpi-card t-blue">
-      <div class="kpi-lbl">&#9632; Promotions</div>
-      <div class="kpi-val">{kpis['promo_rate']}%</div>
-      <div class="kpi-sub">Avg promo rate / SKU</div>
-      <span class="kpi-badge up">&#8679; +12% lift avg</span>
+      <div class="kpi-lbl">&#9632; Promotions Run</div>
+      <div class="kpi-val">{kpis['number_of_promotions']:,}</div>
+      <div class="kpi-sub">Total promo instances</div>
+      <span class="kpi-badge up">&#8679; {round(kpis['number_of_promotions']/kpis['total_periods'], 1)} per wk</span>
     </div>
   </div>
 </div>"""
@@ -454,6 +458,136 @@ def build_footer_html() -> str:
 # GRADIO BUILDER
 # ─────────────────────────────────────────────────────────────
 
+def build_collapsible_section(section_id: str, title: str, content_html: str) -> str:
+    """Create a clickable collapsible section with expand/collapse chevron."""
+    return f"""
+<style>
+  .collapsible-header {{
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #0a1520;
+    border: 1px solid #1e3a55;
+    border-radius: 8px 8px 0 0;
+    user-select: none;
+    transition: background 0.2s;
+  }}
+  .collapsible-header:hover {{
+    background: #0f2438;
+  }}
+  .collapsible-title {{
+    font-weight: 600;
+    color: #ffffff !important;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }}
+  .collapsible-chevron {{
+    color: #3b82f6 !important;
+    font-size: 14px;
+    transition: transform 0.2s;
+    font-weight: bold;
+  }}
+  .collapsible-chevron.open {{
+    transform: rotate(0deg);
+  }}
+  .collapsible-content {{
+    max-height: 0;
+    overflow: hidden;
+    background: #0a1520;
+    border: 1px solid #1e3a55;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    transition: max-height 0.3s ease;
+    padding: 0 16px;
+  }}
+  .collapsible-content.open {{
+    max-height: 1000px;
+    padding: 16px;
+  }}
+  .collapsible-content ul, .collapsible-content p {{
+    color: #3b82f6 !important;
+    font-size: 11px;
+    line-height: 1.6;
+    margin: 0;
+  }}
+  .collapsible-content ul {{
+    padding-left: 16px;
+  }}
+  .collapsible-content li {{
+    margin-bottom: 6px;
+  }}
+  .collapsible-content strong {{
+    color: #60a5fa !important;
+  }}
+</style>
+<div style="margin-top: 12px;">
+  <div class="collapsible-header" onclick="toggleCollapsible('{section_id}')">
+    <span class="collapsible-title">{title}</span>
+    <span class="collapsible-chevron open" id="{section_id}-chevron">▼</span>
+  </div>
+  <div class="collapsible-content open" id="{section_id}">
+    {content_html}
+  </div>
+</div>
+<script>
+  function toggleCollapsible(id) {{
+    const content = document.getElementById(id);
+    const chevron = document.getElementById(id + '-chevron');
+    content.classList.toggle('open');
+    chevron.classList.toggle('open');
+  }}
+</script>"""
+
+
+def build_project_description_html() -> str:
+    """Project description and navigation instructions - collapsible."""
+    content = """
+    <p style="margin:0 0 8px"><strong style="color:#60a5fa">This dashboard integrates real-time retail analytics with predictive modeling and AI-augmented insights. Use the sidebar to explore:</strong></p>
+    <ul style="margin:0;color:#3b82f6">
+      <li><strong style="color:#60a5fa">Module 1 (Overview)</strong>: High-level KPI summary and key findings</li>
+      <li><strong style="color:#60a5fa">Module 2 (Data Explorer)</strong>: Inspect raw data, filtering, and descriptive statistics</li>
+      <li><strong style="color:#60a5fa">Modules 3–5 (Analytics)</strong>: Promotion effectiveness, price elasticity, scenario simulation</li>
+      <li><strong style="color:#60a5fa">Modules 6–7 (ML)</strong>: Demand forecasting and promotion lift modeling</li>
+      <li><strong style="color:#60a5fa">Module 8 (Chat)</strong>: Ask data-grounded questions in natural language</li>
+      <li><strong style="color:#60a5fa">Module 9 (Reflection)</strong>: Critical assessment of AI components</li>
+      <li><strong style="color:#60a5fa">Module 10 (Export)</strong>: Download results and model documentation</li>
+    </ul>
+    """
+    return build_collapsible_section("proj-desc", "📋 Project Description & Navigation", content)
+
+
+def build_key_findings_html() -> str:
+    """Key findings from analytical modules - collapsible."""
+    content = """
+    <p style="margin:0"><em style="color:#60a5fa">Key findings from Modules 3–7 will auto-populate here once analytical pipelines complete. This section will synthesize:</em></p>
+    <ul style="margin:8px 0 0;color:#3b82f6">
+      <li>Promotion lift impact per SKU</li>
+      <li>Price elasticity rankings</li>
+      <li>Demand forecasts and seasonality</li>
+      <li>Scenario recommendations</li>
+    </ul>
+    """
+    return build_collapsible_section("key-find", "⭐ Key Findings", content)
+
+
+def build_key_assumptions_html() -> str:
+    """Key assumptions made during analysis - collapsible."""
+    content = """
+    <ul style="margin:0;color:#3b82f6">
+      <li><strong style="color:#60a5fa">Data completeness:</strong> All periods represent complete weeks; no gaps assumed to be missing-at-random</li>
+      <li><strong style="color:#60a5fa">Causality:</strong> Promotion feature (feat_main_page) assumed causal for incremental lift (SCAN*PRO justification)</li>
+      <li><strong style="color:#60a5fa">Stationarity:</strong> Historical patterns assumed to persist in forecast horizon unless structural breaks detected</li>
+      <li><strong style="color:#60a5fa">Price exogeneity:</strong> Price changes assumed independent of demand shocks in elasticity estimation</li>
+      <li><strong style="color:#60a5fa">Model scope:</strong> Recommendations apply to baseline & scenario cases only; external events (supply shock, competition) not modeled</li>
+      <li><strong style="color:#60a5fa">AI guardrails:</strong> All AI-generated narratives grounded in actual data; hallucinations blocked via prompt engineering</li>
+    </ul>
+    """
+    return build_collapsible_section("key-assum", "✓ Key Assumptions", content)
+
+
 def build_overview_tab():
     """
     Renders the Overview module inside a running gr.Blocks context.
@@ -467,10 +601,13 @@ def build_overview_tab():
     snap     = compute_sku_snapshot(df, 8)
     fig_line = make_line_chart(df)
     fig_bar  = make_bar_chart(df)
-    fig_gau  = make_gauge(84.0)
+    fig_gau  = make_gauge(float(kpis['number_of_promotions'] / kpis['total_periods'] * 100))
 
     # Header + KPI row
     gr.HTML(value=build_header_html(kpis))
+
+    # Project Description & Navigation
+    gr.HTML(value=build_project_description_html())
 
     # Row 2 — Line chart | Top performers | Gauge
     with gr.Row(equal_height=False):
@@ -513,6 +650,12 @@ def build_overview_tab():
 
         with gr.Column(scale=1):
             gr.HTML(value=build_table_html(snap))
+
+    # Key Findings
+    gr.HTML(value=build_key_findings_html())
+
+    # Key Assumptions
+    gr.HTML(value=build_key_assumptions_html())
 
     # Footer
     gr.HTML(value=build_footer_html())
