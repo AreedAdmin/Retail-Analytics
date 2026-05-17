@@ -193,6 +193,8 @@ def main():
     app.launch(
         debug=True,
         show_error=True,
+        share=True,
+    )
     )
 
 
