@@ -195,8 +195,5 @@ def main():
         show_error=True,
         share=True,
     )
-    )
-
-
 if __name__ == "__main__":
     main()
