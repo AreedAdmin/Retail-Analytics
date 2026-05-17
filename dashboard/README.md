@@ -18,7 +18,8 @@ The app will be available at `http://localhost:7860` (or 7861+ if ports are in u
 
 ### Status
 - ✅ **Module 1 (Overview)**: COMPLETE - Professional dark BI dashboard with KPI cards, charts, tables, and collapsible sections (Project Description, Key Findings, Key Assumptions)
-- ✅ **Data Integration**: Real data from `data/data_raw.csv` (44 SKUs, 104 weeks ~1.9 years)
+- ✅ **Data Integration**: Real data from `data/data_raw.csv` (44 SKUs, 104 weeks ~1.9 years) with automatic date-to-period conversion
+- ✅ **Data Pipeline**: Period indexing fixed - dates converted to numeric week numbers (1-104) automatically on load
 - ⏳ **Modules 2-10**: To be implemented (Data Explorer, Analytics, ML, AI, Export)
 - ✨ **Features**: Responsive collapsible sections, professional dark theme, all KPIs calculated from real data
 

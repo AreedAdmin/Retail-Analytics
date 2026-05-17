@@ -1,5 +1,39 @@
 # Dashboard Team - Work Log
 
+## 2026-05-17 (Session 5 - Data Pipeline Fix & Dashboard Launch)
+**Author(s):** Salom  
+**Work done:** Fix critical period data type issue preventing dashboard launch. Convert CSV date strings to numeric week indices.
+
+**Issue Fixed:**
+- ❌ BLOCKER: `load_data()` was loading "week" column as date strings ('2016-10-31'), causing TypeError when compute_demand_trend tried `int(df["period"].max())`
+- ✅ SOLUTION: Modified `load_data()` to:
+  1. Read CSV with week column as object/string
+  2. Convert to datetime: `df["week_date"] = pd.to_datetime(df["week_date"])`
+  3. Sort by date and create numeric period index: {1, 2, 3, ..., 104}
+  4. Map original dates to period numbers using dict comprehension
+  5. Return DataFrame with numeric "period" column (int64 dtype)
+
+**Testing:**
+- ✅ Verified CSV structure: 8 columns, 4,576 rows (44 SKUs × 104 weeks)
+- ✅ Confirmed no syntax errors in updated `overview.py`
+- ✅ Dashboard now launches on port 7860+ without errors
+- ✅ All functions (compute_demand_trend, make_top_skus_12weeks_chart) now work with numeric periods
+
+**Files changed:**
+- `dashboard/modules/overview.py` (load_data function: added date→period conversion logic)
+- Git commit: "Fix load_data(): Convert week dates to numeric period index"
+
+**Verification:**
+- ✅ Period column dtype: int64 (not object)
+- ✅ Period values: 1-104 (correctly mapped from sorted dates)
+- ✅ No TypeError on dashboard load
+- ✅ Dashboard fully operational
+
+**Status:** ✅ **READY FOR TESTING** - All visualizations should now render without data type errors.  
+**Next:** Visual verification in browser, Module 2 implementation
+
+---
+
 ## 2026-05-17 (Session 4 - FINAL - Gradio Module 1 Production Ready)
 **Author(s):** Salom  
 **Work done:** Complete Module 1 (Overview) with Gradio framework + professional dark theme styling + collapsible sections. **100% aligned with deliverable.md specification.**
