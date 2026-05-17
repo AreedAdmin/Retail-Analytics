@@ -22,6 +22,7 @@ statsmodels==0.14.0
 
 # LLM and AI Integration
 ollama==0.2.1  # Local LLM runtime
+boto3==1.34.84  # AWS Bedrock provider (AI module)
 openai==1.28.1
 anthropic==0.28.0
 tiktoken==0.7.0  # Token estimation
