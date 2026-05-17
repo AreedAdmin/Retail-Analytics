@@ -15,6 +15,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 sys.path.insert(0, PROJECT_ROOT)
 
 from dashboard.modules import overview
+from dashboard.modules.module_7 import build_module_7_tab
 
 # ─────────────────────────────────────────────────────────────
 # GLOBAL CSS  — dark everything, including sidebar
@@ -174,6 +175,8 @@ def build_app() -> gr.Blocks:
             # ── MAIN CONTENT ──
             with gr.Column(scale=5):
                 overview.build_overview_tab()
+                build_module_7_tab()
+
 
                 # Placeholder tabs for other modules (uncomment as they are built)
                 # with gr.Tab("2. Data Explorer"):
