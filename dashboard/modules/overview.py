@@ -79,7 +79,14 @@ def load_data() -> pd.DataFrame:
     for p in paths:
         if os.path.exists(p):
             df = pd.read_csv(p)
-            return df.rename(columns={"sku": "sku_id", "week": "period"})
+            df = df.rename(columns={"sku": "sku_id", "week": "week_date"})
+            # Create numeric period index from unique dates
+            df["week_date"] = pd.to_datetime(df["week_date"])
+            df = df.sort_values("week_date").reset_index(drop=True)
+            unique_weeks = df["week_date"].unique()
+            week_to_period = {week: i+1 for i, week in enumerate(unique_weeks)}
+            df["period"] = df["week_date"].map(week_to_period).astype(int)
+            return df
     return pd.DataFrame()
 
 
@@ -255,6 +262,104 @@ def make_gauge(value: float) -> go.Figure:
         font=dict(color=C["muted"]),
         margin=dict(l=20, r=20, t=30, b=10),
         height=195,
+    )
+    return fig
+
+
+def compute_demand_trend(df: pd.DataFrame, n_weeks: int = 8) -> list:
+    """
+    Compute demand trend for top 8 SKUs.
+    Compares last 8 weeks vs previous 8 weeks.
+    Returns: list of dicts with sku, direction (↗/→/↘), pct_change, status (at_risk if <-10%)
+    """
+    total_periods = int(df["period"].max())
+    recent_start = max(1, total_periods - n_weeks + 1)
+    prior_start = max(1, recent_start - n_weeks)
+    prior_end = recent_start - 1
+    
+    # Top 8 SKUs by total sales
+    top_skus = df.groupby("sku_id")["weekly_sales"].sum().nlargest(8).index.tolist()
+    
+    trends = []
+    for sku in top_skus:
+        recent = df[(df["sku_id"] == sku) & (df["period"] >= recent_start)]["weekly_sales"].sum()
+        prior = df[(df["sku_id"] == sku) & (df["period"] >= prior_start) & (df["period"] <= prior_end)]["weekly_sales"].sum()
+        
+        if prior == 0:
+            pct_change = 0
+            direction = "→"
+        else:
+            pct_change = round((recent - prior) / prior * 100, 1)
+            if pct_change > 5:
+                direction = "↗"
+            elif pct_change < -5:
+                direction = "↘"
+            else:
+                direction = "→"
+        
+        status = "at_risk" if pct_change < -10 else "normal"
+        trends.append({"sku": sku, "direction": direction, "pct_change": pct_change, "status": status})
+    
+    return trends
+
+
+def make_demand_trend_html(trends: list) -> str:
+    """Create HTML for demand trend display."""
+    items = ""
+    for t in trends:
+        color = "#ef4444" if t["status"] == "at_risk" else "#3b82f6"
+        sign = "+" if t["pct_change"] >= 0 else ""
+        items += f"""
+        <div style="display:flex;align-items:center;justify-content:space-between;
+                    padding:8px 12px;border-bottom:1px solid #1e3a55;color:#e8edf5;font-size:11px">
+          <span style="font-weight:600;color:#ffffff">SKU {t['sku']}</span>
+          <span style="font-size:16px;color:#3b82f6;margin:0 12px">{t['direction']}</span>
+          <span style="font-weight:600;color:{color}">{sign}{t['pct_change']}%</span>
+        </div>"""
+    
+    return f"""
+    <div class="panel-wrap">
+      <div class="ph" style="margin-bottom:0;color:#ffffff">
+        <span style="color:#ef4444"><span>📊</span>&nbsp;Demand Trend (Last 8 Weeks)</span>
+      </div>
+      <div style="background:#0a1520">{items}</div>
+    </div>"""
+
+
+def make_top_skus_12weeks_chart(df: pd.DataFrame) -> go.Figure:
+    """Create line chart for top 5 SKUs over last 12 weeks."""
+    total_periods = df["period"].max()
+    period_start = max(1, total_periods - 11)
+    df_recent = df[df["period"] >= period_start].copy()
+    
+    # Top 5 SKUs by total sales in this window
+    top_skus = df_recent.groupby("sku_id")["weekly_sales"].sum().nlargest(5).index.tolist()
+    
+    colors = [C["teal"], C["amber"], C["purple"], C["blue"], "#ef4444"]
+    
+    fig = go.Figure()
+    for i, sku in enumerate(top_skus):
+        sku_data = df_recent[df_recent["sku_id"] == sku].sort_values("period")
+        fig.add_trace(go.Scatter(
+            x=sku_data["period"],
+            y=sku_data["weekly_sales"],
+            name=f"SKU {sku}",
+            mode="lines+markers",
+            line=dict(color=colors[i % len(colors)], width=2.5),
+            marker=dict(size=4),
+            hovertemplate="SKU %{fullData.name}<br>Week %{x}<br>Sales: %{y:,.0f}<extra></extra>",
+        ))
+    
+    fig.update_layout(
+        **PLOTLY_LAYOUT,
+        legend=dict(
+            orientation="h", y=-0.2, x=0,
+            font=dict(size=10, color=C["muted"]),
+            bgcolor="rgba(0,0,0,0)",
+        ),
+        title=dict(text="", x=0.5, xanchor="center"),
+        hovermode="x unified",
+        height=240,
     )
     return fig
 
@@ -526,9 +631,9 @@ def build_collapsible_section(section_id: str, title: str, content_html: str) ->
 <div style="margin-top: 12px;">
   <div class="collapsible-header" onclick="toggleCollapsible('{section_id}')">
     <span class="collapsible-title">{title}</span>
-    <span class="collapsible-chevron open" id="{section_id}-chevron">▼</span>
+    <span class="collapsible-chevron" id="{section_id}-chevron">▼</span>
   </div>
-  <div class="collapsible-content open" id="{section_id}">
+  <div class="collapsible-content" id="{section_id}">
     {content_html}
   </div>
 </div>
@@ -651,6 +756,24 @@ def build_overview_tab():
         with gr.Column(scale=1):
             gr.HTML(value=build_table_html(snap))
 
+    # Row 4 — Demand Trend | Top 5 SKUs chart
+    trend_data = compute_demand_trend(df, n_weeks=8)
+    fig_top5 = make_top_skus_12weeks_chart(df)
+    
+    with gr.Row():
+        with gr.Column(scale=1):
+            gr.HTML(value=make_demand_trend_html(trend_data))
+
+        with gr.Column(scale=1):
+            gr.HTML(value=f"""
+            <div class="panel-wrap" style="margin-bottom:0;border-bottom-left-radius:0;
+                 border-bottom-right-radius:0;border-bottom:none;padding-bottom:4px">
+              <div class="ph" style="margin-bottom:0">
+                <span class="sales-white"><span class="dot-t">📈</span>&nbsp;Top 5 SKUs (Last 12 Weeks)</span>
+              </div>
+            </div>""")
+            gr.Plot(value=fig_top5, show_label=False, container=False)
+
     # Key Findings
     gr.HTML(value=build_key_findings_html())
 
@@ -666,14 +789,13 @@ def build_overview_tab():
 # ─────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    with gr.Blocks(
-        title="Overview — Retail Dashboard",
+    with gr.Blocks(title="Overview — Retail Dashboard") as demo:
+        build_overview_tab()
+
+    demo.launch(
         theme=gr.themes.Base(
             primary_hue=gr.themes.colors.emerald,
             neutral_hue=gr.themes.colors.slate,
         ),
         css=GRADIO_CSS,
-    ) as demo:
-        build_overview_tab()
-
-    demo.launch()
+    )

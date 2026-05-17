@@ -163,14 +163,7 @@ SIDEBAR_HTML = """
 # ─────────────────────────────────────────────────────────────
 
 def build_app() -> gr.Blocks:
-    with gr.Blocks(
-        title="AI-Augmented Retail Analytics Dashboard",
-        theme=gr.themes.Base(
-            primary_hue=gr.themes.colors.emerald,
-            neutral_hue=gr.themes.colors.slate,
-        ),
-        css=APP_CSS,
-    ) as app:
+    with gr.Blocks(title="AI-Augmented Retail Analytics Dashboard") as app:
 
         with gr.Row(elem_classes=["full-row"]):
 
@@ -194,7 +187,15 @@ def build_app() -> gr.Blocks:
 
 def main():
     app = build_app()
-    app.launch(debug=True, show_error=True)
+    app.launch(
+        debug=True,
+        show_error=True,
+        theme=gr.themes.Base(
+            primary_hue=gr.themes.colors.emerald,
+            neutral_hue=gr.themes.colors.slate,
+        ),
+        css=APP_CSS,
+    )
 
 
 if __name__ == "__main__":
