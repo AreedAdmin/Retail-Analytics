@@ -20,7 +20,7 @@ from pathlib import Path
 
 REPO_ROOT     = Path(__file__).resolve().parents[2]
 PROMPT_PATH   = REPO_ROOT / "ai" / "prompts" / "module7_lift_narrative.txt"
-CONTEXT_PATH  = REPO_ROOT / "ml" / "promotions" / "outputs" / "ai_context_module7.json"
+CONTEXT_PATH  = REPO_ROOT / "ml" / "ml_promotions_pricing" / "outputs" / "ai_context_module7.json"
 FAILURE_LOG   = REPO_ROOT / "ai" / "services" / "failure_log.jsonl"
 
 # ── API setup ─────────────────────────────────────────────────────────────────
