@@ -5,6 +5,69 @@
 
 ---
 
+## Quick-start: what you need to install and run this
+
+### Minimum requirements
+
+| Thing | Why you need it |
+|---|---|
+| Python 3.11+ | The codebase uses `int \| None` union syntax — 3.10 and below will fail |
+| All packages in root `requirements.txt` | Run `pip install -r requirements.txt` from the repo root |
+| `ml/ml_promotions_pricing/outputs/ai_context_module7.json` | Already in the repo — the ML pod wrote this; it's the only live context file right now |
+
+### To run with a real AI model (recommended for demo)
+
+1. **Install Ollama** — download from https://ollama.com and run the installer (Mac/Windows/Linux)
+2. **Pull the model** — in a terminal:
+   ```
+   ollama pull llama3.1:8b-instruct-q4_K_M
+   ```
+   This downloads ~4.7 GB once and caches it. You need at least 8 GB RAM free.
+3. **Set the provider and launch the dashboard:**
+   ```
+   LLM_PROVIDER=ollama python -m dashboard.app
+   ```
+   On Windows PowerShell: `$env:LLM_PROVIDER="ollama"; python -m dashboard.app`
+
+### To run without installing anything extra (offline / CI mode)
+
+The `EchoProvider` is a built-in fallback — no Ollama, no API keys needed. It returns a deterministic stub answer so the dashboard still loads and the chat tab is functional (just not intelligent).
+
+```
+LLM_PROVIDER=echo python -m dashboard.app
+```
+
+### To use AWS Bedrock instead of local Ollama
+
+Set two environment variables before launching (no code changes needed):
+
+```
+LLM_PROVIDER=bedrock
+AWS_REGION=eu-west-2       # or whichever region has Bedrock access
+```
+
+You also need AWS credentials configured (`aws configure` or the usual env vars). The model used is `meta.llama3-1-8b-instruct-v1:0` — same Llama 3.1 family, runs in the cloud.
+
+### Verify everything is wired up
+
+```
+python ai/scripts/check_setup.py
+```
+
+Should print `Result: OK`. Warnings about Ollama or AWS are fine if you're not using those providers.
+
+### Run the test suite (no Ollama required)
+
+```
+pytest ai/tests/ -v
+```
+
+All 45 tests pass without any external dependencies. They use the EchoProvider internally.
+
+---
+
+---
+
 ## 1. What this module does
 
 Module 8 embeds a retail analytics chatbot directly inside the Gradio dashboard. A marketing manager can type plain-English questions and receive answers grounded exclusively in the ML and analytics outputs already visible in the dashboard. Every response is labelled `[Data-grounded]` or `[General inference]` so the manager always knows how much to trust it. The module also provides a "Summarise this chart" click action and a multi-chart synthesis panel used across Modules 3–7.
