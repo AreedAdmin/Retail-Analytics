@@ -271,10 +271,6 @@ SIDEBAR_HTML = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap');
 .sb { background:#0a1520; height:100%; padding:16px 0; border-right:1px solid #1e3048; }
-.sb-logo { padding:0 16px 16px; border-bottom:1px solid #1e3048; margin-bottom:12px; }
-.sb-logo-name { font:600 12px/1 'Space Grotesk',sans-serif; color:#00d4aa;
-  text-transform:uppercase; letter-spacing:.08em; display:block; margin-top:6px; }
-.sb-logo-sub  { font-size:10px; color:#4a6080; margin-top:2px; display:block; }
 .sb-sect { font:600 10px/1 'DM Sans',sans-serif; text-transform:uppercase;
   letter-spacing:.1em; color:#4a6080; padding:12px 16px 5px; }
 .sb-item { display:flex; align-items:center; gap:10px; padding:9px 16px;
@@ -285,11 +281,6 @@ SIDEBAR_HTML = """
 .sb-icon { font-size:15px; width:18px; text-align:center; }
 </style>
 <div class="sb">
-  <div class="sb-logo">
-    <span class="sb-logo-name">Retail Analytics</span>
-    <span class="sb-logo-sub">AI-Augmented Dashboard</span>
-  </div>
-
   <a class="sb-item active">Overview</a>
   <a class="sb-item">Data Explorer</a>
 

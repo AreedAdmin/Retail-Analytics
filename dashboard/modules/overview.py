@@ -94,7 +94,7 @@ def make_simulated_data() -> pd.DataFrame:
     """Realistic simulated retail data used when CSV is absent."""
     rng  = np.random.default_rng(42)
     skus = list(range(1, 45))
-    periods = list(range(1, 105))
+    periods = list(range(1, 101))  # ← Fixed: 100 periods, not 104
     funcs = ["Kitchenware", "Electronics", "Apparel", "Tools", "Beauty", "Sports"]
     rows = []
     for sku in skus:
