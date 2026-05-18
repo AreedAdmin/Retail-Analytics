@@ -1,0 +1,22 @@
+name: Sync to Hugging Face Space
+
+on:
+  push:
+    branches: [ main ]  # run on every push to main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Sync to Hugging Face Hub
+        uses: huggingface/hub-sync@v0.1.0
+        with:
+          github_repo_id: ${{ github.repository }}
+          huggingface_repo_id: <HF_USERNAME>/<SPACE_NAME>   # e.g. johndoe/my-cool-app
+          hf_token: ${{ secrets.HF_TOKEN }}
+          # optional: space_sdk: gradio | streamlit | docker | static
+          # space_sdk: gradio
