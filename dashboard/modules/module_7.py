@@ -33,14 +33,29 @@ sys.path.insert(0, str(REPO_ROOT))
 # ── Load pre-computed outputs ─────────────────────────────────────────────────
 
 def load_outputs():
-    try:
-        lift_df     = pd.read_csv(OUTPUTS_PATH / "promotion_output.csv", parse_dates=["period"])
-        sku_summary = pd.read_csv(OUTPUTS_PATH / "sku_lift_summary.csv")
-        with open(CONTEXT_PATH) as f:
-            ai_context = json.load(f)
-        return lift_df, sku_summary, ai_context, None
-    except FileNotFoundError as e:
-        return None, None, None, str(e)
+    """Load ML outputs. Try multiple paths for GitHub + HF Spaces compatibility."""
+    output_paths = [
+        OUTPUTS_PATH / "promotion_output.csv",
+        Path("ml/ml_promotions_pricing/outputs/promotion_output.csv"),
+    ]
+    
+    lift_df = None
+    sku_summary = None
+    ai_context = None
+    
+    for csv_path in output_paths:
+        try:
+            lift_df = pd.read_csv(csv_path, parse_dates=["period"])
+            sku_summary = pd.read_csv(csv_path.parent / "sku_lift_summary.csv")
+            with open(csv_path.parent / "ai_context_module7.json") as f:
+                ai_context = json.load(f)
+            return lift_df, sku_summary, ai_context, None
+        except FileNotFoundError:
+            continue
+    
+    # If no files found, return error message with paths attempted
+    error_msg = f"Outputs not found. Tried: {[str(p) for p in output_paths]}"
+    return None, None, None, error_msg
 
 
 # ── Chart builders ─────────────────────────────────────────────────────────────
