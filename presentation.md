@@ -192,6 +192,37 @@ loaders raise a clear "run the notebook" error rather than silently breaking.
 
 ---
 
+## Slide 6b — Architecture: The Layered Cake
+
+*(Placed before the per-service deep-dives — the one-glance mental model.)*
+
+```
+   ┌──────────────────────────────────────────────┐    ╔══════════════╗
+   │  CLIENT · Presentation                        │    ║  AI LAYER    ║
+   │  Gradio app · 11 tabs · charts · KPIs         │    ║  (sidecar)   ║
+   ├──────────────────────────────────────────────┤    ║              ║
+   │  SERVICES · ML & Analytics                    │ ◀──║ ai/services  ║
+   │  Forecast · Promo Lift · Elasticity · Scenario│    ║ context →    ║
+   ├──────────────────────────────────────────────┤    ║ LLMClient →  ║
+   │  DATA · Foundation                            │    ║ guardrail →  ║
+   │  data_raw.csv · schemas.py · cached loaders   │    ║ Ollama Cloud ║
+   └──────────────────────────────────────────────┘    ╚══════════════╝
+        each layer ⇄ the one below via frozen contracts
+```
+
+**One hero visual:** a 3-tier cake — **Client** on top, **Services** in the
+middle, **Data** at the base — each tier depending only on the tier below
+through frozen contracts. The **AI layer** is a sidecar pillar callable from
+every tier.
+
+**Speaker notes:** Use this as the orientation slide before drilling into
+each service. Top-down: the client only consumes; services are produced
+offline and integrate via contracts; data is the fixed foundation; the AI
+layer is not a tier but a sidecar any layer can call. The next slides go one
+service deep.
+
+---
+
 ## Slide 7 — Service 1: Demand Forecasting (ML)
 
 **Goal:** weekly demand per SKU with uncertainty.

@@ -261,6 +261,32 @@ ForecastOutput:
 </div></div>`,
 `The architectural backbone. Loaders raise a clear "run the notebook" error rather than silently breaking — integration is safe and parallelisable.`);
 
+/* 6.5 — ARCHITECTURE: LAYERED CAKE */
+add(`
+<div class="kicker">Architecture</div>
+<h2>The stack — a <span class="ac">layered cake</span></h2>
+<div class="fill"><div style="display:flex;gap:18px;align-items:stretch">
+ <div style="flex:1;display:flex;flex-direction:column;gap:12px">
+  ${[
+    ['CLIENT · Presentation','Gradio app · 11 module tabs · charts · KPIs · click‑to‑summarise','var(--accent)'],
+    ['SERVICES · ML &amp; Analytics','Forecasting (HistGBR) · Promo Lift (XGBoost) · Elasticity (OLS) · Scenario','#79838f'],
+    ['DATA · Foundation','data_raw.csv · schemas.py contracts · validated, cached loaders','#79838f'],
+  ].map(b=>`<div style="background:var(--panel);border:1px solid var(--border);
+     border-top:3px solid ${b[2]};border-radius:10px;padding:18px 20px">
+     <div style="font:600 12px/1 var(--mono);letter-spacing:.18em;color:var(--text)">${b[0]}</div>
+     <div style="font-size:13px;color:var(--muted);margin-top:8px">${b[1]}</div></div>`).join('')}
+ </div>
+ <div style="width:248px;background:var(--soft);border:1px solid var(--line);
+   border-radius:10px;padding:18px;display:flex;flex-direction:column;justify-content:center;gap:10px">
+   <div style="font:600 12px/1 var(--mono);letter-spacing:.18em;color:var(--accent)">AI LAYER · sidecar</div>
+   <div style="font-size:12px;color:var(--muted);line-height:1.9">ai/services<br>context → LLMClient<br>→ guardrail → telemetry<br>→ <span class="ac">Ollama Cloud</span></div>
+   <div style="font-size:11px;color:var(--dim);margin-top:4px">callable from every layer</div>
+ </div>
+</div>
+<div class="sub" style="margin-top:14px">Each layer depends only on the one below via frozen contracts; the AI layer is a sidecar every layer can call.</div>
+</div>`,
+`The mental model for the whole system before we drill in: a layered cake — Client on top, Services in the middle, Data foundation at the base, integrated only through frozen contracts, with the AI layer as a sidecar any layer can call. The next slides go one layer / service deep.`);
+
 /* 7 — FORECAST */
 add(`
 <div class="kicker">Service 1 · ML</div>
