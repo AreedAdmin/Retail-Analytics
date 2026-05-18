@@ -194,6 +194,13 @@ def main():
         debug=True,
         show_error=True,
         share=True,
+        theme=gr.themes.Base(
+            primary_hue=gr.themes.colors.emerald,
+            neutral_hue=gr.themes.colors.slate,
+        ),
+        css=APP_CSS,
     )
+
+
 if __name__ == "__main__":
     main()
