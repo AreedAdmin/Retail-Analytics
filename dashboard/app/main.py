@@ -357,13 +357,11 @@ THEME_TOGGLE_JS = """
 }
 """
 
-# JS: on first load, restore the saved theme (default dark).
+# Light-only app: always apply the light theme on load. (The dark theme /
+# toggle were removed — light matches Gradio's default surfaces, which
+# eliminates the white-gap mismatch.)
 THEME_RESTORE_JS = """
-() => {
-    if (localStorage.getItem('ra-theme') === 'light') {
-        document.body.classList.add('light-theme');
-    }
-}
+() => { document.body.classList.add('light-theme'); }
 """
 
 # JS: turn the static sidebar into real navigation. Sidebar item order
@@ -414,13 +412,7 @@ def build_app() -> gr.Blocks:
             # ── SIDEBAR ──
             with gr.Column(scale=1, min_width=240, elem_classes=["sidebar-col"]):
                 gr.HTML(value=SIDEBAR_HTML)
-                gr.Button(
-                    "🌗  Light / Dark",
-                    elem_classes=["theme-toggle"],
-                    size="sm",
-                )
-                # Click handler is attached via THEME_TOGGLE_JS at app.load
-                # (robust DOM listener; see note on that constant).
+                # (Theme toggle removed — the app is light-only.)
 
             # ── MAIN CONTENT ──
             # One tab bar; each module owns its own gr.Tab (no double nesting).
@@ -444,7 +436,6 @@ def build_app() -> gr.Blocks:
 
         # Restore saved theme + wire the sidebar as the navigation.
         app.load(fn=None, inputs=None, outputs=None, js=THEME_RESTORE_JS)
-        app.load(fn=None, inputs=None, outputs=None, js=THEME_TOGGLE_JS)
         app.load(fn=None, inputs=None, outputs=None, js=SIDEBAR_NAV_JS)
 
     return app

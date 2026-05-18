@@ -13,16 +13,16 @@ import os
 # COLOURS
 # ─────────────────────────────────────────────────────────────
 C = {
-    "bg":     "#0d1b2a",
-    "panel":  "#112236",
-    "border": "#1e3a55",
-    "teal":   "#00d4aa",
-    "amber":  "#f59e0b",
+    "bg":     "#f4f6fa",
+    "panel":  "#ffffff",
+    "border": "#d8dee9",
+    "teal":   "#00a888",
+    "amber":  "#d97706",
     "purple": "#7c5cbf",
-    "blue":   "#3b82f6",
-    "text":   "#e8edf5",
-    "muted":  "#5a7a9a",
-    "grid":   "rgba(30,58,85,0.5)",
+    "blue":   "#2563eb",
+    "text":   "#1a2330",
+    "muted":  "#6b7a90",
+    "grid":   "rgba(180,190,205,0.45)",
 }
 
 PLOTLY_LAYOUT = dict(
@@ -39,29 +39,29 @@ PLOTLY_LAYOUT = dict(
 # ─────────────────────────────────────────────────────────────
 GRADIO_CSS = """
 body, .gradio-container, .main, .wrap, .gap, .svelte-1ipelgc {
-    background: #0d1b2a !important;
-    color: #e8edf5 !important;
+    background: #f4f6fa !important;
+    color: #1a2330 !important;
 }
 .block, .form, .panel, .gr-box, .gr-panel, .gr-form, .gr-group {
-    background: #112236 !important;
-    border: 1px solid #1e3a55 !important;
+    background: #ffffff !important;
+    border: 1px solid #d8dee9 !important;
     border-radius: 12px !important;
 }
-.plotly-graph-div { background: #112236 !important; }
+.plotly-graph-div { background: #ffffff !important; }
 .tab-nav button {
-    background: #0d1b2a !important;
-    color: #8a9bb5 !important;
+    background: #f4f6fa !important;
+    color: #51607a !important;
     border-bottom: 2px solid transparent !important;
 }
 .tab-nav button.selected {
-    color: #00d4aa !important;
-    border-bottom: 2px solid #00d4aa !important;
-    background: #112236 !important;
+    color: #00a888 !important;
+    border-bottom: 2px solid #00a888 !important;
+    background: #ffffff !important;
 }
 .prose, .output-html { background: transparent !important; }
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #0d1b2a; }
-::-webkit-scrollbar-thumb { background: #2a4a6a; border-radius: 3px; }
+::-webkit-scrollbar-track { background: #f4f6fa; }
+::-webkit-scrollbar-thumb { background: #c2ccdb; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #3a5a7a; }
 footer { display: none !important; }
 """
@@ -249,9 +249,9 @@ def make_gauge(value: float) -> go.Figure:
             bgcolor=C["panel"],
             borderwidth=0,
             steps=[
-                dict(range=[0,  60], color="#1a2d42"),
-                dict(range=[60, 80], color="#1e3a55"),
-                dict(range=[80,100], color="#1e4a3a"),
+                dict(range=[0,  60], color="#eef2f8"),
+                dict(range=[60, 80], color="#d8dee9"),
+                dict(range=[80,100], color="#d8f3e8"),
             ],
             threshold=dict(line=dict(color=C["teal"], width=2),
                            thickness=0.8, value=value),
@@ -307,22 +307,22 @@ def make_demand_trend_html(trends: list) -> str:
     """Create HTML for demand trend display."""
     items = ""
     for t in trends:
-        color = "#ef4444" if t["status"] == "at_risk" else "#3b82f6"
+        color = "#dc2626" if t["status"] == "at_risk" else "#2563eb"
         sign = "+" if t["pct_change"] >= 0 else ""
         items += f"""
         <div style="display:flex;align-items:center;justify-content:space-between;
-                    padding:8px 12px;border-bottom:1px solid #1e3a55;color:#e8edf5;font-size:11px">
-          <span style="font-weight:600;color:#ffffff">SKU {t['sku']}</span>
-          <span style="font-size:16px;color:#3b82f6;margin:0 12px">{t['direction']}</span>
+                    padding:8px 12px;border-bottom:1px solid #d8dee9;color:#1a2330;font-size:11px">
+          <span style="font-weight:600;color:#1a2330">SKU {t['sku']}</span>
+          <span style="font-size:16px;color:#2563eb;margin:0 12px">{t['direction']}</span>
           <span style="font-weight:600;color:{color}">{sign}{t['pct_change']}%</span>
         </div>"""
     
     return f"""
     <div class="panel-wrap">
-      <div class="ph" style="margin-bottom:0;color:#ffffff">
-        <span style="color:#ef4444"><span>📊</span>&nbsp;Demand Trend (Last 8 Weeks)</span>
+      <div class="ph" style="margin-bottom:0;color:#1a2330">
+        <span style="color:#dc2626"><span>📊</span>&nbsp;Demand Trend (Last 8 Weeks)</span>
       </div>
-      <div style="background:#0a1520">{items}</div>
+      <div style="background:#ffffff">{items}</div>
     </div>"""
 
 
@@ -335,7 +335,7 @@ def make_top_skus_12weeks_chart(df: pd.DataFrame) -> go.Figure:
     # Top 5 SKUs by total sales in this window
     top_skus = df_recent.groupby("sku_id")["weekly_sales"].sum().nlargest(5).index.tolist()
     
-    colors = [C["teal"], C["amber"], C["purple"], C["blue"], "#ef4444"]
+    colors = [C["teal"], C["amber"], C["purple"], C["blue"], "#dc2626"]
     
     fig = go.Figure()
     for i, sku in enumerate(top_skus):
@@ -372,84 +372,84 @@ SHARED_CSS = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap');
 .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:4px}
-.kpi-card{background:#112236;border:1px solid #1e3a55;border-radius:12px;padding:18px 16px 14px;
+.kpi-card{background:#ffffff;border:1px solid #d8dee9;border-radius:12px;padding:18px 16px 14px;
   transition:transform .25s cubic-bezier(.4,0,.2,1),border-color .25s,box-shadow .25s;cursor:pointer}
 .kpi-card:hover{transform:translateY(-3px);border-color:rgba(0,212,170,.55);
   box-shadow:0 8px 32px rgba(0,212,170,.12)}
-.kpi-card.t-teal{border-top:3px solid #00d4aa}
+.kpi-card.t-teal{border-top:3px solid #00a888}
 .kpi-card.t-purple{border-top:3px solid #7c5cbf}
-.kpi-card.t-amber{border-top:3px solid #f59e0b}
-.kpi-card.t-blue{border-top:3px solid #3b82f6}
+.kpi-card.t-amber{border-top:3px solid #d97706}
+.kpi-card.t-blue{border-top:3px solid #2563eb}
 .kpi-lbl{font:600 10px/1 'DM Sans',sans-serif;text-transform:uppercase;
-  letter-spacing:.1em;color:#ffffff !important;margin-bottom:8px}
+  letter-spacing:.1em;color:#1a2330 !important;margin-bottom:8px}
 .kpi-val{font:700 36px/1 'Space Grotesk',sans-serif;color:#fff!important;margin-bottom:6px}
-.kpi-sub{font-size:11px;color:#ffffff !important;margin-bottom:8px}
+.kpi-sub{font-size:11px;color:#1a2330 !important;margin-bottom:8px}
 .kpi-badge{display:inline-flex;align-items:center;gap:3px;font:600 11px 'DM Sans',sans-serif;
   padding:2px 8px;border-radius:10px}
-.kpi-badge.up{background:rgba(0,212,170,.15);color:#00d4aa}
-.kpi-badge.warn{background:rgba(245,158,11,.15);color:#f59e0b}
+.kpi-badge.up{background:rgba(0,212,170,.15);color:#00a888}
+.kpi-badge.warn{background:rgba(245,158,11,.15);color:#d97706}
 .db-header{display:flex;align-items:flex-start;justify-content:space-between;
-  padding-bottom:14px;margin-bottom:16px;border-bottom:1px solid #1e3a55}
-.db-title{font:600 20px/1.2 'Space Grotesk',sans-serif;color:#ffffff !important;margin-bottom:4px}
-.db-sub{font-size:12px;color:#ffffff !important}
+  padding-bottom:14px;margin-bottom:16px;border-bottom:1px solid #d8dee9}
+.db-title{font:600 20px/1.2 'Space Grotesk',sans-serif;color:#1a2330 !important;margin-bottom:4px}
+.db-sub{font-size:12px;color:#1a2330 !important}
 .db-pills{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px}
-.pill{background:#1a2d42;border:1px solid #2a4a6a;border-radius:6px;
-  padding:3px 10px;font-size:11px;color:#ffffff !important}
-.badge-live{background:rgba(239,68,68,.15);color:#ef4444 !important;border:1px solid rgba(239,68,68,.3);
+.pill{background:#eef2f8;border:1px solid #c2ccdb;border-radius:6px;
+  padding:3px 10px;font-size:11px;color:#1a2330 !important}
+.badge-live{background:rgba(239,68,68,.15);color:#dc2626 !important;border:1px solid rgba(239,68,68,.3);
   border-radius:20px;padding:3px 10px;font:600 11px 'DM Sans',sans-serif}
 .ph{font:600 11px/1 'DM Sans',sans-serif;text-transform:uppercase;letter-spacing:.07em;
-  color:#ffffff !important;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
-.dot-t{color:#ffffff !important}.dot-a{color:#ffffff !important}.dot-p{color:#ffffff !important}.dot-b{color:#ffffff !important}
+  color:#1a2330 !important;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.dot-t{color:#1a2330 !important}.dot-a{color:#1a2330 !important}.dot-p{color:#1a2330 !important}.dot-b{color:#1a2330 !important}
 .tl{list-style:none;padding:0;margin:0}
 .tl li{display:flex;align-items:center;justify-content:space-between;
-  padding:7px 6px;border-bottom:1px solid #1a3050;border-radius:6px;
+  padding:7px 6px;border-bottom:1px solid #d8dee9;border-radius:6px;
   cursor:pointer;transition:background .15s}
 .tl li:last-child{border-bottom:none}
-.tl li:hover{background:#1a2d42}
+.tl li:hover{background:#eef2f8}
 .rk{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;
   justify-content:center;font:700 10px 'Space Grotesk',sans-serif;flex-shrink:0;
-  background:#0d2235;color:#5a7a9a}
-.rk.r1{background:rgba(245,158,11,.2);color:#f59e0b}
+  background:#e7f6f2;color:#6b7a90}
+.rk.r1{background:rgba(245,158,11,.2);color:#d97706}
 .rk.r2{background:rgba(148,163,184,.15);color:#94a3b8}
 .rk.r3{background:rgba(205,124,56,.15);color:#cd7c38}
-.sn{flex:1;margin-left:8px;font-size:12px;color:#ffffff !important}
-.sv{font:600 12px 'Space Grotesk',sans-serif;color:#ffffff !important}
+.sn{flex:1;margin-left:8px;font-size:12px;color:#1a2330 !important}
+.sv{font:600 12px 'Space Grotesk',sans-serif;color:#1a2330 !important}
 .sk{width:100%;border-collapse:collapse;font-size:11px}
-.sk th{color:#ffffff !important;font:600 10px 'DM Sans',sans-serif;text-transform:uppercase;
+.sk th{color:#1a2330 !important;font:600 10px 'DM Sans',sans-serif;text-transform:uppercase;
   letter-spacing:.07em;padding:0 8px 8px;text-align:left}
-.sk td{padding:6px 8px;color:#ffffff !important;border-bottom:1px solid #162840}
-.sk tr:hover td{background:#1a2d42}
+.sk td{padding:6px 8px;color:#1a2330 !important;border-bottom:1px solid #d8dee9}
+.sk tr:hover td{background:#eef2f8}
 .sk tr:last-child td{border-bottom:none}
 .sd{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
-.s-on{background:#00d4aa;box-shadow:0 0 5px rgba(0,212,170,.6)}
-.s-ac{background:#3b82f6;box-shadow:0 0 5px rgba(59,130,246,.6)}
-.s-lw{background:#f59e0b;box-shadow:0 0 5px rgba(245,158,11,.6)}
-.sku-25{color:#00d4aa !important;font-weight:700}
-.sku-42{color:#f59e0b !important;font-weight:700}
-.trend-red{color:#ef4444 !important}
-.promo-orange{color:#f59e0b !important}
-.sales-white{color:#ffffff !important}
-.sku-snapshot-orange{color:#f59e0b !important}
-.footer-text{color:#ffffff !important}
-.top-perf-red{color:#ef4444 !important}
+.s-on{background:#00a888;box-shadow:0 0 5px rgba(0,212,170,.6)}
+.s-ac{background:#2563eb;box-shadow:0 0 5px rgba(59,130,246,.6)}
+.s-lw{background:#d97706;box-shadow:0 0 5px rgba(245,158,11,.6)}
+.sku-25{color:#00a888 !important;font-weight:700}
+.sku-42{color:#d97706 !important;font-weight:700}
+.trend-red{color:#dc2626 !important}
+.promo-orange{color:#d97706 !important}
+.sales-white{color:#1a2330 !important}
+.sku-snapshot-orange{color:#d97706 !important}
+.footer-text{color:#1a2330 !important}
+.top-perf-red{color:#dc2626 !important}
 .gg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.gc{background:#0d2235;border-radius:8px;padding:10px;text-align:center}
-.gl{font-size:10px;color:#ffffff !important;text-transform:uppercase;letter-spacing:.07em;font-weight:600}
-.gv{font:700 15px 'Space Grotesk',sans-serif;margin-top:3px;color:#ffffff !important}
+.gc{background:#e7f6f2;border-radius:8px;padding:10px;text-align:center}
+.gl{font-size:10px;color:#1a2330 !important;text-transform:uppercase;letter-spacing:.07em;font-weight:600}
+.gv{font:700 15px 'Space Grotesk',sans-serif;margin-top:3px;color:#1a2330 !important}
 .df{display:flex;align-items:center;justify-content:space-between;
-  padding:10px 16px;margin-top:6px;background:#0a1520;
-  border:1px solid #1e3048;border-radius:8px;font-size:11px;color:#ffffff !important}
-.df .ok{color:#ffffff !important}
-.panel-wrap{background:#112236;border:1px solid #1e3a55;border-radius:12px;
+  padding:10px 16px;margin-top:6px;background:#ffffff;
+  border:1px solid #d8dee9;border-radius:8px;font-size:11px;color:#1a2330 !important}
+.df .ok{color:#1a2330 !important}
+.panel-wrap{background:#ffffff;border:1px solid #d8dee9;border-radius:12px;
   padding:16px;transition:border-color .25s}
-.panel-wrap:hover{border-color:#2a4a6a}
+.panel-wrap:hover{border-color:#c2ccdb}
 </style>
 """
 
 
 def build_header_html(kpis: dict) -> str:
     return f"""{SHARED_CSS}
-<div style="background:#0d1b2a;padding:16px 4px 0">
+<div style="background:#f4f6fa;padding:16px 4px 0">
   <div class="db-header">
     <div>
       <div class="db-title">Overview</div>
@@ -518,7 +518,7 @@ def build_gauge_labels_html(top_sku: int, weakest_sku: int) -> str:
 def build_table_html(rows: list) -> str:
     dot = {"Online":"s-on","Active":"s-ac","Low":"s-lw"}
     trs = "".join(
-        f'<tr><td><strong style="color:#e8edf5" class="{"sku-25" if r["sku_id"] == 25 else "sku-42" if r["sku_id"] == 42 else ""}">{r["sku_id"]}</strong></td>'
+        f'<tr><td><strong style="color:#1a2330" class="{"sku-25" if r["sku_id"] == 25 else "sku-42" if r["sku_id"] == 42 else ""}">{r["sku_id"]}</strong></td>'
         f'<td><span class="sd {dot.get(r["status"],"s-lw")}"></span>{r["status"]}</td>'
         f'<td>{r["avg_sales"]}</td><td>${r["avg_price"]}</td><td>{r["promo_pct"]}%</td></tr>'
         for r in rows
@@ -527,8 +527,8 @@ def build_table_html(rows: list) -> str:
 <div class="panel-wrap">
   <div class="ph">
     <span class="sku-snapshot-orange"><span class="dot-t">&#9632;</span>&nbsp;SKU Status Snapshot</span>
-    <span style="background:#1a2d42;border:1px solid #2a4a6a;border-radius:6px;
-                 padding:2px 7px;font-size:10px;color:#4a6080">Top 8</span>
+    <span style="background:#eef2f8;border:1px solid #c2ccdb;border-radius:6px;
+                 padding:2px 7px;font-size:10px;color:#8a97ad">Top 8</span>
   </div>
   <table class="sk">
     <thead><tr><th>SKU</th><th>Status</th><th>Avg Sales</th><th>Price</th><th>Promo%</th></tr></thead>
@@ -538,7 +538,7 @@ def build_table_html(rows: list) -> str:
 
 
 def build_panel_title(icon_class: str, icon: str, label: str, right: str = "") -> str:
-    right_html = f'<span style="font-size:10px;color:#4a6080">{right}</span>' if right else ""
+    right_html = f'<span style="font-size:10px;color:#8a97ad">{right}</span>' if right else ""
     return f"""
 <div class="panel-wrap" style="padding-bottom:4px;border-bottom:none;
      border-bottom-left-radius:0;border-bottom-right-radius:0;
@@ -573,24 +573,24 @@ def build_collapsible_section(section_id: str, title: str, content_html: str) ->
     align-items: center;
     justify-content: space-between;
     padding: 12px 16px;
-    background: #0a1520;
-    border: 1px solid #1e3a55;
+    background: #ffffff;
+    border: 1px solid #d8dee9;
     border-radius: 8px 8px 0 0;
     user-select: none;
     transition: background 0.2s;
   }}
   .collapsible-header:hover {{
-    background: #0f2438;
+    background: #f4f6fa;
   }}
   .collapsible-title {{
     font-weight: 600;
-    color: #ffffff !important;
+    color: #1a2330 !important;
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }}
   .collapsible-chevron {{
-    color: #3b82f6 !important;
+    color: #2563eb !important;
     font-size: 14px;
     transition: transform 0.2s;
     font-weight: bold;
@@ -601,8 +601,8 @@ def build_collapsible_section(section_id: str, title: str, content_html: str) ->
   .collapsible-content {{
     max-height: 0;
     overflow: hidden;
-    background: #0a1520;
-    border: 1px solid #1e3a55;
+    background: #ffffff;
+    border: 1px solid #d8dee9;
     border-top: none;
     border-radius: 0 0 8px 8px;
     transition: max-height 0.3s ease;
@@ -613,7 +613,7 @@ def build_collapsible_section(section_id: str, title: str, content_html: str) ->
     padding: 16px;
   }}
   .collapsible-content ul, .collapsible-content p {{
-    color: #3b82f6 !important;
+    color: #2563eb !important;
     font-size: 11px;
     line-height: 1.6;
     margin: 0;
@@ -625,7 +625,7 @@ def build_collapsible_section(section_id: str, title: str, content_html: str) ->
     margin-bottom: 6px;
   }}
   .collapsible-content strong {{
-    color: #60a5fa !important;
+    color: #2563eb !important;
   }}
 </style>
 <div style="margin-top: 12px;">
@@ -650,15 +650,15 @@ def build_collapsible_section(section_id: str, title: str, content_html: str) ->
 def build_project_description_html() -> str:
     """Project description and navigation instructions - collapsible."""
     content = """
-    <p style="margin:0 0 8px"><strong style="color:#60a5fa">This dashboard integrates real-time retail analytics with predictive modeling and AI-augmented insights. Use the sidebar to explore:</strong></p>
-    <ul style="margin:0;color:#3b82f6">
-      <li><strong style="color:#60a5fa">Module 1 (Overview)</strong>: High-level KPI summary and key findings</li>
-      <li><strong style="color:#60a5fa">Module 2 (Data Explorer)</strong>: Inspect raw data, filtering, and descriptive statistics</li>
-      <li><strong style="color:#60a5fa">Modules 3–5 (Analytics)</strong>: Promotion effectiveness, price elasticity, scenario simulation</li>
-      <li><strong style="color:#60a5fa">Modules 6–7 (ML)</strong>: Demand forecasting and promotion lift modeling</li>
-      <li><strong style="color:#60a5fa">Module 8 (Chat)</strong>: Ask data-grounded questions in natural language</li>
-      <li><strong style="color:#60a5fa">Module 9 (Reflection)</strong>: Critical assessment of AI components</li>
-      <li><strong style="color:#60a5fa">Module 10 (Export)</strong>: Download results and model documentation</li>
+    <p style="margin:0 0 8px"><strong style="color:#2563eb">This dashboard integrates real-time retail analytics with predictive modeling and AI-augmented insights. Use the sidebar to explore:</strong></p>
+    <ul style="margin:0;color:#2563eb">
+      <li><strong style="color:#2563eb">Module 1 (Overview)</strong>: High-level KPI summary and key findings</li>
+      <li><strong style="color:#2563eb">Module 2 (Data Explorer)</strong>: Inspect raw data, filtering, and descriptive statistics</li>
+      <li><strong style="color:#2563eb">Modules 3–5 (Analytics)</strong>: Promotion effectiveness, price elasticity, scenario simulation</li>
+      <li><strong style="color:#2563eb">Modules 6–7 (ML)</strong>: Demand forecasting and promotion lift modeling</li>
+      <li><strong style="color:#2563eb">Module 8 (Chat)</strong>: Ask data-grounded questions in natural language</li>
+      <li><strong style="color:#2563eb">Module 9 (Reflection)</strong>: Critical assessment of AI components</li>
+      <li><strong style="color:#2563eb">Module 10 (Export)</strong>: Download results and model documentation</li>
     </ul>
     """
     return build_collapsible_section("proj-desc", "📋 Project Description & Navigation", content)
@@ -667,8 +667,8 @@ def build_project_description_html() -> str:
 def build_key_findings_html() -> str:
     """Key findings from analytical modules - collapsible."""
     content = """
-    <p style="margin:0"><em style="color:#60a5fa">Key findings from Modules 3–7 will auto-populate here once analytical pipelines complete. This section will synthesize:</em></p>
-    <ul style="margin:8px 0 0;color:#3b82f6">
+    <p style="margin:0"><em style="color:#2563eb">Key findings from Modules 3–7 will auto-populate here once analytical pipelines complete. This section will synthesize:</em></p>
+    <ul style="margin:8px 0 0;color:#2563eb">
       <li>Promotion lift impact per SKU</li>
       <li>Price elasticity rankings</li>
       <li>Demand forecasts and seasonality</li>
@@ -681,13 +681,13 @@ def build_key_findings_html() -> str:
 def build_key_assumptions_html() -> str:
     """Key assumptions made during analysis - collapsible."""
     content = """
-    <ul style="margin:0;color:#3b82f6">
-      <li><strong style="color:#60a5fa">Data completeness:</strong> All periods represent complete weeks; no gaps assumed to be missing-at-random</li>
-      <li><strong style="color:#60a5fa">Causality:</strong> Promotion feature (feat_main_page) assumed causal for incremental lift (SCAN*PRO justification)</li>
-      <li><strong style="color:#60a5fa">Stationarity:</strong> Historical patterns assumed to persist in forecast horizon unless structural breaks detected</li>
-      <li><strong style="color:#60a5fa">Price exogeneity:</strong> Price changes assumed independent of demand shocks in elasticity estimation</li>
-      <li><strong style="color:#60a5fa">Model scope:</strong> Recommendations apply to baseline & scenario cases only; external events (supply shock, competition) not modeled</li>
-      <li><strong style="color:#60a5fa">AI guardrails:</strong> All AI-generated narratives grounded in actual data; hallucinations blocked via prompt engineering</li>
+    <ul style="margin:0;color:#2563eb">
+      <li><strong style="color:#2563eb">Data completeness:</strong> All periods represent complete weeks; no gaps assumed to be missing-at-random</li>
+      <li><strong style="color:#2563eb">Causality:</strong> Promotion feature (feat_main_page) assumed causal for incremental lift (SCAN*PRO justification)</li>
+      <li><strong style="color:#2563eb">Stationarity:</strong> Historical patterns assumed to persist in forecast horizon unless structural breaks detected</li>
+      <li><strong style="color:#2563eb">Price exogeneity:</strong> Price changes assumed independent of demand shocks in elasticity estimation</li>
+      <li><strong style="color:#2563eb">Model scope:</strong> Recommendations apply to baseline & scenario cases only; external events (supply shock, competition) not modeled</li>
+      <li><strong style="color:#2563eb">AI guardrails:</strong> All AI-generated narratives grounded in actual data; hallucinations blocked via prompt engineering</li>
     </ul>
     """
     return build_collapsible_section("key-assum", "✓ Key Assumptions", content)
@@ -722,7 +722,7 @@ def build_overview_tab():
                  border-bottom-right-radius:0;border-bottom:none;padding-bottom:4px">
               <div class="ph" style="margin-bottom:0">
                 <span class="trend-red"><span class="dot-t">&#9650;</span>&nbsp;Weekly Sales Trend</span>
-                <span style="font-size:10px;color:#4a6080">All SKUs</span>
+                <span style="font-size:10px;color:#8a97ad">All SKUs</span>
               </div>
             </div>""")
             gr.Plot(value=fig_line, show_label=False, container=False)

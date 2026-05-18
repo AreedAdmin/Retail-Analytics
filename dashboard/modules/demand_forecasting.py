@@ -15,11 +15,12 @@ from dashboard.analytics.common.forecast_loader import get_forecast_loader
 # ─────────────────────────────────────────────────────────────
 # COLOURS  (kept identical to modules/overview.py)
 # ─────────────────────────────────────────────────────────────
+# Light palette (app is light-only — see deploy.md / main.py).
 C = {
-    "bg": "#0d1b2a", "panel": "#112236", "border": "#1e3a55",
-    "teal": "#00d4aa", "amber": "#f59e0b", "purple": "#7c5cbf",
-    "blue": "#3b82f6", "text": "#e8edf5", "muted": "#5a7a9a",
-    "grid": "rgba(30,58,85,0.5)",
+    "bg": "#f4f6fa", "panel": "#ffffff", "border": "#d8dee9",
+    "teal": "#00a888", "amber": "#d97706", "purple": "#7c5cbf",
+    "blue": "#2563eb", "text": "#1a2330", "muted": "#51607a",
+    "grid": "rgba(180,190,205,0.45)",
 }
 
 PLOTLY_LAYOUT = dict(
@@ -31,9 +32,9 @@ PLOTLY_LAYOUT = dict(
 )
 
 GRADIO_CSS = """
-body, .gradio-container, .main, .wrap, .gap { background:#0d1b2a !important; color:#e8edf5 !important; }
-.block, .form, .panel { background:#112236 !important; border:1px solid #1e3a55 !important; border-radius:12px !important; }
-.plotly-graph-div { background:#112236 !important; }
+body, .gradio-container, .main, .wrap, .gap { background:#f4f6fa !important; color:#1a2330 !important; }
+.block, .form, .panel { background:#ffffff !important; border:1px solid #d8dee9 !important; border-radius:12px !important; }
+.plotly-graph-div { background:#ffffff !important; }
 footer { display:none !important; }
 """
 
@@ -41,14 +42,14 @@ KPI_CSS = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap');
 .fc-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin:4px 0 12px}
-.fc-card{background:#112236;border:1px solid #1e3a55;border-radius:12px;padding:16px 14px;border-top:3px solid #00d4aa}
-.fc-card.amber{border-top-color:#f59e0b}.fc-card.blue{border-top-color:#3b82f6}.fc-card.purple{border-top-color:#7c5cbf}
-.fc-lbl{font:600 10px/1 'DM Sans',sans-serif;text-transform:uppercase;letter-spacing:.1em;color:#ffffff;margin-bottom:8px}
-.fc-val{font:700 28px/1 'Space Grotesk',sans-serif;color:#fff}
-.fc-sub{font-size:11px;color:#8a9bb5;margin-top:6px}
-.fc-title{font:600 20px/1.2 'Space Grotesk',sans-serif;color:#fff;margin-bottom:4px}
-.fc-note{font-size:12px;color:#8a9bb5}
-.fc-warn{background:#1a2d42;border:1px solid #2a4a6a;border-radius:12px;padding:24px;color:#e8edf5;font-size:13px}
+.fc-card{background:#ffffff;border:1px solid #d8dee9;border-radius:12px;padding:16px 14px;border-top:3px solid #00a888}
+.fc-card.amber{border-top-color:#d97706}.fc-card.blue{border-top-color:#2563eb}.fc-card.purple{border-top-color:#7c5cbf}
+.fc-lbl{font:600 10px/1 'DM Sans',sans-serif;text-transform:uppercase;letter-spacing:.1em;color:#51607a;margin-bottom:8px}
+.fc-val{font:700 28px/1 'Space Grotesk',sans-serif;color:#1a2330}
+.fc-sub{font-size:11px;color:#51607a;margin-top:6px}
+.fc-title{font:600 20px/1.2 'Space Grotesk',sans-serif;color:#1a2330;margin-bottom:4px}
+.fc-note{font-size:12px;color:#51607a}
+.fc-warn{background:#eef2f8;border:1px solid #d8dee9;border-radius:12px;padding:24px;color:#1a2330;font-size:13px}
 </style>
 """
 
@@ -135,16 +136,16 @@ def _worst_skus_html(per_sku: pd.DataFrame, n: int = 8) -> str:
             .head(n)[["sku", "MAE", "RMSE", "MAPE"]])
     body = "".join(
         f'<div style="display:flex;justify-content:space-between;padding:7px 12px;'
-        f'border-bottom:1px solid #1e3a55;font-size:11px;color:#e8edf5">'
-        f'<span style="color:#fff;font-weight:600">SKU {int(r.sku)}</span>'
+        f'border-bottom:1px solid #d8dee9;font-size:11px;color:#1a2330">'
+        f'<span style="color:#1a2330;font-weight:600">SKU {int(r.sku)}</span>'
         f'<span>MAE {r.MAE:,.0f}</span><span>RMSE {r.RMSE:,.0f}</span>'
-        f'<span style="color:#f59e0b">MAPE {r.MAPE:,.0f}%</span></div>'
+        f'<span style="color:#d97706">MAPE {r.MAPE:,.0f}%</span></div>'
         for r in rows.itertuples(index=False)
     )
     return (
         '<div class="panel-wrap"><div class="fc-lbl" style="padding:10px 12px;'
-        'color:#ef4444">Worst SKUs by MAE (test)</div>'
-        f'<div style="background:#0a1520">{body}</div></div>'
+        'color:#dc2626">Worst SKUs by MAE (test)</div>'
+        f'<div style="background:#ffffff">{body}</div></div>'
     )
 
 
