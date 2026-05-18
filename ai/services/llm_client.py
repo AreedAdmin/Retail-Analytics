@@ -250,53 +250,81 @@ class LLMClient:
         # gpt-oss is a reasoning model: hidden reasoning consumes tokens, so
         # give the visible answer real headroom or it can come back empty.
         num_predict = max(int(max_tokens), 512)
-        resp = client.chat(
+        import time as _t
+
+        # Stream so TTFT / TPS are measured directly — Ollama Cloud strips
+        # the native eval_duration fields, so wall-clock streaming is the
+        # only reliable source of these metrics.
+        stream = client.chat(
             model=model,
             messages=[
                 {"role": "system", "content": system},
                 {"role": "user", "content": user},
             ],
             options={"temperature": 0, "num_predict": num_predict},
+            stream=True,
         )
-        # ollama returns a ChatResponse (attr access) or a dict, by version
-        msg = getattr(resp, "message", None)
-        if msg is None:
-            msg = resp["message"]
 
-        def _get(field):
-            v = getattr(msg, field, None)
-            if v is None and isinstance(msg, dict):
-                v = msg.get(field)
-            return (v or "").strip()
+        def _piece(chunk, field):
+            m = getattr(chunk, "message", None)
+            if m is None and isinstance(chunk, dict):
+                m = chunk.get("message")
+            if m is None:
+                return ""
+            v = getattr(m, field, None)
+            if v is None and isinstance(m, dict):
+                v = m.get(field)
+            return v or ""
 
-        content = _get("content") or _get("thinking")
+        t0 = _t.perf_counter()
+        first_t = last_t = None
+        content_parts, think_parts, n_tok = [], [], 0
+        final = None
+        for chunk in stream:
+            c, th = _piece(chunk, "content"), _piece(chunk, "thinking")
+            if c or th:
+                if first_t is None:
+                    first_t = _t.perf_counter()
+                last_t = _t.perf_counter()
+                n_tok += 1
+            if c:
+                content_parts.append(c)
+            elif th:
+                think_parts.append(th)
+            final = chunk
+
+        content = ("".join(content_parts).strip()
+                   or "".join(think_parts).strip())
         if not content:
             # Don't return a silent blank — let generate() fall back.
             raise RuntimeError("Ollama returned an empty response")
 
-        # Native timing (nanoseconds) → real TTFT / TPS, no streaming needed.
+        now = _t.perf_counter()
+
         def _rf(field):
-            v = getattr(resp, field, None)
-            if v is None and isinstance(resp, dict):
-                v = resp.get(field)
+            v = getattr(final, field, None)
+            if v is None and isinstance(final, dict):
+                v = final.get(field)
             try:
                 return float(v) if v is not None else None
             except (TypeError, ValueError):
                 return None
 
-        total_d = _rf("total_duration")
-        load_d = _rf("load_duration") or 0.0
-        pe_cnt = _rf("prompt_eval_count")
-        pe_dur = _rf("prompt_eval_duration") or 0.0
         ev_cnt = _rf("eval_count")
-        ev_dur = _rf("eval_duration")
+        pe_cnt = _rf("prompt_eval_count")
+        gen_s = (last_t - first_t) if (first_t and last_t) else None
+        if ev_cnt and gen_s and gen_s > 0:
+            tps = ev_cnt / gen_s
+        elif gen_s and gen_s > 0:
+            tps = n_tok / gen_s
+        else:
+            tps = None
         self._native = {
-            "total_ms": (total_d / 1e6) if total_d else None,
-            # time before the first generated token: model load + prompt eval
-            "ttft_ms": (load_d + pe_dur) / 1e6 if (load_d or pe_dur) else None,
-            "tps": (ev_cnt / (ev_dur / 1e9)) if (ev_cnt and ev_dur) else None,
-            "prompt_tokens": int(pe_cnt) if pe_cnt else None,
-            "completion_tokens": int(ev_cnt) if ev_cnt else None,
+            "total_ms": (now - t0) * 1000.0,
+            "ttft_ms": ((first_t - t0) * 1000.0) if first_t else None,
+            "tps": tps,
+            "prompt_tokens": int(pe_cnt) if pe_cnt else self._est_tokens(user),
+            "completion_tokens": int(ev_cnt) if ev_cnt else n_tok,
         }
         return content
 
