@@ -18,6 +18,8 @@ from dashboard.modules import (
     overview,
     data_explorer,
     promotion_effectiveness,
+    price_elasticity,
+    scenario_simulator,
     demand_forecasting,
     promotion_lift_model,
     chat_interface,
@@ -148,6 +150,59 @@ h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif !important; }
     background: var(--accent-soft) !important;
 }
 
+/* ── Gradio theme-variable bridge ──────────────────────────────
+   Gradio renders labels/inputs/tables/markdown with its OWN css vars,
+   which stay light → unreadable on the dark canvas. Remap them to our
+   tokens so all chrome follows the theme (and the light toggle). */
+.gradio-container, body, body.light-theme .gradio-container {
+    --body-text-color: var(--text) !important;
+    --body-text-color-subdued: var(--text-muted) !important;
+    --block-title-text-color: var(--text) !important;
+    --block-label-text-color: var(--text-muted) !important;
+    --block-info-text-color: var(--text-muted) !important;
+    --block-background-fill: var(--bg-panel) !important;
+    --block-border-color: var(--border) !important;
+    --border-color-primary: var(--border) !important;
+    --background-fill-primary: var(--bg) !important;
+    --background-fill-secondary: var(--bg-panel) !important;
+    --input-background-fill: var(--bg-elev) !important;
+    --input-border-color: var(--border) !important;
+    --input-placeholder-color: var(--text-dim) !important;
+    --input-text-color: var(--text) !important;
+    --color-accent: var(--accent) !important;
+    --color-accent-soft: var(--accent-soft) !important;
+    --link-text-color: var(--accent) !important;
+    --table-text-color: var(--text) !important;
+    --table-even-background-fill: var(--bg-panel) !important;
+    --table-odd-background-fill: var(--bg-elev) !important;
+    --table-border-color: var(--border) !important;
+    --button-secondary-background-fill: var(--bg-elev) !important;
+    --button-secondary-text-color: var(--text) !important;
+    --neutral-950: var(--text) !important;
+}
+/* explicit fallbacks for elements that ignore the vars */
+.gradio-container, .gradio-container .prose,
+.gradio-container .prose *, .gradio-container p,
+.gradio-container li, .gradio-container span,
+.gradio-container .md, .gradio-container h1, .gradio-container h2,
+.gradio-container h3, .gradio-container h4 { color: var(--text); }
+.gradio-container label, .gradio-container .label-wrap span,
+.gradio-container .block-title, .gradio-container .gr-box label,
+span[data-testid="block-info"] { color: var(--text-muted) !important; }
+.gradio-container input, .gradio-container textarea,
+.gradio-container select, .gradio-container .gr-text-input {
+    color: var(--text) !important;
+    background: var(--bg-elev) !important;
+}
+.gradio-container table td, .gradio-container table th {
+    color: var(--text) !important; border-color: var(--border) !important;
+}
+.gradio-container .tab-nav + div, .gradio-container .tabitem {
+    background: var(--bg) !important;
+}
+/* once the sidebar nav is wired, it becomes the sole navigation */
+body.sb-wired .tab-nav { display: none !important; }
+
 /* ── scrollbar ── */
 ::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-track { background: var(--scroll-track); }
@@ -191,7 +246,8 @@ SIDEBAR_HTML = """
 /* nav item */
 .sb-item { display:flex; align-items:center; gap:11px; padding:8px 16px 8px 14px;
   color:var(--text-muted); border-left:2px solid transparent;
-  cursor:default; transition:all .15s ease; text-decoration:none; }
+  cursor:pointer; transition:all .15s ease; text-decoration:none;
+  user-select:none; -webkit-tap-highlight-color:transparent; }
 .sb-item:hover { color:var(--text); background:var(--hover);
   border-left-color:var(--accent-line); }
 .sb-idx { font:600 10px/1 'IBM Plex Mono',monospace; color:var(--text-dim);
@@ -229,28 +285,28 @@ SIDEBAR_HTML = """
   </div>
 
   <div class="sb-sect"><span>Workspace</span><hr></div>
-  <a class="sb-item active"><span class="sb-idx">01</span><span class="sb-label">Overview</span></a>
-  <a class="sb-item"><span class="sb-idx">02</span><span class="sb-label">Data Explorer</span></a>
+  <a class="sb-item active" data-idx="0"><span class="sb-idx">01</span><span class="sb-label">Overview</span></a>
+  <a class="sb-item" data-idx="1"><span class="sb-idx">02</span><span class="sb-label">Data Explorer</span></a>
 
   <div class="sb-sect"><span>Analytics</span><hr></div>
-  <a class="sb-item"><span class="sb-idx">03</span><span class="sb-label">Promotion Effectiveness</span></a>
-  <a class="sb-item soon"><span class="sb-idx">04</span><span class="sb-label">Price Elasticity</span><span class="sb-tag">soon</span></a>
-  <a class="sb-item soon"><span class="sb-idx">05</span><span class="sb-label">Scenario Simulator</span><span class="sb-tag">soon</span></a>
+  <a class="sb-item" data-idx="2"><span class="sb-idx">03</span><span class="sb-label">Promotion Effectiveness</span></a>
+  <a class="sb-item" data-idx="3"><span class="sb-idx">04</span><span class="sb-label">Price Elasticity</span></a>
+  <a class="sb-item" data-idx="4"><span class="sb-idx">05</span><span class="sb-label">Scenario Simulator</span></a>
 
   <div class="sb-sect"><span>Machine Learning</span><hr></div>
-  <a class="sb-item"><span class="sb-idx">06</span><span class="sb-label">Demand Forecasting</span></a>
-  <a class="sb-item"><span class="sb-idx">07</span><span class="sb-label">Promotion Lift Model</span></a>
+  <a class="sb-item" data-idx="5"><span class="sb-idx">06</span><span class="sb-label">Demand Forecasting</span></a>
+  <a class="sb-item" data-idx="6"><span class="sb-idx">07</span><span class="sb-label">Promotion Lift Model</span></a>
 
   <div class="sb-sect"><span>Intelligence</span><hr></div>
-  <a class="sb-item"><span class="sb-idx">08</span><span class="sb-label">AI Assistant</span></a>
+  <a class="sb-item" data-idx="7"><span class="sb-idx">08</span><span class="sb-label">AI Assistant</span></a>
 
   <div class="sb-sect"><span>System</span><hr></div>
-  <a class="sb-item"><span class="sb-idx">09</span><span class="sb-label">Critical Reflection</span></a>
-  <a class="sb-item"><span class="sb-idx">10</span><span class="sb-label">Appendix &amp; Export</span></a>
+  <a class="sb-item" data-idx="8"><span class="sb-idx">09</span><span class="sb-label">Critical Reflection</span></a>
+  <a class="sb-item" data-idx="9"><span class="sb-idx">10</span><span class="sb-label">Appendix &amp; Export</span></a>
 
   <div class="sb-foot">
     <div><span class="dot"></span><b>System Online</b></div>
-    <div>43 SKUs &middot; 8/10 Modules</div>
+    <div>44 SKUs &middot; 10/10 Modules</div>
     <div>Build v1.0 &middot; AI Grounded</div>
   </div>
 </div>
@@ -274,6 +330,45 @@ THEME_RESTORE_JS = """
 () => {
     if (localStorage.getItem('ra-theme') === 'light') {
         document.body.classList.add('light-theme');
+    }
+}
+"""
+
+# JS: turn the static sidebar into real navigation. Sidebar item order
+# matches the gr.Tabs order 1:1, so item data-idx N drives tab button N.
+# Retries because Gradio renders the tab bar asynchronously.
+SIDEBAR_NAV_JS = """
+() => {
+    const wire = () => {
+        const tabs = document.querySelectorAll('.tab-nav button');
+        const items = document.querySelectorAll('.sb-item[data-idx]');
+        if (tabs.length < items.length || !items.length) return false;
+        const setActive = (i) => {
+            document.querySelectorAll('.sb-item').forEach(
+                x => x.classList.remove('active'));
+            const it = document.querySelector('.sb-item[data-idx="'+i+'"]');
+            if (it) it.classList.add('active');
+        };
+        items.forEach(it => {
+            const i = parseInt(it.getAttribute('data-idx'), 10);
+            it.onclick = () => {
+                const b = document.querySelectorAll('.tab-nav button')[i];
+                if (b) b.click();
+                setActive(i);
+                const main = document.querySelector('.tabitem')
+                          || document.querySelector('.main');
+                if (main && main.scrollIntoView) main.scrollIntoView();
+            };
+        });
+        tabs.forEach((b, bi) => b.addEventListener('click', () => setActive(bi)));
+        document.body.classList.add('sb-wired');
+        return true;
+    };
+    if (!wire()) {
+        let n = 0;
+        const t = setInterval(() => {
+            if (wire() || ++n > 50) clearInterval(t);
+        }, 150);
     }
 }
 """
@@ -305,14 +400,17 @@ def build_app() -> gr.Blocks:
                         overview.build_overview_tab()
                     data_explorer.build_data_explorer_tab()
                     promotion_effectiveness.build_promotion_effectiveness_tab()
+                    price_elasticity.build_price_elasticity_tab()
+                    scenario_simulator.build_scenario_simulator_tab()
                     demand_forecasting.build_demand_forecasting_tab()
                     promotion_lift_model.build_promotion_lift_model_tab()
                     chat_interface.build_chat_tab()
                     critical_reflection.build_critical_reflection_tab()
                     appendix_export.build_appendix_export_tab()
 
-        # Restore the visitor's saved theme on page load (default: dark).
+        # Restore saved theme + wire the sidebar as the navigation.
         app.load(fn=None, inputs=None, outputs=None, js=THEME_RESTORE_JS)
+        app.load(fn=None, inputs=None, outputs=None, js=SIDEBAR_NAV_JS)
 
     return app
 

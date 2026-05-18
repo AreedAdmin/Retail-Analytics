@@ -72,7 +72,16 @@ def chat(message: str, history: List[Any], scope: str = "all") -> str:
 # ── Module 8b: click-to-summarise a single chart/module ──────────────────────
 
 def summarise_scope(scope: str) -> str:
-    ctx = context_builder.build_context(scope)
+    return summarise_payload(context_builder.build_context(scope),
+                             module=f"summarise:{scope}")
+
+
+def summarise_payload(ctx: dict, module: str = "summarise:payload") -> str:
+    """
+    Click-to-summarise for an arbitrary, already-grounded context dict
+    (used by modules that build their context on the fly, e.g. the
+    Scenario Simulator). Same prompt + guardrail path as summarise_scope.
+    """
     template = load_prompt("click_to_summarise.txt")
     user = template.replace("{context_json}", json.dumps(ctx, indent=2))
 
@@ -81,7 +90,7 @@ def summarise_scope(scope: str) -> str:
         user=user,
         max_tokens=300,
     )
-    safe, _ = guardrail.apply(raw, ctx, module=f"summarise:{scope}", prompt=template)
+    safe, _ = guardrail.apply(raw, ctx, module=module, prompt=template)
     return safe
 
 

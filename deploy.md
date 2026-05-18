@@ -46,8 +46,8 @@ loading committed artifacts. No separate model server, no Ollama.**
 
 Rationale: the forecasting artifact (`HistGBR` + `OneHotEncoder` + small
 arrays via `joblib`) is a few MB, CPU-only, <1 s inference. A dedicated
-microservice / GPU endpoint / Ollama is unnecessary and against the 8 GB,
-simplicity, and reproducibility goals.
+microservice / GPU endpoint / Ollama is unnecessary given the model's tiny
+footprint, and against the simplicity and reproducibility goals.
 
 - **Artifact storage:** commit `ml/ml_forecasting/outputs/model_artifacts.joblib`
   to the repo (use Git LFS only if >~10 MB — expected not). Version-pinned

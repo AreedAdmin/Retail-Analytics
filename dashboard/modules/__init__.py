@@ -14,13 +14,14 @@ Each module corresponds to one of the 10 dashboard pages:
 10. appendix_export.py - Module 10: Appendix & Export
 """
 
-# Implemented modules. Modules 4 (price_elasticity) & 5 (scenario_simulator)
-# are still pending (require the elasticity model to be built first).
+# All 10 dashboard modules are implemented.
 
 __all__ = [
     "overview",                 # Module 1
     "data_explorer",            # Module 2
     "promotion_effectiveness",  # Module 3
+    "price_elasticity",         # Module 4
+    "scenario_simulator",       # Module 5
     "demand_forecasting",       # Module 6
     "promotion_lift_model",     # Module 7
     "chat_interface",           # Module 8
