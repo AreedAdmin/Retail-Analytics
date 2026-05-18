@@ -179,18 +179,62 @@ def build_forecast_context() -> Dict[str, Any]:
     }
 
 
+def build_elasticity_context() -> Dict[str, Any]:
+    """Price-elasticity context from the Module 4 model output."""
+    try:
+        from dashboard.analytics.common.elasticity_loader import (
+            get_elasticity_loader,
+        )
+
+        loader = get_elasticity_loader()
+        if not loader.available():
+            raise FileNotFoundError("elasticity output not generated")
+        m = loader.headline_metrics()
+        cls = loader.classify().dropna(subset=["elasticity_value"])
+        most_el = cls.sort_values("elasticity_value").head(3)
+        least_el = cls.sort_values("elasticity_value", ascending=False).head(3)
+        findings = [
+            f"{m['num_fitted']}/{m['num_skus']} SKUs fitted; median "
+            f"elasticity {m['median_elasticity']:.2f}.",
+            f"{m['num_elastic']} elastic (β<−1), "
+            f"{m['num_inelastic']} inelastic (−1<β<0).",
+            "Most price-sensitive: " + ", ".join(
+                f"SKU {int(r.sku_id)} ({r.elasticity_value:.2f})"
+                for r in most_el.itertuples()) + ".",
+            "Most pricing power: " + ", ".join(
+                f"SKU {int(r.sku_id)} ({r.elasticity_value:.2f})"
+                for r in least_el.itertuples()) + ".",
+        ]
+        return {
+            "module_name": "price_elasticity",
+            "chart_id": "elasticity_by_sku",
+            "metrics": m,
+            "key_findings": findings,
+        }
+    except Exception as e:
+        logger.warning("elasticity context failed: %s", e)
+        return {
+            "module_name": "price_elasticity",
+            "chart_id": "elasticity_by_sku",
+            "metrics": {},
+            "key_findings": ["Price-elasticity output unavailable."],
+        }
+
+
 # ── Registry / aggregation ───────────────────────────────────────────────────
 
 _BUILDERS = {
     "overview": build_overview_context,
     "promotion_lift": build_promotion_context,
     "demand_forecasting": build_forecast_context,
+    "price_elasticity": build_elasticity_context,
 }
 
 SCOPE_LABELS = {
     "overview": "Overview KPIs",
     "promotion_lift": "Promotion Lift Model",
     "demand_forecasting": "Demand Forecasting",
+    "price_elasticity": "Price Elasticity",
 }
 
 

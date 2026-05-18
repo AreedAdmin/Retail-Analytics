@@ -121,7 +121,7 @@ The application consumes data from the `data/` directory and presents all analyt
 **Owner:** ML Pod A  
 **Purpose:** Predict future demand per SKU for the next N periods.
 
-- Models implemented: regression baseline + at least one non-linear model (e.g., gradient boosted trees or a lightweight neural network ≤ 8 GB RAM).
+- Models implemented: regression baseline + at least one non-linear model (e.g., gradient boosted trees or a lightweight neural network).
 - Per-SKU forecast display:
   - Time series chart of historical demand with forecast overlaid.
   - Confidence intervals (80% and 95%) where the model supports it.
@@ -221,9 +221,8 @@ The application consumes data from the `data/` directory and presents all analyt
 | Framework | Gradio |
 | Naming | snake_case throughout — all files, variables, functions, columns |
 | Dependencies | Pinned in root `requirements.txt` |
-| Secrets | All API keys stored as GitHub Repository Secrets, never in files |
-| Model memory | All models must run within 8 GB RAM |
-| LLM API | Claude (Anthropic) or OpenAI — API calls only, no local LLMs |
+| Secrets | API keys stored as GitHub Repository / Hugging Face Space secrets, never in files |
+| LLM | Ollama Cloud (`gpt-oss:120b-cloud`) primary, OpenAI/Anthropic API fallback, offline grounded extractor if none |
 | Branching | `ml`, `ai`, `analytics` branches; PRs to `main` only |
 | Data source | `data/` directory (read-only; no raw file modification) |
 | AI code | All AI-assisted code reviewed and commented `# AI-assisted: reviewed by [name]` |

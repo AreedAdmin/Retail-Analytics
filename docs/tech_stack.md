@@ -36,7 +36,7 @@ Use pinned versions in `requirements.txt` once agreed by the team.
 
 - scikit-learn
 - statsmodels
-- xgboost (optional, if memory budget allows)
+- xgboost (optional)
 
 ### Evaluation and Explainability
 
