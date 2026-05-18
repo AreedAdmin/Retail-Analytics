@@ -170,6 +170,22 @@ add(`
 </div>`,
 `The gap we closed: raw data on one side, a manager who needs decisions on the other. Everything in between — models, analytics, dashboard, grounded GenAI, deployment — is what we built.`);
 
+/* 2b — MANAGER QUESTIONS */
+add(`
+<div class="kicker">Assignment Map</div>
+<h2>Four manager questions → four answers</h2>
+<div class="fill"><div class="grid" style="grid-template-columns:1fr;gap:11px">
+ ${[['Expected demand next periods?','Module 6 · forecast + 95% band + AI narrative'],
+    ['Do promotions boost demand? For which SKUs?','Modules 3 & 7 · incremental sales · lift %'],
+    ['Price sensitivity? Impact of ±10% price?','Modules 4 & 5 · elasticity β · scenarios · memo'],
+    ['Ask in plain English?','Module 8 · grounded chat · chart summaries']]
+  .map((r,i)=>`<div class="card ${i===3?'k':''}" style="display:flex;align-items:center;gap:20px;padding:14px 18px">
+   <span class="mono ac" style="font-size:11px;width:28px">Q${i+1}</span>
+   <span style="flex:1;font-size:14px">${r[0]}</span>
+   <span class="mono mut" style="font-size:11px;text-align:right;max-width:42%">${r[1]}</span></div>`).join('')}
+</div></div>`,
+`For the marker: every brief question has a module. Do not skip this — it scores Content Insight (30 pts). Walk each row in ~20 seconds.`);
+
 /* 3 — PRODUCT */
 add(`
 <div class="kicker">The Product</div>
@@ -184,6 +200,41 @@ add(`
      <span class="l mut">+ shared contracts<br>+ shared AI layer</span></div>
 </div></div>`,
 `Stress it's one product, not 11 scripts — shared data contracts, shared Palantir theme, one AI layer every module calls. The two highlighted tiles (AI Assistant, AI Analytics) are the GenAI core.`);
+
+/* 3b — ANALYTICS SUITE */
+add(`
+<div class="kicker">Analytics Suite</div>
+<h2>Three engines, one dashboard</h2>
+<div class="fill"><div class="grid" style="grid-template-columns:repeat(3,1fr);gap:14px">
+ ${[['Promotion lift','XGBoost counterfactual<br>+ matched control','Incremental units &amp; lift %','Modules 3 · 7'],
+    ['Price elasticity','Log–log OLS per SKU<br>β = own-price sensitivity','Demand curves · rankings','Module 4'],
+    ['Scenario simulator','Chains elasticity<br>constant-elasticity what-if','±5/10/20/30% · waterfall','Module 5']]
+  .map(c=>`<div class="card k" style="padding:20px 16px">
+   <div class="t ac">${c[0]}</div>
+   <div style="font:600 14px/1.3 var(--head);margin:12px 0 8px">${c[1]}</div>
+   <div class="s">${c[2]}</div>
+   <div class="chip" style="margin-top:12px;font-size:11px"><span class="c">→</span> ${c[3]}</div></div>`).join('')}
+</div>
+<div class="sub" style="margin-top:14px;align-self:center">+ <span class="ac">Module 6</span> demand forecasting (HistGBR) — separate ML track</div>
+</div></div>`,
+`Three distinct statistical engines — not one generic ML block. Module 5 does not retrain; it projects from Module 4. Module 3 = business view; Module 7 = model diagnostics.`);
+
+/* 3c — RUBRIC */
+add(`
+<div class="kicker">Assessment</div>
+<h2>Criteria → evidence</h2>
+<div class="fill"><div class="grid" style="grid-template-columns:1fr;gap:10px">
+ ${[['Clarity &amp; Structure','20','11-tab console · consistent UI · this deck'],
+    ['Content Insight','30','Forecast · promo lift · elasticity · 8 scenarios'],
+    ['GenAI Integration','20','Context JSON · prompts · guardrails · 3 features'],
+    ['Critical Reflection','10','Module 9 · failure log · honest limitations'],
+    ['Use of Visuals','20','Plotly · CIs · heatmaps · drill-downs']]
+  .map(r=>`<div class="card" style="display:flex;align-items:center;gap:16px;padding:13px 18px">
+   <span class="mono ac" style="width:36px;font-size:13px">${r[1]}</span>
+   <span style="font:600 14px var(--head);width:200px">${r[0]}</span>
+   <span class="s" style="flex:1">${r[2]}</span></div>`).join('')}
+</div></div>`,
+`Optional for markers — points to evidence not claims. Skip in a 10-min demo if short on time.`);
 
 /* 4 — STACK */
 add(`
@@ -334,6 +385,24 @@ add(`
 </div></div>`,
 `HistGradientBoostingRegressor on log1p sales, past-only features, chronological split, residual-quantile intervals. Beats naive materially, intervals well-calibrated. Honest: it's a backtest, not a live forecast.`);
 
+/* 7b — FORECAST METHODOLOGY */
+add(`
+<div class="kicker">Forecasting · Method</div>
+<h2>HistGBR pipeline</h2>
+<div class="fill"><div class="flow" style="gap:12px;align-items:stretch">
+ ${[['Features','lags · rolling stats · promo history · calendar · price shape · past-only'],
+    ['Models','Naive · Ridge · HistGBR (+ CV tuned) · ARIMA'],
+    ['Target','log1p(weekly_sales)'],
+    ['Split','13-wk val + 13-wk test'],
+    ['Intervals','residual quantiles → 95% band']]
+  .map((s,i)=>`<div class="card ${i===1?'k':''}" style="flex:1;padding:14px">
+   <div class="t">${s[0]}</div><div class="s" style="margin-top:8px;font-size:12px;line-height:1.6">${s[1]}</div></div>
+   ${i<4?'<div class="arrow">→</div>':''}`).join('')}
+</div>
+<div class="chip" style="align-self:center;margin-top:16px"><span class="c">RAM</span> HistGBR fits 8 GB rule — no neural net required</div>
+</div>`,
+`Assignment allows regression OR neural nets — we benchmarked in the notebook and selected HistGBR. True forward forecast needs assumed future price/promo (stated in README). Features are all trailing — no leakage.`);
+
 /* 8 — PROMO LIFT */
 add(`
 <div class="kicker">Service 2 · ML</div>
@@ -353,6 +422,27 @@ add(`
  </div>
 </div></div>`,
 `XGBoost, counterfactual + matched-control ensemble, time-series CV. We SHOW the modest R² in-product and the AI is told to state it — reliability is communicated, not hidden. Strong responders are rank-trustworthy.`);
+
+/* 8b — SCAN*PRO / PROMO METHOD */
+add(`
+<div class="kicker">Promotion · Method</div>
+<h2>SCAN*PRO intent, XGBoost counterfactual</h2>
+<div class="fill"><div class="flow" style="gap:20px;align-items:stretch">
+ <div class="card" style="flex:1">
+  <div class="t">Brief asks SCAN*PRO</div>
+  <div class="s" style="margin-top:10px;line-height:1.8">Decompose sales into base + trend + seasonality + <span class="ac">promo increment</span></div>
+ </div>
+ <div class="arrow" style="font-size:22px">→</div>
+ <div class="card k" style="flex:1.2">
+  <div class="t ac">Our alternative</div>
+  <pre class="mono" style="font-size:11px;color:var(--accent);margin-top:10px;line-height:1.7">incremental = actual − counterfactual
+lift% = incremental / counterfactual</pre>
+  <div class="s" style="margin-top:10px">60% ML baseline (promo excluded) + 40% matched control ±8 wks · bootstrap CIs</div>
+ </div>
+</div>
+<div class="sub" style="margin-top:14px">Same goal — isolate promo lift — more flexible for sparse promos; weaker causal claim (stated in Module 9)</div>
+</div>`,
+`Name SCAN*PRO explicitly. Course allows alternative approach. Walk counterfactual formula. Mention SHAP in notebook for feature attribution. Modest R² shown in-product.`);
 
 /* 9 — ELASTICITY */
 add(`
@@ -505,6 +595,26 @@ add(`
 </div>`,
 `One code path powers chat, summaries and the Module-7 narrative — consistency, and one place to harden. narrative_service.py is that orchestrator.`);
 
+/* 13b — AI CHART SUMMARY */
+add(`
+<div class="kicker">AI · Chart summaries</div>
+<h2>Click-to-summarise &amp; multi-briefing</h2>
+<div class="fill"><div class="flow" style="gap:24px;align-items:stretch">
+ <div class="card k" style="flex:1;padding:20px">
+  <div class="t ac">8b · one chart</div>
+  <div style="font-size:12px;color:var(--muted);margin-top:14px;line-height:2" class="mono">
+  Summarise btn → metrics JSON → click_to_summarise.txt → guardrail → ≤120 words</div>
+ </div>
+ <div class="card" style="flex:1;padding:20px">
+  <div class="t ac">8c · many modules</div>
+  <div style="font-size:12px;color:var(--muted);margin-top:14px;line-height:2" class="mono">
+  tick Forecast + Promo + Elasticity → multi_select_summary.txt → executive memo</div>
+ </div>
+</div>
+<div class="chip" style="align-self:center;margin-top:20px"><span class="c">RULE</span> LLM never sees raw CSV — only ml/outputs metrics</div>
+</div>`,
+`This is "AI Insight Narration" from the brief — distinct from free-form chat. Two modes: surgical per-chart and strategic cross-module. Same guardrail path as Module 8a.`);
+
 /* 14 — AI ANALYTICS */
 add(`
 <div class="kicker">AI Observability</div>
@@ -573,7 +683,7 @@ add(`
 /* 17 — SCALE */
 add(`
 <div class="kicker">Scale &amp; Reliability</div>
-<h2>The slow part is external &amp; elastic</h2>
+<h2>Three tiers · app · models · LLM</h2>
 <div class="fill"><div class="flow" style="gap:22px;align-items:stretch">
  ${[['Compute-light','UI reads precomputed files — no training, no weights in app'],
     ['LLM scales alone','swap one env var; cloud absorbs concurrency'],
@@ -585,7 +695,7 @@ add(`
    <div style="font:600 14px/1.25 var(--head);margin:12px 0 8px">${c[0]}</div>
    <div class="s" style="font-size:11.5px;line-height:1.6">${c[1]}</div></div>`).join('')}
 </div></div>`,
-`Scaling = the slow part (the 120B model) is external and elastic; the app itself is stateless, cheap, and never hard-fails on AI.`);
+`Three-tier scalability: HF app reads precomputed files (cheap, stateless). Models retrain offline in ml/. LLM on Ollama Cloud with offline stub — never hard-fails. More users = duplicate Spaces; more SKUs = new CSV outputs.`);
 
 /* 18 — QUALITY */
 add(`
@@ -631,15 +741,15 @@ add(`
 <div class="title-hero" style="background:radial-gradient(900px 480px at 75% 35%,rgba(77,155,255,.10),transparent 60%)">
  <div class="kicker">Roadmap &amp; Close</div>
  <div class="flow" style="gap:0;margin:10px 0 34px">
-  ${['True forward forecasting','Causal promo / elasticity','Theme-refactor legacy tabs','Automated test suite']
+  ${['Forward forecast paths','SCAN*PRO side-by-side','Causal DiD / IV','Failure-log RAG','Load-test users']
    .map((r,i)=>`<div style="display:flex;align-items:center">
    <div class="card" style="padding:12px 16px"><span class="mono ac" style="font-size:11px">0${i+1}</span>
-   <div style="font-size:12.5px;margin-top:6px">${r}</div></div>${i<3?'<div class="arrow" style="margin:0 12px">→</div>':''}</div>`).join('')}
+   <div style="font-size:12.5px;margin-top:6px">${r}</div></div>${i<4?'<div class="arrow" style="margin:0 12px">→</div>':''}</div>`).join('')}
  </div>
- <h1 style="font-size:38px;line-height:1.2;max-width:24ch">From one CSV to a manager-ready<br><span class="ac">decision console.</span></h1>
+ <h1 style="font-size:38px;line-height:1.2;max-width:28ch">Every brief question answered —<br><span class="ac">grounded · critiqued · deployed.</span></h1>
  <div class="sub" style="font-size:16px;margin-top:18px">Deployed · grounded · observable.</div>
 </div>`,
-`Closing line verbatim: "We delivered a deployed, grounded, observable AI analytics product — from one CSV to a manager-ready decision console." Then invite questions.`);
+`Closing: we answered all four manager questions, critiqued GenAI honestly (Module 9), and shipped a live demo. Invite questions. Mention HF Space URL if hosted.`);
 
 /* 21 — APPENDIX A */
 add(`

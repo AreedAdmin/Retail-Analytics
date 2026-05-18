@@ -43,18 +43,24 @@ using the Speaker notes.
 |---|---|
 | 1 Title | Full‑bleed dark hero, geometric logo mark, animated accent underline |
 | 2 Problem | Left "1 CSV" tile → 4 question chips, arrow to "decisions" |
+| 2b Manager Qs | 4 assignment questions → module numbers (rubric map) |
 | 3 Product | 11‑tile module grid, icons, accent active state |
+| 3b Analytics | 3-column: Promo · Elasticity · Scenario (methods + modules) |
+| Rubric | 5-row criterion → what we delivered (20/30/20/10/20) |
 | 4 Stack | Layered chip stack (UI→Data→ML→GenAI→Deploy), logos/icons |
 | 5 Architecture | **Animated layered SVG**, connectors draw left→right |
 | 6 Contracts | Contract "schema card" ↔ loader ↔ module link diagram |
 | 7 Forecast | Mini actual‑vs‑predicted line + CI band + 3 metric counters |
+| 7b Forecast deep | Feature pipeline → HistGBR → intervals (method diagram) |
 | 8 Promo Lift | Horizontal lift bar chart (top SKUs) + R²/MAE gauges |
+| 8b Promo method | SCAN*PRO brief vs XGBoost counterfactual (lift formula) |
 | 9 Elasticity | Demand curve + elasticity histogram split at β=−1 |
 | 9b AI eval | Benefit ↔ limitation ledger + 5-tile "how we close every gap" row |
 | 10 LLM client | Backend fallback ladder, animated "resolve" path |
 | 11 Grounding | Prompt → CONTEXT JSON → answer flow, "[Data‑grounded]" stamp |
 | 12 Guardrails | 3‑step pipeline icons (check → label → log), red‑flag node |
 | 13 GenAI feats | 3 device‑style cards (chat / summarise / multi) |
+| 13b AI summary | Chart click → context JSON → narrative flow (8b/8c) |
 | 14 AI Analytics | TTFT/TPS gauges + category donut, live‑log ticker |
 | 15 UI/UX | Side‑by‑side dark/light product mock, palette swatches |
 | 16 Deploy | HF Space ⇄ Ollama Cloud topology, "free" badge |
@@ -100,6 +106,23 @@ manager who needs decisions on the other. Everything between is what we built.
 
 ---
 
+## Slide 2b — The Manager's Four Questions (Assignment Map)
+
+**Each row = one grading question → where we answer it in the product:**
+
+| Marketing manager asks… | Dashboard answer |
+|-------------------------|------------------|
+| *Expected demand next periods?* | **Module 6** — per-SKU forecast + 95% band + AI narrative |
+| *Do promotions boost demand? For which SKUs?* | **Modules 3 & 7** — incremental sales, lift %, rankings |
+| *Which SKUs are price-sensitive? What if ±10% price?* | **Modules 4 & 5** — elasticity β, scenarios, revenue waterfall, AI memo |
+| *Can I ask in plain English?* | **Module 8** — grounded chat + chart summaries |
+
+**Speaker notes:** This slide is for the marker — we did not build features in
+isolation; every module maps to a question in the brief. Walk the four rows in
+~30 seconds, then say the next slide shows the full product.
+
+---
+
 ## Slide 3 — What We Delivered (the Product)
 
 A single Gradio app, **11 tabs**, Palantir‑style command console:
@@ -120,6 +143,41 @@ A single Gradio app, **11 tabs**, Palantir‑style command console:
 
 **Speaker notes:** Stress it's *one cohesive product*, not 11 scripts —
 shared contracts, shared theme, shared AI layer.
+
+---
+
+## Slide 3b — Analytics Suite (Three Engines)
+
+The dashboard analytics are **three distinct statistical engines**, not one
+generic "ML block":
+
+| Engine | Method | Question answered | Modules |
+|--------|--------|-------------------|---------|
+| **Promotion lift** | XGBoost counterfactual + matched control (SCAN*PRO‑style decomposition) | Incremental units & % lift per SKU | 3, 7 |
+| **Price elasticity** | Log–log OLS per SKU (`log Q ~ log P + promo`) | Own‑price sensitivity β | 4 |
+| **Scenario projection** | Constant‑elasticity what‑if (chains Module 4) | Revenue impact at ±5/10/20/30% | 5 |
+
+Plus **demand forecasting** (HistGBR, separate ML track) in Module 6.
+
+**Speaker notes:** Markers often conflate "analytics" — we separate *causal‑style
+promo lift*, *descriptive elasticity*, and *forward scenario math*. Module 5
+does not retrain; it projects from Module 4. Module 3 shows business rankings;
+Module 7 shows model diagnostics (R², residuals, SHAP in notebook).
+
+---
+
+## Slide 3c — Grading Criteria → Our Evidence
+
+| Criterion (pts) | How we demonstrate it |
+|-----------------|-------------------------|
+| **Clarity & Structure (20)** | 11-tab console, sidebar routing, consistent Palantir UI, this deck |
+| **Content Insight (30)** | HistGBR forecast, promo lift per SKU, elasticity + 8 scenarios, exportable tables |
+| **GenAI Integration (20)** | Context JSON, versioned prompts, labels, guardrails, 3 GenAI features |
+| **Critical Reflection (10)** | Module 9, failure log, limitations stated in-product and here |
+| **Use of Visuals (20)** | Plotly charts, CIs, heatmaps, waterfalls, drill-down SKU selectors |
+
+**Speaker notes:** Optional slide — use if the audience includes the marker.
+Otherwise fold into the close. Points to *evidence*, not claims.
 
 ---
 
@@ -255,6 +313,29 @@ and the intervals are well‑calibrated; it is a *backtest*, not a live forecast
 
 ---
 
+## Slide 7b — Forecasting Methodology (In Depth)
+
+**Problem:** predict weekly `demand_units` per SKU with uncertainty.
+
+**Pipeline (all past‑only — no leakage):**
+1. **Features:** lags 1–4w, rolling mean/std, promo history, calendar
+   (week-of-year, quarter), price shape (log price, vs-SKU mean, discount flag).
+2. **Candidates:** Naive, Ridge, **HistGradientBoostingRegressor** (+ CV‑tuned),
+   per-SKU ARIMA — selected on validation MAE.
+3. **Target:** `log1p(weekly_sales)` — stabilises variance across SKUs.
+4. **Split:** chronological — 13‑week validation, 13‑week test (panel).
+5. **Intervals:** residual quantiles in log space → 95% band in `forecast.csv`.
+
+**Why HistGBR (not a neural net):** fits the **8 GB RAM** rule; strong on tabular
+panel data; faster iteration than deep learning for 44 SKUs × 100 weeks.
+
+**Speaker notes:** The assignment asks for regression *or* neural nets — we chose
+HistGBR as the production model after benchmarking in the notebook. Be explicit:
+delivered file is a **backtest** on held-out weeks; true forward forecast would
+need assumed future price/promo paths (stated in Module 6 / README).
+
+---
+
 ## Slide 8 — Service 2: Promotion Lift (ML)
 
 **Goal:** incremental sales & % lift attributable to a promotion.
@@ -272,6 +353,36 @@ and the intervals are well‑calibrated; it is a *backtest*, not a live forecast
 **Speaker notes:** We *show* the modest R² in‑product and the AI is instructed
 to state it — reliability is communicated, not hidden. Strong responders are
 rank‑trustworthy even where absolute error is high.
+
+---
+
+## Slide 8b — Promotion Methodology: SCAN*PRO & Our Alternative
+
+**Assignment asks for SCAN*PRO** — a marketing-mix model that decomposes sales into
+base, trend, seasonality, and **promotion increment** per SKU.
+
+**Our justified alternative (documented in notebook):**
+```
+incremental_sales = actual_sales − counterfactual_baseline
+lift_pct          = incremental / counterfactual × 100
+```
+
+| Step | What we do |
+|------|------------|
+| 1 | **XGBoost** predicts demand with `feat_main_page` *excluded* → ML counterfactual (no-promo baseline) |
+| 2 | **Matched control** — average sales in ±8 non-promo weeks around each promo week |
+| 3 | **Ensemble** — 60% ML + 40% matched control when both exist |
+| 4 | **Uncertainty** — 90% bootstrap CIs on SKU‑level lift summaries |
+| 5 | **Validation** — 5‑fold TimeSeriesSplit (no future→past leakage) |
+
+**Relation to SCAN*PRO:** same *intent* — isolate incremental demand from
+promotion — but we use ML counterfactuals where SCAN*PRO uses multiplicative
+decomposition. Trade-off: more flexible for sparse promos; weaker causal claim.
+
+**Speaker notes:** This is the "Content Insight" depth slide for promotions.
+Name SCAN*PRO, explain why XGBoost counterfactual is defensible (course allows
+"alternative approach"), and show the lift formula on screen. Mention SHAP in
+the notebook for feature attribution (price, lags, seasonality drive baseline).
 
 ---
 
@@ -423,6 +534,38 @@ narrative — consistency and one place to harden.
 
 ---
 
+## Slide 13b — AI Chart Summary Feature (8b & 8c)
+
+**8b — Click-to-summarise (per chart):**
+```
+User clicks "Summarise" on a chart
+  → chart metrics packaged as AIContextPayload (numbers only)
+  → click_to_summarise.txt prompt
+  → LLMClient → guardrail (numeric check + label)
+  → ≤120-word narrative beside the chart
+```
+
+**8c — Multi-select briefing:**
+```
+User ticks modules (Forecast + Promo + Elasticity…)
+  → combined CONTEXT JSON from all selected scopes
+  → multi_select_summary.txt
+  → one executive memo synthesising cross-module insights
+```
+
+**Grounding rule:** the LLM never receives raw CSV rows — only pre-computed
+metrics from `ml/*/outputs/` and analytics loaders.
+
+**Where it appears:** Promotion, Elasticity, Forecasting, Scenario, Module 7
+(every chart with a summarise button shares `narrative_service.summarise_payload`).
+
+**Speaker notes:** This is the feature the brief calls "AI Insight Narration."
+Contrast with Module 8a chat (free-form Q&A). Emphasise we built *two* narration
+modes — surgical (one chart) and strategic (multi-module). Both use the same
+guardrail path as chat.
+
+---
+
 ## Slide 14 — AI Observability (AI Analytics module)
 
 `ai/services/telemetry.py` + the **AI Analytics** tab:
@@ -476,18 +619,26 @@ model to Ollama Cloud so a free CPU Space stays light and reliable.
 
 ## Slide 17 — How It Scales & Stays Reliable
 
-- **Compute‑light by design** — UI reads precomputed CSVs; no training,
-  no model weights in the app → trivial memory, instant cold start.
-- **LLM scales independently** — swap one env var for a bigger/faster
-  backend; cloud inference absorbs concurrency.
-- **Graceful degradation** — backend chain ends in an offline extractor;
-  the dashboard *never* hard‑fails on AI.
-- **Contract‑driven** — new models/SKUs slot in by writing a conformant
-  file; loaders validate. New AI scopes are one registry entry.
-- **Observable** — telemetry + failure log make AI behaviour measurable.
+**App tier (Hugging Face Spaces — free CPU):**
+- Stateless Gradio UI — reads CSV/JSON only; **no training at request time**
+- Cold start: load 4,400 rows + ~3 MB of model outputs → seconds, not minutes
+- Horizontal scale: duplicate Spaces instances behind a link (no session state)
 
-**Speaker notes:** Scaling = the slow part (the 120B model) is external and
-elastic; the app itself is stateless and cheap.
+**Model tier (offline `ml/` notebooks):**
+- Retrain locally or in CI when data refreshes; ship new `outputs/` files
+- 44 SKUs today → design supports hundreds via same contract (one row per SKU-week)
+
+**LLM tier (Ollama Cloud / API):**
+- Heavy model **offloaded** — app sends compact JSON context (~2–8 KB), not the dataset
+- Concurrent users → cloud provider queues; app degrades to offline stub if down
+- Swap `LLM_BACKEND` / API key without redeploying analytics
+
+**Degradation ladder:** Ollama → Claude → OpenAI → local HF → **offline extractor**
+( echoes only supplied numbers — cannot invent figures )
+
+**Speaker notes:** Answer "what happens with more SKUs / more users?" in three
+sentences: app stays cheap (precomputed files), ML retrains offline, LLM scales
+externally. The bottleneck is never the Gradio layer.
 
 ---
 
@@ -519,15 +670,22 @@ the product itself tells the user where to be cautious.
 
 ---
 
-## Slide 20 — Roadmap & Close
+## Slide 20 — What We Would Do Next
 
-- True forward forecasting (assumed future price/promo paths).
-- Causal promo/elasticity (DiD, instrumented price).
-- Theme‑aware refactor of the two legacy module bodies.
-- Automated test suite for loaders + guardrail.
+| Priority | Initiative | Why |
+|----------|------------|-----|
+| 1 | **True forward forecast** | Assume future price/promo paths; extend `forecast.csv` beyond backtest |
+| 2 | **Full SCAN*PRO implementation** | Compare decomposition vs counterfactual; report side-by-side in Module 7 |
+| 3 | **Causal inference** | DiD / IV for price and promo — move from descriptive to causal claims |
+| 4 | **RAG over interaction log** | Learn from Module 9 failure cases to tighten prompts automatically |
+| 5 | **Load testing** | Quantify concurrent-user behaviour on Ollama Cloud vs paid API |
 
 **Closing line:** *We delivered a deployed, grounded, observable AI analytics
-product — from one CSV to a manager‑ready decision console.*
+product — from one CSV to a manager‑ready decision console that answers every
+question in the brief.*
+
+**Speaker notes:** "What's next" shows intellectual honesty — we know the edges.
+End with the four manager questions answered, GenAI critiqued, and a live demo link.
 
 ---
 
