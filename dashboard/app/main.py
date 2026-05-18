@@ -2,20 +2,35 @@
 Main Gradio application — AI-Augmented Retail Analytics Dashboard.
 
 Run:
-    python main.py
-or
-    python -m dashboard.app.main
+    python main.py (local)
+    python app/main.py (from dashboard dir)
+    
+Deploy to HF Spaces:
+    gradio deploy
 """
 
 import gradio as gr
 import os
 import sys
+from pathlib import Path
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-sys.path.insert(0, PROJECT_ROOT)
+# Support both local and HF Spaces environments
+current_dir = Path(__file__).parent.parent
+app_root = current_dir.parent
 
-from dashboard.modules import overview
-from dashboard.modules.module_7 import build_module_7_tab
+# Try GitHub structure first, fallback to HF Spaces
+sys.path.insert(0, str(app_root))
+sys.path.insert(0, str(current_dir))
+
+# Import modules - works in both environments
+try:
+    # GitHub structure (dashboard/modules)
+    from dashboard.modules import overview
+    from dashboard.modules.module_7 import build_module_7_tab
+except (ImportError, ModuleNotFoundError):
+    # HF Spaces structure (modules)
+    from modules import overview
+    from modules.module_7 import build_module_7_tab
 
 # ─────────────────────────────────────────────────────────────
 # GLOBAL CSS  — dark everything, including sidebar
