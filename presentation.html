@@ -379,6 +379,48 @@ revenue% = (1+price%)·(1+demand%) − 1</pre>
 </div></div>`,
 `Per-SKU log-log OLS, promo-controlled, CIs from SEs. Module 5 is the payoff of Module 4 — chained services, not a new model. Caveats (endogeneity, observational) stated in-product.`);
 
+/* 9.5 — AI INTEGRATION: CRITICAL EVALUATION */
+add(`
+<div class="kicker">AI Integration · Critical Evaluation</div>
+<h2>Why a GenAI layer — and why it's <span class="am">risky</span></h2>
+<div class="fill"><div class="flow" style="gap:18px;align-items:stretch">
+ <div class="card" style="flex:1;border-left:2px solid var(--accent)">
+  <div class="t ac">Benefits — why we added it</div>
+  <div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+  ${[['Plain-English access','a non-technical manager queries the models directly'],
+     ['Instant synthesis','auto-narratives across forecast / lift / elasticity'],
+     ['Decision-speed','every chart explained on demand, in context'],
+     ['One layer, many uses','chat · click-to-summarise · executive briefing']]
+   .map(b=>`<div><div style="font:600 13px/1.2 var(--head)">${b[0]}</div>
+    <div class="s" style="margin-top:2px">${b[1]}</div></div>`).join('')}
+  </div>
+ </div>
+ <div class="card" style="flex:1;border-left:2px solid var(--amber)">
+  <div class="t am">Limitations — what LLMs get wrong</div>
+  <div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+  ${[['Hallucination','fabricated figures &amp; unsupported claims'],
+     ['No ground truth','the model does not know our dataset'],
+     ['Off-purpose / jailbreak','prompt-override · used for anything but the job'],
+     ['Cost &amp; throughput','API bills · request queue under concurrent demand']]
+   .map(b=>`<div><div style="font:600 13px/1.2 var(--head)">${b[0]}</div>
+    <div class="s" style="margin-top:2px">${b[1]}</div></div>`).join('')}
+  </div>
+ </div>
+</div>
+<div class="lbl" style="align-self:center;margin-top:18px">↓ how we close every gap (next slides)</div>
+<div class="grid" style="grid-template-columns:repeat(5,1fr);gap:10px;margin-top:10px">
+ ${[['RAG architecture','grounds answers in our data → fewer hallucinations'],
+    ['System prompts','enforced discipline → fewer hallucinations'],
+    ['Guardrails','no override · on-purpose only · secure'],
+    ['Open-source LLM','zero marginal cost · no cashflow stress'],
+    ['Fast TTFT · 215 TPS','no queue under concurrent demand']]
+  .map(m=>`<div class="card k" style="padding:13px 12px">
+   <div style="font:600 12px/1.25 var(--head)">${m[0]}</div>
+   <div class="s" style="font-size:10.5px;line-height:1.5;margin-top:6px">${m[1]}</div></div>`).join('')}
+</div>
+</div>`,
+`The honest framing slide BEFORE the AI-layer deep-dives. Benefits first: natural-language access turns our models into something a marketing manager can actually use. Then own the limitations — LLMs hallucinate, don't know our data, can be pushed off-purpose or jailbroken, and carry cost/throughput risk. The bottom row is the promise: we did NOT just bolt on a chatbot — every gap is deliberately closed. (1) RAG architecture grounds every answer in our own model outputs and gives the LLM relevant context to pull from, cutting hallucination. (2) Versioned system prompts enforce discipline (cite only context, declare uncertainty), cutting hallucination further. (3) Guardrails make it secure — no prompt-override, the assistant is usable ONLY for its purpose. Cautionary example: the Chipotle customer-service bot that users jailbroke into writing a reverse-linked-list — an assistant with no guardrail becomes a free general-purpose LLM on the company's bill and brand. (4) An open-source LLM (gpt-oss:120b via Ollama Cloud) means no expensive end-of-month API bill, no cashflow stress, no extra cost for this intelligence. (5) Fast time-to-first-token (~1.7s) and ~215 TPS keep responses snappy so concurrent users aren't stuck in a request queue. Tell the audience: "watch each of these five close a specific risk."`);
+
 /* 10 — LLM CLIENT */
 add(`
 <div class="kicker">AI Layer</div>
