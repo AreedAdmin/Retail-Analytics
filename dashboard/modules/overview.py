@@ -382,7 +382,7 @@ SHARED_CSS = """
 .kpi-card.t-blue{border-top:3px solid #2563eb}
 .kpi-lbl{font:600 10px/1 'DM Sans',sans-serif;text-transform:uppercase;
   letter-spacing:.1em;color:#1a2330 !important;margin-bottom:8px}
-.kpi-val{font:700 36px/1 'Space Grotesk',sans-serif;color:#fff!important;margin-bottom:6px}
+.kpi-val{font:700 36px/1 'Space Grotesk',sans-serif;color:#1a2330!important;margin-bottom:6px}
 .kpi-sub{font-size:11px;color:#1a2330 !important;margin-bottom:8px}
 .kpi-badge{display:inline-flex;align-items:center;gap:3px;font:600 11px 'DM Sans',sans-serif;
   padding:2px 8px;border-radius:10px}
