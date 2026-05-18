@@ -11,7 +11,9 @@
   --bg:#0a0d13; --panel:#11151d; --elev:#161b24; --border:#1d2430;
   --text:#d7dde6; --muted:#79838f; --dim:#49525f;
   --accent:#4d9bff; --soft:rgba(77,155,255,.12); --line:rgba(77,155,255,.45);
-  --grok:#7c5cbf; --amber:#f59e0b; --red:#ef4444; --r:4px;
+  --grok:#7c5cbf; --grok-soft:rgba(124,92,191,.12); --grok-line:rgba(124,92,191,.45);
+  --green:#22c55e; --green-soft:rgba(34,197,94,.12);
+  --amber:#f59e0b; --red:#ef4444; --r:4px;
   --mono:'IBM Plex Mono',ui-monospace,monospace;
   --head:'Space Grotesk',system-ui,sans-serif;
   --body:'Inter',system-ui,sans-serif;
@@ -30,34 +32,40 @@ body{background-image:
   background:linear-gradient(180deg,#0c1017,#0a0d13);
   border:1px solid var(--border);border-radius:8px;
   box-shadow:0 0 0 1px rgba(0,0,0,.4),0 30px 80px -20px rgba(0,0,0,.8)}
-.slide.active{display:flex;animation:in .34s cubic-bezier(.2,.7,.2,1)}
-@keyframes in{from{opacity:0;transform:translateY(14px) scale(.992)}to{opacity:1;transform:none}}
+.slide.active{display:flex;animation:in-fwd .34s cubic-bezier(.2,.7,.2,1)}
+#deck[data-dir="-1"] .slide.active{animation:in-bwd .34s cubic-bezier(.2,.7,.2,1)}
+@keyframes in-fwd{from{opacity:0;transform:translateX(30px) scale(.992)}to{opacity:1;transform:none}}
+@keyframes in-bwd{from{opacity:0;transform:translateX(-30px) scale(.992)}to{opacity:1;transform:none}}
 .slide::before{content:'';position:absolute;left:0;top:0;width:100%;height:2px;
-  background:linear-gradient(90deg,var(--accent),transparent 55%)}
+  background:linear-gradient(90deg,var(--slide-accent,var(--accent)),transparent 55%)}
 
 /* typography ---------------------------------------------------------- */
 .kicker{font:600 11px/1 var(--mono);letter-spacing:.32em;color:var(--accent);
   text-transform:uppercase;margin-bottom:16px;display:flex;gap:12px;align-items:center}
 .kicker::after{content:'';flex:1;height:1px;background:var(--border)}
+.kicker-ai{color:var(--grok)}
+.kicker-ai::after{background:var(--grok-line)}
 h1{font:700 56px/1.04 var(--head);letter-spacing:-.02em}
 h2{font:700 36px/1.1 var(--head);letter-spacing:-.015em;margin-bottom:6px}
 h2 .ac{color:var(--accent)}
 .sub{color:var(--muted);font-size:15px;max-width:62ch;margin-top:10px;line-height:1.6}
 .mono{font-family:var(--mono)}
 .fill{flex:1;display:flex;flex-direction:column;justify-content:center}
+pre{background:var(--elev);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px}
 
 /* footer -------------------------------------------------------------- */
 .foot{position:absolute;left:64px;right:64px;bottom:24px;display:flex;
   justify-content:space-between;align-items:center;
-  font:500 10.5px/1 var(--mono);color:var(--dim);letter-spacing:.14em;text-transform:uppercase}
+  font:500 10.5px/1 var(--mono);color:var(--muted);letter-spacing:.14em;text-transform:uppercase}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);
   box-shadow:0 0 0 4px var(--soft);display:inline-block;margin-right:8px;vertical-align:middle}
 
 /* progress + counter -------------------------------------------------- */
 #bar{position:fixed;top:0;left:0;height:2px;background:var(--accent);
   width:0;z-index:50;transition:width .3s ease;box-shadow:0 0 10px var(--accent)}
-#idx{position:fixed;right:18px;top:14px;font:600 11px/1 var(--mono);
-  color:var(--dim);letter-spacing:.2em;z-index:50}
+#idx{position:fixed;right:18px;top:10px;font:600 11px/1 var(--mono);
+  color:var(--muted);letter-spacing:.2em;z-index:50;
+  background:rgba(0,0,0,.45);padding:5px 11px;border-radius:20px;border:1px solid var(--border)}
 #idx b{color:var(--accent)}
 
 /* notes --------------------------------------------------------------- */
@@ -80,34 +88,38 @@ h2 .ac{color:var(--accent)}
 /* generic visual kit -------------------------------------------------- */
 .grid{display:grid;gap:14px}
 .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);
-  padding:18px 16px;position:relative;overflow:hidden}
+  padding:18px 16px;position:relative;overflow:hidden;transition:border-color .18s ease}
+.card:hover{border-color:var(--line)}
 .card .t{font:600 10px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
 .card .v{font:700 30px/1 var(--head);margin-top:10px}
 .card .s{font-size:11px;color:var(--muted);margin-top:7px}
 .card.k{border-top:2px solid var(--accent)}
+.card.g{border-top:2px solid var(--green)}
+.card.ai-card{border-top:2px solid var(--grok)}
 .tile{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);
-  padding:14px 12px;display:flex;flex-direction:column;gap:7px;transition:.18s}
+  padding:16px 14px;display:flex;flex-direction:column;gap:7px;transition:.18s}
 .tile .n{font:600 10px/1 var(--mono);color:var(--dim)}
 .tile .l{font:600 13px/1.25 var(--body)}
 .tile.on{border-color:var(--line);background:var(--soft)}
 .tile.on .n{color:var(--accent)}
 .chip{display:inline-flex;align-items:center;gap:8px;background:var(--panel);
-  border:1px solid var(--border);border-radius:var(--r);padding:9px 13px;
+  border:1px solid var(--border);border-radius:20px;padding:9px 13px;
   font:500 12px/1 var(--body);color:var(--text)}
 .chip .c{color:var(--accent);font-family:var(--mono);font-size:11px}
 .flow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.arrow{color:var(--dim);font-size:18px}
+.arrow{color:var(--line);font-size:18px;opacity:.8}
 .big{font:700 44px/1 var(--head)}
 .big .u{font-size:15px;color:var(--muted);font-family:var(--mono);margin-left:4px}
+.big-num{display:inline-block;background:var(--elev);border-radius:6px;padding:4px 14px;border:1px solid var(--border)}
 .lbl{font:600 10px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
-.mut{color:var(--muted)} .ac{color:var(--accent)} .am{color:var(--amber)}
+.mut{color:var(--muted)} .ac{color:var(--accent)} .am{color:var(--amber)} .gr{color:var(--green)}
 svg{display:block;width:100%;height:auto;overflow:visible}
 .draw{stroke-dasharray:1;stroke-dashoffset:1;animation:dr 1.1s ease forwards}
 .slide.active .draw{animation-play-state:running}
 @keyframes dr{to{stroke-dashoffset:0}}
 .title-hero{position:absolute;inset:0;display:flex;flex-direction:column;
   justify-content:center;padding:0 90px;
-  background:radial-gradient(900px 480px at 78% 30%,rgba(77,155,255,.10),transparent 60%)}
+  background:radial-gradient(900px 480px at 40% 50%,rgba(77,155,255,.10),transparent 60%)}
 </style>
 </head>
 <body>
@@ -179,8 +191,10 @@ add(`
     ['Do promotions boost demand? For which SKUs?','Modules 3 & 7 · incremental sales · lift %'],
     ['Price sensitivity? Impact of ±10% price?','Modules 4 & 5 · elasticity β · scenarios · memo'],
     ['Ask in plain English?','Module 8 · grounded chat · chart summaries']]
-  .map((r,i)=>`<div class="card ${i===3?'k':''}" style="display:flex;align-items:center;gap:20px;padding:14px 18px">
-   <span class="mono ac" style="font-size:11px;width:28px">Q${i+1}</span>
+  .map((r,i)=>`<div class="card ${i===3?'k':''}" style="display:flex;align-items:center;gap:18px;padding:14px 18px">
+   <div style="width:44px;height:44px;border-radius:50%;background:var(--soft);border:1px solid var(--line);
+     display:flex;align-items:center;justify-content:center;flex:none;
+     font:700 15px/1 var(--mono);color:var(--accent)">Q${i+1}</div>
    <span style="flex:1;font-size:14px">${r[0]}</span>
    <span class="mono mut" style="font-size:11px;text-align:right;max-width:42%">${r[1]}</span></div>`).join('')}
 </div></div>`,
@@ -191,7 +205,7 @@ add(`
 <div class="kicker">The Product</div>
 <h2>11 views, one cohesive console</h2>
 <div class="fill">
-<div class="grid" style="grid-template-columns:repeat(4,1fr)">
+<div class="grid" style="grid-template-columns:repeat(4,1fr);gap:16px">
  ${[['01','Overview'],['02','Data Explorer'],['03','Promotion Effectiveness'],['04','Price Elasticity'],
     ['05','Scenario Simulator'],['06','Demand Forecasting'],['07','Promotion Lift Model'],['08','AI Assistant'],
     ['AI','AI Analytics'],['09','Critical Reflection'],['10','Appendix &amp; Export']]
@@ -223,16 +237,25 @@ add(`
 add(`
 <div class="kicker">Assessment</div>
 <h2>Criteria → evidence</h2>
-<div class="fill"><div class="grid" style="grid-template-columns:1fr;gap:10px">
- ${[['Clarity &amp; Structure','20','11-tab console · consistent UI · this deck'],
-    ['Content Insight','30','Forecast · promo lift · elasticity · 8 scenarios'],
-    ['GenAI Integration','20','Context JSON · prompts · guardrails · 3 features'],
-    ['Critical Reflection','10','Module 9 · failure log · honest limitations'],
-    ['Use of Visuals','20','Plotly · CIs · heatmaps · drill-downs']]
-  .map(r=>`<div class="card" style="display:flex;align-items:center;gap:16px;padding:13px 18px">
-   <span class="mono ac" style="width:36px;font-size:13px">${r[1]}</span>
-   <span style="font:600 14px var(--head);width:200px">${r[0]}</span>
-   <span class="s" style="flex:1">${r[2]}</span></div>`).join('')}
+<div class="fill"><div class="grid" style="grid-template-columns:1fr;gap:8px">
+ ${[['Clarity &amp; Structure','20','.20','#4d9bff','11-tab console · consistent UI · this deck'],
+    ['Content Insight','30','.30','#7c5cbf','Forecast · promo lift · elasticity · 8 scenarios'],
+    ['GenAI Integration','20','.20','#4d9bff','Context JSON · prompts · guardrails · 3 features'],
+    ['Critical Reflection','10','.10','#f59e0b','Module 9 · failure log · honest limitations'],
+    ['Use of Visuals','20','.20','#22c55e','Plotly · CIs · heatmaps · drill-downs']]
+  .map(r=>`<div class="card" style="display:flex;align-items:center;gap:18px;padding:10px 18px">
+   <svg data-ring="${r[2]}" width="54" height="54" viewBox="0 0 54 54" style="width:54px;height:54px;flex:none">
+     <circle cx="27" cy="27" r="21" fill="none" stroke="var(--border)" stroke-width="4"/>
+     <circle cx="27" cy="27" r="21" fill="none" stroke="${r[3]}" stroke-width="4"
+       stroke-dasharray="131.95" stroke-dashoffset="131.95"
+       transform="rotate(-90 27 27)" class="ring-arc"/>
+     <text x="27" y="32" fill="var(--text)" font-family="var(--mono)" font-size="12"
+       text-anchor="middle" font-weight="700">${r[1]}</text>
+   </svg>
+   <span style="font:600 14px var(--head);width:190px;flex:none">${r[0]}</span>
+   <div style="flex:1;display:flex;flex-wrap:wrap;gap:6px 8px">
+     ${r[4].split(' · ').map(e=>`<span style="font:500 12px/1 var(--mono);padding:4px 10px;border-radius:5px;background:${r[3]}18;border:1px solid ${r[3]}44;color:var(--text)">${e}</span>`).join('')}
+   </div></div>`).join('')}
 </div></div>`,
 `Optional for markers — points to evidence not claims. Skip in a 10-min demo if short on time.`);
 
@@ -326,7 +349,7 @@ add(`
     <div style="font:600 12px/1 var(--mono);letter-spacing:.18em;color:var(--text)">CLIENT · Presentation</div>
     <div style="font-size:13px;color:var(--muted);margin-top:8px">Gradio app · 11 module tabs · charts · KPIs · click‑to‑summarise</div>
    </div>
-   <div style="background:var(--panel);border:1px solid var(--border);border-top:3px solid #79838f;border-radius:10px;padding:16px 20px">
+   <div style="background:var(--panel);border:1px solid var(--border);border-top:3px solid var(--grok);border-radius:10px;padding:16px 20px">
     <div style="font:600 12px/1 var(--mono);letter-spacing:.18em;color:var(--text)">SERVICES · ML &amp; Analytics</div>
     <div style="display:flex;gap:12px;margin-top:12px">
      ${[
@@ -339,7 +362,7 @@ add(`
         <div style="font-size:11px;color:var(--muted);margin-top:6px">${s[1]}</div></div>`).join('')}
     </div>
    </div>
-   <div style="background:var(--panel);border:1px solid var(--border);border-top:3px solid #79838f;border-radius:10px;padding:16px 20px">
+   <div style="background:var(--panel);border:1px solid var(--border);border-top:3px solid var(--green);border-radius:10px;padding:16px 20px">
     <div style="font:600 12px/1 var(--mono);letter-spacing:.18em;color:var(--text)">DATA · Foundation</div>
     <div style="font-size:13px;color:var(--muted);margin-top:8px">data_raw.csv · schemas.py contracts · validated, cached loaders</div>
    </div>
@@ -379,7 +402,7 @@ add(`
  </svg>
  <div class="grid" style="grid-template-columns:1fr;gap:12px;width:230px">
    <div class="card k"><div class="t">Test MAE</div><div class="v"><span data-c="58.7">0</span></div></div>
-   <div class="card"><div class="t">95% Coverage</div><div class="v"><span data-c="93.5">0</span><span class="mut" style="font-size:16px">%</span></div></div>
+   <div class="card g"><div class="t">95% Coverage</div><div class="v"><span data-c="93.5">0</span><span class="mut" style="font-size:16px">%</span></div></div>
    <div class="card"><div class="t">Horizon</div><div class="v" style="font-size:18px">13-wk val + test</div></div>
  </div>
 </div></div>`,
@@ -391,7 +414,7 @@ add(`
 <h2>HistGBR pipeline</h2>
 <div class="fill"><div class="flow" style="gap:12px;align-items:stretch">
  ${[['Features','lags · rolling stats · promo history · calendar · price shape · past-only'],
-    ['Models','Naive · Ridge · HistGBR (+ CV tuned) · ARIMA'],
+    ['Models','<span style="color:var(--muted)">Naive · Ridge ·</span> <span style="color:var(--accent);font-weight:700">HistGBR ✓</span><span style="color:var(--muted)"> · ARIMA</span><br><span style="display:inline-block;margin-top:8px;font:600 9px/1 var(--mono);letter-spacing:.14em;background:var(--soft);border:1px solid var(--line);border-radius:20px;padding:3px 9px;color:var(--accent)">SELECTED</span>'],
     ['Target','log1p(weekly_sales)'],
     ['Split','13-wk val + 13-wk test'],
     ['Intervals','residual quantiles → 95% band']]
@@ -471,7 +494,7 @@ revenue% = (1+price%)·(1+demand%) − 1</pre>
 
 /* 9.5 — AI INTEGRATION: CRITICAL EVALUATION */
 add(`
-<div class="kicker">AI Integration · Critical Evaluation</div>
+<div class="kicker kicker-ai">AI Integration · Critical Evaluation</div>
 <h2>Why a GenAI layer — and why it's <span class="am">risky</span></h2>
 <div class="fill"><div class="flow" style="gap:18px;align-items:stretch">
  <div class="card" style="flex:1;border-left:2px solid var(--accent)">
@@ -513,20 +536,25 @@ add(`
 
 /* 10 — LLM CLIENT */
 add(`
-<div class="kicker">AI Layer</div>
+<div class="kicker kicker-ai">AI Layer</div>
 <h2>One client, any backend</h2>
 <div class="fill"><div class="flow" style="gap:34px;align-items:center">
- <div class="grid" style="gap:10px;flex:1">
+ <div style="flex:1;display:flex;flex-direction:column;gap:8px">
   ${[['1','OLLAMA_API_KEY','Ollama Cloud · gpt-oss:120b','on'],
      ['2','ANTHROPIC_API_KEY','Claude',''],
      ['3','OPENAI_API_KEY','OpenAI',''],
      ['4','transformers','local open model · CPU/ZeroGPU',''],
      ['5','else','offline grounded extractor','warn']]
-   .map(r=>`<div class="card" style="display:flex;align-items:center;gap:16px;padding:12px 16px;
-     border-left:2px solid ${r[3]=='on'?'var(--accent)':r[3]=='warn'?'var(--amber)':'var(--border)'}">
-     <span class="mono ${r[3]=='on'?'ac':'mut'}" style="font-size:13px">${r[0]}</span>
-     <span class="mono" style="font-size:12px;color:var(--muted);width:175px">${r[1]}</span>
-     <span class="arrow">→</span><span style="font-size:13px">${r[2]}</span></div>`).join('')}
+   .map((r,i)=>`<div style="margin-left:${i*20}px">
+     <div class="card" style="display:flex;align-items:center;gap:14px;padding:10px 16px;
+       border-left:2px solid ${r[3]=='on'?'var(--accent)':r[3]=='warn'?'var(--amber)':'var(--border)'}">
+       <span class="mono" style="font-size:11px;color:var(--dim);width:14px">${r[0]}</span>
+       <span class="mono" style="font-size:11px;color:var(--muted);width:160px">${r[1]}</span>
+       <span class="arrow" style="font-size:14px">→</span>
+       <span style="font-size:13px;flex:1;color:${r[3]=='on'?'var(--text)':'var(--muted)'}">${r[2]}</span>
+       ${r[3]=='on'?`<span style="font:600 9px/1 var(--mono);letter-spacing:.14em;background:var(--soft);border:1px solid var(--line);border-radius:20px;padding:3px 9px;color:var(--accent)">ACTIVE</span>`:''}
+       ${r[3]=='warn'?`<span style="font:600 9px/1 var(--mono);letter-spacing:.14em;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.4);border-radius:20px;padding:3px 9px;color:var(--amber)">SAFE FALLBACK</span>`:''}
+     </div></div>`).join('')}
  </div>
  <div class="card k" style="width:260px">
   <div class="t">Guarantee</div>
@@ -539,18 +567,22 @@ add(`
 
 /* 11 — GROUNDING */
 add(`
-<div class="kicker">AI Layer · Anti-Hallucination #1</div>
+<div class="kicker kicker-ai">AI Layer · Anti-Hallucination #1</div>
 <h2>Grounded in our own numbers</h2>
 <div class="fill"><div class="flow" style="justify-content:space-between;gap:16px">
  ${[['User prompt','plain English question'],
     ['+ CONTEXT JSON','explicit figures from model outputs only'],
     ['System prompt','cite ONLY context · else "no data"'],
     ['LLM','Ollama Cloud']]
-  .map((s,i)=>`<div class="card" style="flex:1"><div class="t">${i+1}</div>
-   <div style="font:600 15px/1.2 var(--head);margin-top:10px">${s[0]}</div>
-   <div class="s">${s[1]}</div></div>${i<3?'<div class="arrow">→</div>':''}`).join('')}
+  .map((s,i)=>`<div class="card" style="flex:1;padding-top:18px">
+   <div style="width:28px;height:28px;border-radius:50%;background:var(--grok-soft);border:1px solid var(--grok-line);
+     display:flex;align-items:center;justify-content:center;font:700 11px/1 var(--mono);
+     color:var(--grok);margin-bottom:10px">${i+1}</div>
+   <div style="font:600 15px/1.2 var(--head)">${s[0]}</div>
+   <div class="s" style="margin-top:6px">${s[1]}</div></div>${i<3?'<div class="arrow">→</div>':''}`).join('')}
 </div>
-<div class="chip" style="align-self:center;margin-top:26px;border-color:var(--line)">
+<div style="height:2px;background:linear-gradient(90deg,var(--grok),var(--accent));border-radius:1px;margin-top:14px;opacity:.35"></div>
+<div class="chip" style="align-self:center;margin-top:12px;border-color:var(--line)">
   every reply ends with <span class="ac mono">&nbsp;[Data-grounded]&nbsp;</span> or <span class="mono mut">&nbsp;[General inference]&nbsp;</span></div>
 <div class="sub" style="text-align:center;align-self:center">Prompts are versioned files in <span class="mono">ai/prompts/</span> — never inline.</div>
 </div>`,
@@ -558,18 +590,18 @@ add(`
 
 /* 12 — GUARDRAILS */
 add(`
-<div class="kicker">AI Layer · Anti-Hallucination #2</div>
+<div class="kicker kicker-ai">AI Layer · Anti-Hallucination #2</div>
 <h2>Every answer is verified</h2>
 <div class="fill"><div class="flow" style="justify-content:space-between;gap:18px">
- <div class="card" style="flex:1"><div class="big ac">01</div>
+ <div class="card" style="flex:1"><div class="big ac big-num">01</div>
    <div style="font:600 16px var(--head);margin-top:8px">Numeric check</div>
    <div class="s">each number matched to context (rounding-tolerant)</div></div>
  <div class="arrow">→</div>
- <div class="card" style="flex:1"><div class="big ac">02</div>
+ <div class="card" style="flex:1"><div class="big ac big-num">02</div>
    <div style="font:600 16px var(--head);margin-top:8px">Label enforced</div>
    <div class="s">grounded/inference derived, not trusted from model</div></div>
  <div class="arrow">→</div>
- <div class="card" style="flex:1"><div class="big am">03</div>
+ <div class="card" style="flex:1;border-top:2px solid var(--amber)"><div class="big ac big-num">03</div>
    <div style="font:600 16px var(--head);margin-top:8px">Failure logged</div>
    <div class="s">flagged → failure_log.jsonl → Module 9 live</div></div>
 </div>
@@ -579,7 +611,7 @@ add(`
 
 /* 13 — GENAI FEATURES */
 add(`
-<div class="kicker">AI Layer · Module 8</div>
+<div class="kicker kicker-ai">AI Layer · Module 8</div>
 <h2>Three grounded GenAI features</h2>
 <div class="fill"><div class="grid" style="grid-template-columns:repeat(3,1fr);gap:18px">
  ${[['8a','Chat','Persistent Q&amp;A · scope-limited grounding · auto-categorised'],
@@ -597,31 +629,59 @@ add(`
 
 /* 13b — AI CHART SUMMARY */
 add(`
-<div class="kicker">AI · Chart summaries</div>
+<div class="kicker kicker-ai">AI · Chart summaries</div>
 <h2>Click-to-summarise &amp; multi-briefing</h2>
-<div class="fill"><div class="flow" style="gap:24px;align-items:stretch">
- <div class="card k" style="flex:1;padding:20px">
-  <div class="t ac">8b · one chart</div>
-  <div style="font-size:12px;color:var(--muted);margin-top:14px;line-height:2" class="mono">
-  Summarise btn → metrics JSON → click_to_summarise.txt → guardrail → ≤120 words</div>
+<div class="fill"><div style="display:grid;grid-template-columns:1fr 1.35fr;gap:22px;align-items:stretch;flex:1">
+ <!-- left: pipeline cards -->
+ <div style="display:flex;flex-direction:column;gap:16px">
+  <div class="card k" style="padding:18px">
+   <div class="mono" style="font-size:11px;color:var(--muted);margin-bottom:8px">8b · one chart</div>
+   <div class="flow" style="gap:6px;align-items:center;flex-wrap:wrap">
+    ${['Summarise btn','metrics JSON','click_to_summarise.txt','guardrail','≤ 120 words'].map((s,i,a)=>`<span class="mono" style="font-size:11px;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:3px 8px">${s}</span>${i<a.length-1?'<span style="color:var(--muted);font-size:12px">→</span>':''}`).join('')}
+   </div>
+  </div>
+  <div class="card" style="padding:18px">
+   <div class="mono" style="font-size:11px;color:var(--muted);margin-bottom:8px">8c · many modules</div>
+   <div class="flow" style="gap:6px;align-items:center;flex-wrap:wrap">
+    ${['Forecast + Promo','multi_select_summary.txt','guardrail','executive memo'].map((s,i,a)=>`<span class="mono" style="font-size:11px;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:3px 8px">${s}</span>${i<a.length-1?'<span style="color:var(--muted);font-size:12px">→</span>':''}`).join('')}
+   </div>
+  </div>
+  <div class="chip" style="align-self:flex-start;font-size:11px"><span class="c">RULE</span> LLM never sees raw CSV — only ml/outputs metrics</div>
  </div>
- <div class="card" style="flex:1;padding:20px">
-  <div class="t ac">8c · many modules</div>
-  <div style="font-size:12px;color:var(--muted);margin-top:14px;line-height:2" class="mono">
-  tick Forecast + Promo + Elasticity → multi_select_summary.txt → executive memo</div>
+ <!-- right: mock AI output terminal -->
+ <div style="background:#0c1017;border:1px solid var(--grok-line);border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--grok),var(--accent))"></div>
+  <div class="flow" style="gap:8px;align-items:center">
+   <span style="width:10px;height:10px;border-radius:50%;background:#ff5f57;display:inline-block"></span>
+   <span style="width:10px;height:10px;border-radius:50%;background:#febc2e;display:inline-block"></span>
+   <span style="width:10px;height:10px;border-radius:50%;background:#28c840;display:inline-block"></span>
+   <span class="mono" style="font-size:10px;color:var(--muted);margin-left:6px">narrative_service.py · output</span>
+  </div>
+  <div class="mono" style="font-size:12px;line-height:1.8;color:#c9d1db">
+   <span style="color:var(--muted)">&gt;&gt;&gt; </span><span style="color:var(--grok)">click_to_summarise</span>(<span style="color:#79c0ff">module</span>=<span style="color:#a5d6ff">"forecast"</span>)<br>
+   <br>
+   <span style="color:#e6edf3">Promotional weeks drive a <strong style="color:#4d9bff">+18 %</strong> uplift in revenue</span><br>
+   <span style="color:#e6edf3">vs. baseline, with peak sensitivity in weeks <strong style="color:#4d9bff">4 – 7</strong>.</span><br>
+   <span style="color:#e6edf3">HistGBR RMSE held at <strong style="color:#4d9bff">£ 1,240</strong> across the hold-out</span><br>
+   <span style="color:#e6edf3">window — within the ± 5 % tolerance threshold.</span><br>
+   <br>
+   <span style="color:var(--muted)">confidence: </span><span style="color:#28c840">0.91</span>&nbsp;&nbsp;<span style="color:var(--muted)">tokens: </span><span style="color:#e6edf3">97</span>
+  </div>
+  <div class="flow" style="gap:10px;align-items:center;margin-top:4px">
+   <span style="background:rgba(124,77,255,.18);border:1px solid var(--grok-line);border-radius:5px;padding:3px 10px;font-size:11px;color:var(--grok)" class="mono">[Data-grounded]</span>
+   <span style="background:rgba(40,200,64,.1);border:1px solid rgba(40,200,64,.3);border-radius:5px;padding:3px 10px;font-size:11px;color:#28c840" class="mono">guardrail ✓ pass</span>
+  </div>
  </div>
-</div>
-<div class="chip" style="align-self:center;margin-top:20px"><span class="c">RULE</span> LLM never sees raw CSV — only ml/outputs metrics</div>
-</div>`,
+</div></div>`,
 `This is "AI Insight Narration" from the brief — distinct from free-form chat. Two modes: surgical per-chart and strategic cross-module. Same guardrail path as Module 8a.`);
 
 /* 14 — AI ANALYTICS */
 add(`
-<div class="kicker">AI Observability</div>
+<div class="kicker kicker-ai">AI Observability</div>
 <h2>We instrument our own AI</h2>
 <div class="fill"><div class="flow" style="gap:26px;align-items:center">
  ${[['TTFT','1.7','s','time to first token'],['TPS','215','','tokens / sec'],['Success','100','%','non-fallback']]
-  .map(g=>`<div class="card k" style="flex:1;text-align:center;padding:26px 14px">
+  .map((g,gi)=>`<div class="card ${gi===2?'g':'k'}" style="flex:1;text-align:center;padding:26px 14px">
    <div class="lbl">${g[0]}</div>
    <div class="big" style="margin:14px 0 4px"><span data-c="${g[1]}" data-dec="${g[1].includes('.')?1:0}">0</span><span class="u">${g[2]}</span></div>
    <div class="s">${g[3]}</div></div>`).join('')}
@@ -669,8 +729,16 @@ add(`
    <div class="s">free CPU tier · no GPU<br>stateless · instant cold start</div>
    <div class="chip" style="margin-top:16px;justify-content:center"><span class="c">app.py</span> → demo</div>
  </div>
- <div style="text-align:center"><div class="arrow" style="font-size:26px">⇄</div>
-   <div class="mono" style="font-size:10px;color:var(--dim);margin-top:6px">secret key</div></div>
+ <div style="display:flex;flex-direction:column;align-items:center;justify-content:center">
+  <svg viewBox="0 0 160 90" style="width:160px;overflow:visible">
+    <path d="M10,45 Q80,8 150,45" class="draw" stroke="var(--accent)" stroke-width="1.5" fill="none" pathLength="1"/>
+    <path d="M10,45 Q80,82 150,45" stroke="var(--dim)" stroke-width="1" fill="none" stroke-dasharray="3 4"/>
+    <text x="80" y="22" fill="var(--accent)" font-family="var(--mono)" font-size="10" text-anchor="middle">~1.7s TTFT · 215 TPS</text>
+    <text x="80" y="76" fill="var(--dim)" font-family="var(--mono)" font-size="9" text-anchor="middle">OLLAMA_API_KEY</text>
+    <circle cx="10" cy="45" r="3" fill="var(--accent)"/>
+    <circle cx="150" cy="45" r="3" fill="var(--accent)"/>
+  </svg>
+ </div>
  <div class="card k" style="width:280px;text-align:center;padding:30px 20px">
    <div class="lbl">LLM</div>
    <div style="font:700 22px var(--head);margin:14px 0 6px">Ollama Cloud</div>
@@ -684,16 +752,34 @@ add(`
 add(`
 <div class="kicker">Scale &amp; Reliability</div>
 <h2>Three tiers · app · models · LLM</h2>
-<div class="fill"><div class="flow" style="gap:22px;align-items:stretch">
- ${[['Compute-light','UI reads precomputed files — no training, no weights in app'],
-    ['LLM scales alone','swap one env var; cloud absorbs concurrency'],
-    ['Graceful degradation','backend chain ends in offline extractor — never hard-fails'],
-    ['Contract-driven','new model/SKU = a conformant file; new AI scope = 1 registry line'],
-    ['Observable','telemetry + failure log make AI measurable']]
-  .map((c,i)=>`<div class="card ${i==2?'k':''}" style="flex:1;padding:20px 14px">
-   <div class="big ac" style="font-size:30px">0${i+1}</div>
-   <div style="font:600 14px/1.25 var(--head);margin:12px 0 8px">${c[0]}</div>
-   <div class="s" style="font-size:11.5px;line-height:1.6">${c[1]}</div></div>`).join('')}
+<div class="fill"><div class="grid" style="grid-template-columns:repeat(3,1fr);gap:16px">
+ <div class="card" style="border-top:2px solid var(--accent);padding:22px 18px">
+  <div class="lbl" style="color:var(--accent);margin-bottom:16px">HF SPACES · APP</div>
+  <div style="display:flex;flex-direction:column;gap:14px">
+   <div><div style="font:600 13px/1.2 var(--head)">Compute-light</div>
+    <div class="s" style="margin-top:5px">UI reads precomputed files — stateless, no model weights in-process</div></div>
+   <div><div style="font:600 13px/1.2 var(--head)">Contract-driven</div>
+    <div class="s" style="margin-top:5px">new SKU = a conformant file; new AI scope = 1 registry line</div></div>
+  </div>
+ </div>
+ <div class="card" style="border-top:2px solid var(--green);padding:22px 18px">
+  <div class="lbl" style="color:var(--green);margin-bottom:16px">ML PIPELINE · MODELS</div>
+  <div style="display:flex;flex-direction:column;gap:14px">
+   <div><div style="font:600 13px/1.2 var(--head)">Observable</div>
+    <div class="s" style="margin-top:5px">telemetry + failure log make AI performance measurable</div></div>
+   <div><div style="font:600 13px/1.2 var(--head)">Reproducible</div>
+    <div class="s" style="margin-top:5px">every output regenerates from ml/ — deterministic by construction</div></div>
+  </div>
+ </div>
+ <div class="card" style="border-top:2px solid var(--grok);padding:22px 18px">
+  <div class="lbl" style="color:var(--grok);margin-bottom:16px">☁ OLLAMA CLOUD · LLM</div>
+  <div style="display:flex;flex-direction:column;gap:14px">
+   <div><div style="font:600 13px/1.2 var(--head)">LLM scales alone</div>
+    <div class="s" style="margin-top:5px">swap one env var; cloud absorbs concurrency</div></div>
+   <div><div style="font:600 13px/1.2 var(--head)">Graceful degradation</div>
+    <div class="s" style="margin-top:5px">offline extractor at chain end — never hard-fails on AI</div></div>
+  </div>
+ </div>
 </div></div>`,
 `Three-tier scalability: HF app reads precomputed files (cheap, stateless). Models retrain offline in ml/. LLM on Ollama Cloud with offline stub — never hard-fails. More users = duplicate Spaces; more SKUs = new CSV outputs.`);
 
@@ -794,6 +880,7 @@ let cur=0;
 S.forEach((s,i)=>{
   const el=document.createElement('section');
   el.className='slide'; el.dataset.i=i;
+  if(s.html.includes('kicker-ai')) el.style.setProperty('--slide-accent','var(--grok)');
   el.innerHTML=s.html+`<div class="foot"><span><span class="dot"></span>Retail Analytics · AI Console</span><span>Imperial College · Retail &amp; Marketing Analytics</span></div>`;
   deck.appendChild(el);
 });
@@ -809,6 +896,21 @@ function animateCounts(el){
       if(p<1) requestAnimationFrame(step); else n.textContent=target.toFixed(dec); }
     n.textContent=(0).toFixed(dec); requestAnimationFrame(step);
   });
+  el.querySelectorAll('[data-ring]').forEach(svg=>{
+    const arc=svg.querySelector('.ring-arc');
+    if(!arc) return;
+    const circ=parseFloat(arc.getAttribute('stroke-dasharray'));
+    const frac=parseFloat(svg.dataset.ring);
+    let t0=null,dur=1000;
+    const step=ts=>{
+      t0=t0||ts; const p=Math.min((ts-t0)/dur,1);
+      const e=1-Math.pow(1-p,3);
+      arc.setAttribute('stroke-dashoffset',circ*(1-frac*e));
+      if(p<1) requestAnimationFrame(step);
+    };
+    arc.setAttribute('stroke-dashoffset',circ);
+    requestAnimationFrame(step);
+  });
 }
 function show(i){
   cur=Math.max(0,Math.min(S.length-1,i));
@@ -818,7 +920,7 @@ function show(i){
   notesEl.innerHTML=`<b>Speaker Notes — ${cur+1}/${S.length}</b>${S[cur].notes}`;
   animateCounts(slides[cur]);
 }
-function go(d){ show(cur+d); }
+function go(d){ deck.dataset.dir=d; show(cur+d); }
 addEventListener('keydown',e=>{
   if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();go(1);}
   else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();go(-1);}
