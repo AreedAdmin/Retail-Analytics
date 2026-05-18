@@ -2,7 +2,7 @@ name: Sync to Hugging Face Space
 
 on:
   push:
-    branches: [ main ]  # run on every push to main
+    branches: [ feature/dashboard-modules-integration ]  # run on every push to main
 
 jobs:
   sync:
