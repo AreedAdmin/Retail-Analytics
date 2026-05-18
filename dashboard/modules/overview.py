@@ -135,6 +135,11 @@ def compute_kpis(df: pd.DataFrame) -> dict:
         "total_periods":        int(df["period"].nunique()),
         "avg_price":            round(float(df["price"].mean()), 2),
         "number_of_promotions": number_of_promotions,
+        # Promo Score = share of all SKU-week observations that were on
+        # promotion (0-100%). Denominator is total rows, NOT the period
+        # count — dividing by periods produced the bogus 1575%.
+        "promo_penetration_pct": round(
+            number_of_promotions / len(df) * 100, 1) if len(df) else 0.0,
         "top_sku":              int(sku_sales.idxmax()),
         "weakest_sku":          int(sku_sales.idxmin()),
     }
@@ -706,7 +711,7 @@ def build_overview_tab():
     snap     = compute_sku_snapshot(df, 8)
     fig_line = make_line_chart(df)
     fig_bar  = make_bar_chart(df)
-    fig_gau  = make_gauge(float(kpis['number_of_promotions'] / kpis['total_periods'] * 100))
+    fig_gau  = make_gauge(float(kpis['promo_penetration_pct']))
 
     # Header + KPI row
     gr.HTML(value=build_header_html(kpis))
