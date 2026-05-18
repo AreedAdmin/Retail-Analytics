@@ -1,22 +1,22 @@
 """
-Entry point for Hugging Face Spaces deployment.
-This file allows the app to be deployed on HF Spaces while maintaining
-compatibility with local development.
+Hugging Face Spaces entrypoint.
 
-Local use: python dashboard/app/main.py
-HF Spaces: Automatically runs this app.py
+HF Spaces (Gradio SDK) runs `app.py` at the repo root and serves the
+module-level `demo` Blocks. Keeping the `__main__` guard lets it also run
+locally with `python app.py` (equivalent to `python -m dashboard.app.main`).
 """
 
-import sys
 import os
-from pathlib import Path
 
-# Setup path
-app_root = Path(__file__).parent
-sys.path.insert(0, str(app_root))
+# Disable Gradio's experimental SSR mode. It causes noisy asyncio
+# "Invalid file descriptor" finalizer tracebacks (and occasional flaky
+# rendering) on HF Spaces. Set BEFORE importing gradio so it's the default
+# regardless of whether Spaces calls .launch() itself or runs this file.
+os.environ.setdefault("GRADIO_SSR_MODE", "False")
 
-# Import main app
-from dashboard.app.main import main
+from dashboard.app.main import build_app
+
+demo = build_app()
 
 if __name__ == "__main__":
-    main()
+    demo.launch(ssr_mode=False)

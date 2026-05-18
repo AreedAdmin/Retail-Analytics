@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI-Augmented Retail Analytics — Technical Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0d13; --panel:#11151d; --elev:#161b24; --border:#1d2430;
+  --text:#d7dde6; --muted:#79838f; --dim:#49525f;
+  --accent:#4d9bff; --soft:rgba(77,155,255,.12); --line:rgba(77,155,255,.45);
+  --grok:#7c5cbf; --amber:#f59e0b; --red:#ef4444; --r:4px;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --head:'Space Grotesk',system-ui,sans-serif;
+  --body:'Inter',system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--body);overflow:hidden}
+body{background-image:
+  linear-gradient(rgba(77,155,255,.025) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(77,155,255,.025) 1px,transparent 1px);
+  background-size:44px 44px}
+
+/* deck frame ---------------------------------------------------------- */
+#deck{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.slide{position:absolute;width:min(96vw,1320px);height:min(94vh,742px);
+  padding:54px 64px;display:none;flex-direction:column;
+  background:linear-gradient(180deg,#0c1017,#0a0d13);
+  border:1px solid var(--border);border-radius:8px;
+  box-shadow:0 0 0 1px rgba(0,0,0,.4),0 30px 80px -20px rgba(0,0,0,.8)}
+.slide.active{display:flex;animation:in .34s cubic-bezier(.2,.7,.2,1)}
+@keyframes in{from{opacity:0;transform:translateY(14px) scale(.992)}to{opacity:1;transform:none}}
+.slide::before{content:'';position:absolute;left:0;top:0;width:100%;height:2px;
+  background:linear-gradient(90deg,var(--accent),transparent 55%)}
+
+/* typography ---------------------------------------------------------- */
+.kicker{font:600 11px/1 var(--mono);letter-spacing:.32em;color:var(--accent);
+  text-transform:uppercase;margin-bottom:16px;display:flex;gap:12px;align-items:center}
+.kicker::after{content:'';flex:1;height:1px;background:var(--border)}
+h1{font:700 56px/1.04 var(--head);letter-spacing:-.02em}
+h2{font:700 36px/1.1 var(--head);letter-spacing:-.015em;margin-bottom:6px}
+h2 .ac{color:var(--accent)}
+.sub{color:var(--muted);font-size:15px;max-width:62ch;margin-top:10px;line-height:1.6}
+.mono{font-family:var(--mono)}
+.fill{flex:1;display:flex;flex-direction:column;justify-content:center}
+
+/* footer -------------------------------------------------------------- */
+.foot{position:absolute;left:64px;right:64px;bottom:24px;display:flex;
+  justify-content:space-between;align-items:center;
+  font:500 10.5px/1 var(--mono);color:var(--dim);letter-spacing:.14em;text-transform:uppercase}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--accent);
+  box-shadow:0 0 0 4px var(--soft);display:inline-block;margin-right:8px;vertical-align:middle}
+
+/* progress + counter -------------------------------------------------- */
+#bar{position:fixed;top:0;left:0;height:2px;background:var(--accent);
+  width:0;z-index:50;transition:width .3s ease;box-shadow:0 0 10px var(--accent)}
+#idx{position:fixed;right:18px;top:14px;font:600 11px/1 var(--mono);
+  color:var(--dim);letter-spacing:.2em;z-index:50}
+#idx b{color:var(--accent)}
+
+/* notes --------------------------------------------------------------- */
+#notes{position:fixed;left:0;right:0;bottom:0;max-height:42vh;overflow:auto;
+  background:#070a0f;border-top:1px solid var(--line);
+  padding:20px 32px;display:none;z-index:60;
+  font-size:14px;line-height:1.7;color:var(--muted)}
+#notes.show{display:block}
+#notes b{color:var(--accent);font:600 11px/1 var(--mono);letter-spacing:.2em;
+  text-transform:uppercase;display:block;margin-bottom:8px}
+.hint{position:fixed;left:18px;top:13px;font:500 10px/1 var(--mono);
+  color:var(--dim);letter-spacing:.12em;z-index:50}
+
+/* logo mark ----------------------------------------------------------- */
+.mark{position:relative;width:46px;height:46px}
+.mark i{position:absolute;display:block;box-sizing:border-box}
+.mark i:nth-child(1){width:28px;height:28px;left:0;top:0;border:2px solid var(--accent)}
+.mark i:nth-child(2){width:28px;height:28px;right:0;bottom:0;background:var(--accent);opacity:.85}
+
+/* generic visual kit -------------------------------------------------- */
+.grid{display:grid;gap:14px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);
+  padding:18px 16px;position:relative;overflow:hidden}
+.card .t{font:600 10px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.card .v{font:700 30px/1 var(--head);margin-top:10px}
+.card .s{font-size:11px;color:var(--muted);margin-top:7px}
+.card.k{border-top:2px solid var(--accent)}
+.tile{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);
+  padding:14px 12px;display:flex;flex-direction:column;gap:7px;transition:.18s}
+.tile .n{font:600 10px/1 var(--mono);color:var(--dim)}
+.tile .l{font:600 13px/1.25 var(--body)}
+.tile.on{border-color:var(--line);background:var(--soft)}
+.tile.on .n{color:var(--accent)}
+.chip{display:inline-flex;align-items:center;gap:8px;background:var(--panel);
+  border:1px solid var(--border);border-radius:var(--r);padding:9px 13px;
+  font:500 12px/1 var(--body);color:var(--text)}
+.chip .c{color:var(--accent);font-family:var(--mono);font-size:11px}
+.flow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.arrow{color:var(--dim);font-size:18px}
+.big{font:700 44px/1 var(--head)}
+.big .u{font-size:15px;color:var(--muted);font-family:var(--mono);margin-left:4px}
+.lbl{font:600 10px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.mut{color:var(--muted)} .ac{color:var(--accent)} .am{color:var(--amber)}
+svg{display:block;width:100%;height:auto;overflow:visible}
+.draw{stroke-dasharray:1;stroke-dashoffset:1;animation:dr 1.1s ease forwards}
+.slide.active .draw{animation-play-state:running}
+@keyframes dr{to{stroke-dashoffset:0}}
+.title-hero{position:absolute;inset:0;display:flex;flex-direction:column;
+  justify-content:center;padding:0 90px;
+  background:radial-gradient(900px 480px at 78% 30%,rgba(77,155,255,.10),transparent 60%)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div class="hint mono">← → navigate · N notes · F fullscreen</div>
+<div id="idx" class="mono"><b>01</b> / 22</div>
+<div id="deck"></div>
+<div id="notes"></div>
+
+<script>
+/* ============================================================ SLIDES */
+const S = [];
+const add = (html, notes) => S.push({html, notes});
+
+/* 1 — TITLE */
+add(`
+<div class="title-hero">
+  <div style="display:flex;gap:18px;align-items:center;margin-bottom:30px">
+    <div class="mark"><i></i><i></i></div>
+    <div>
+      <div class="mono" style="font-size:11px;letter-spacing:.3em;color:var(--accent)">RETAIL · ANALYTICS</div>
+      <div class="mono" style="font-size:10px;letter-spacing:.22em;color:var(--dim);margin-top:5px">AI INTELLIGENCE CONSOLE</div>
+    </div>
+  </div>
+  <h1>AI-Augmented Retail<br>Analytics <span style="color:var(--accent)">Dashboard</span></h1>
+  <div class="sub" style="font-size:17px;max-width:60ch">A grounded GenAI decision console for retail pricing &amp; promotions —
+  from one CSV to a manager-ready, deployed product.</div>
+  <div class="flow" style="margin-top:38px">
+    <span class="chip"><span class="c">11</span> interactive views</span>
+    <span class="chip"><span class="c">3</span> ML / analytics services</span>
+    <span class="chip"><span class="c">1</span> provider-agnostic AI layer</span>
+    <span class="chip"><span class="c">∞</span> free cloud deploy</span>
+  </div>
+</div>`,
+`Open: "We turned a raw weekly sales spreadsheet into a deployed, AI-assisted analytics product that a marketing manager can actually ask questions to — with every answer grounded in our own models." Set the tone: technical, product-grade, not a class demo.`);
+
+/* 2 — PROBLEM */
+add(`
+<div class="kicker">The Problem</div>
+<h2>One spreadsheet. Four decisions.</h2>
+<div class="fill">
+ <div class="flow" style="justify-content:space-between">
+   <div class="card" style="width:210px">
+     <div class="t">Input</div><div class="v mono" style="font-size:20px">data_raw.csv</div>
+     <div class="s">44 SKUs × 100 weeks<br>4,400 rows · price · promo</div>
+   </div>
+   <div class="arrow">→</div>
+   <div class="grid" style="grid-template-columns:1fr 1fr;gap:12px;flex:1;margin:0 8px">
+     <span class="chip">What drives demand &amp; price sensitivity?</span>
+     <span class="chip">Do promotions actually pay back?</span>
+     <span class="chip">What if we change price?</span>
+     <span class="chip">Can a manager just <span class="ac">ask</span> in English?</span>
+   </div>
+   <div class="arrow">→</div>
+   <div class="card k" style="width:190px">
+     <div class="t">Output</div><div class="v" style="font-size:22px">Decisions</div>
+     <div class="s">grounded, explained,<br>on-demand</div>
+   </div>
+ </div>
+</div>`,
+`The gap we closed: raw data on one side, a manager who needs decisions on the other. Everything in between — models, analytics, dashboard, grounded GenAI, deployment — is what we built.`);
+
+/* 3 — PRODUCT */
+add(`
+<div class="kicker">The Product</div>
+<h2>11 views, one cohesive console</h2>
+<div class="fill">
+<div class="grid" style="grid-template-columns:repeat(4,1fr)">
+ ${[['01','Overview'],['02','Data Explorer'],['03','Promotion Effectiveness'],['04','Price Elasticity'],
+    ['05','Scenario Simulator'],['06','Demand Forecasting'],['07','Promotion Lift Model'],['08','AI Assistant'],
+    ['AI','AI Analytics'],['09','Critical Reflection'],['10','Appendix &amp; Export']]
+   .map((m,i)=>`<div class="tile ${i==7||i==8?'on':''}"><span class="n">${m[0]}</span><span class="l">${m[1]}</span></div>`).join('')}
+   <div class="tile" style="border-style:dashed;justify-content:center;align-items:center">
+     <span class="l mut">+ shared contracts<br>+ shared AI layer</span></div>
+</div></div>`,
+`Stress it's one product, not 11 scripts — shared data contracts, shared Palantir theme, one AI layer every module calls. The two highlighted tiles (AI Assistant, AI Analytics) are the GenAI core.`);
+
+/* 4 — STACK */
+add(`
+<div class="kicker">Tech Stack</div>
+<h2>Layered &amp; deliberate</h2>
+<div class="fill"><div class="grid" style="gap:11px">
+ ${[['UI / APP','Gradio 6.9 · custom Palantir CSS · Plotly'],
+    ['DATA','pandas · numpy · pyarrow · cached loaders'],
+    ['ML / STATS','scikit-learn HistGBR · XGBoost · statsmodels OLS'],
+    ['GENAI','Ollama Cloud gpt-oss:120b · Anthropic/OpenAI/local fallback'],
+    ['CONFIG','python-dotenv · HF Space secrets'],
+    ['DEPLOY','Hugging Face Spaces — free CPU tier']]
+  .map((r,i)=>`<div class="card" style="display:flex;align-items:center;gap:20px;padding:13px 18px;border-left:2px solid ${i==3?'var(--accent)':'var(--border)'}">
+    <span class="lbl" style="width:120px;color:${i==3?'var(--accent)':'var(--muted)'}">${r[0]}</span>
+    <span style="font-size:14px">${r[1]}</span></div>`).join('')}
+ <div class="chip" style="align-self:flex-start;margin-top:6px"><span class="c">RULE</span> the dashboard never trains a model — it consumes validated outputs</div>
+</div></div>`,
+`Design rule is the punchline: models are produced offline in ml/, the app is a pure consumer. We also fixed phantom version pins that would have broken the Space build.`);
+
+/* 5 — ARCHITECTURE */
+add(`
+<div class="kicker">Architecture</div>
+<h2>Contract-driven, layered, decoupled</h2>
+<div class="fill">
+<svg viewBox="0 0 1180 430" font-family="var(--mono)">
+ <defs><marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+   <path d="M0,0 L7,3 L0,6 Z" fill="#4d9bff"/></marker></defs>
+ ${[['data_raw.csv',40,30,200,46,'#1d2430'],
+    ['OFFLINE ml/  ·  HistGBR · XGBoost · OLS',40,120,360,58,'#1d2430'],
+    ['Contracts  schemas.py',470,120,300,58,'#4d9bff'],
+    ['Loaders  (validated · cached)',40,235,730,52,'#1d2430'],
+    ['dashboard/modules/*  —  11 Gradio tabs',40,330,470,60,'#1d2430'],
+    ['AI LAYER  ai/services',560,330,210,60,'#4d9bff'],
+    ['Ollama Cloud  (streamed)',830,330,310,60,'#1d2430']]
+  .map(b=>`<g><rect x="${b[1]}" y="${b[2]}" width="${b[3]}" height="${b[4]}" rx="5"
+     fill="#11151d" stroke="${b[5]}"/><text x="${b[1]+b[3]/2}" y="${b[2]+b[4]/2+4}"
+     fill="#d7dde6" font-size="14" text-anchor="middle">${b[0]}</text></g>`).join('')}
+ ${[['M140 76 L140 120'],['M220 178 L470 178'],['M220 178 L300 235'],
+    ['M620 178 L620 235'],['M300 287 L260 330'],['M620 287 L650 330'],
+    ['M770 360 L830 360']].map(p=>`<path class="draw" d="${p[0]}" stroke="#4d9bff"
+    stroke-width="1.6" fill="none" marker-end="url(#ar)"
+    pathLength="1" style="animation-delay:${Math.random()*.5}s"/>`).join('')}
+</svg>
+<div class="sub" style="margin-top:8px">Data is fixed input → models run offline → <span class="ac">contracts</span> decouple ML from UI → the AI layer is a sidecar every module can call.</div>
+</div>`,
+`Walk it left→right as the connectors draw in. The contracts box is the backbone — ML, analytics, UI and AI teams integrate only through frozen dataclass contracts, enabling parallel work and safe refactors.`);
+
+/* 6 — CONTRACTS */
+add(`
+<div class="kicker">Data Foundation</div>
+<h2>Frozen contracts, validating loaders</h2>
+<div class="fill"><div class="flow" style="justify-content:space-between;gap:24px">
+ <div class="card" style="flex:1">
+  <div class="t">schemas.py — contract</div>
+  <pre class="mono" style="font-size:12px;color:var(--muted);margin-top:12px;line-height:1.7">@dataclass
+ForecastOutput:
+  sku_id · period
+  y_true · y_pred
+  y_lower · y_upper
+  model_name</pre>
+ </div>
+ <div class="arrow">→</div>
+ <div class="card" style="flex:1">
+  <div class="t">*_loader.py</div>
+  <div class="s" style="font-size:13px;margin-top:12px;line-height:1.8">
+  validates required columns<br>caches as singleton<br>
+  <span class="am">fails loudly</span> → "run the notebook"</div>
+ </div>
+ <div class="arrow">→</div>
+ <div class="card k" style="flex:1">
+  <div class="t">module / AI</div>
+  <div class="s" style="font-size:13px;margin-top:12px;line-height:1.8">
+  charts · KPIs · tables<br>grounding context<br>no hidden coupling</div>
+ </div>
+</div></div>`,
+`The architectural backbone. Loaders raise a clear "run the notebook" error rather than silently breaking — integration is safe and parallelisable.`);
+
+/* 7 — FORECAST */
+add(`
+<div class="kicker">Service 1 · ML</div>
+<h2>Demand Forecasting <span class="mut" style="font-size:18px">— HistGBR</span></h2>
+<div class="fill"><div class="flow" style="gap:30px;align-items:stretch">
+ <svg viewBox="0 0 560 230" style="flex:1;max-width:560px">
+   <rect x="0" y="0" width="560" height="230" fill="none"/>
+   <path d="M0,150 C90,120 150,165 230,120 C310,80 390,140 470,95 L560,110"
+     class="draw" stroke="#4d9bff" stroke-width="2.5" fill="none" pathLength="1"/>
+   <path d="M0,135 C90,105 150,150 230,105 C310,65 390,125 470,80 L560,95
+            L560,150 C470,120 390,170 310,120 C230,170 150,135 90,160 L0,170 Z"
+     fill="rgba(77,155,255,.12)"/>
+   <path d="M0,165 C90,150 150,175 230,150 C310,120 390,160 470,135 L560,140"
+     stroke="#79838f" stroke-width="1.5" fill="none" stroke-dasharray="4 4"/>
+   <text x="6" y="20" fill="#79838f" font-family="var(--mono)" font-size="11">forecast · 95% band · actual</text>
+ </svg>
+ <div class="grid" style="grid-template-columns:1fr;gap:12px;width:230px">
+   <div class="card k"><div class="t">Test MAE</div><div class="v"><span data-c="58.7">0</span></div></div>
+   <div class="card"><div class="t">95% Coverage</div><div class="v"><span data-c="93.5">0</span><span class="mut" style="font-size:16px">%</span></div></div>
+   <div class="card"><div class="t">Horizon</div><div class="v" style="font-size:18px">13-wk val + test</div></div>
+ </div>
+</div></div>`,
+`HistGradientBoostingRegressor on log1p sales, past-only features, chronological split, residual-quantile intervals. Beats naive materially, intervals well-calibrated. Honest: it's a backtest, not a live forecast.`);
+
+/* 8 — PROMO LIFT */
+add(`
+<div class="kicker">Service 2 · ML</div>
+<h2>Promotion Lift <span class="mut" style="font-size:18px">— XGBoost</span></h2>
+<div class="fill"><div class="flow" style="gap:30px;align-items:stretch">
+ <svg viewBox="0 0 560 240" style="flex:1;max-width:560px" font-family="var(--mono)">
+  ${[['SKU 11',92],['SKU 38',59],['SKU 6',53],['SKU 2',46],['SKU 13',43]]
+    .map((b,i)=>`<text x="0" y="${30+i*46}" fill="#79838f" font-size="12">${b[0]}</text>
+     <rect x="80" y="${18+i*46}" width="${b[1]*4.6}" height="20" rx="3" fill="#4d9bff" opacity="${1-i*.12}"/>
+     <text x="${88+b[1]*4.6}" y="${33+i*46}" fill="#d7dde6" font-size="12">${b[1]}%</text>`).join('')}
+ </svg>
+ <div class="grid" style="grid-template-columns:1fr 1fr;gap:12px;width:300px;align-content:center">
+   <div class="card"><div class="t">OOS MAE</div><div class="v"><span data-c="65.3">0</span></div></div>
+   <div class="card"><div class="t">R²</div><div class="v"><span data-c="0.215" data-dec="3">0</span></div></div>
+   <div class="card"><div class="t">Median lift</div><div class="v"><span data-c="21">0</span><span class="mut" style="font-size:15px">%</span></div></div>
+   <div class="card"><div class="t">Promo SKUs</div><div class="v"><span data-c="43">0</span></div></div>
+ </div>
+</div></div>`,
+`XGBoost, counterfactual + matched-control ensemble, time-series CV. We SHOW the modest R² in-product and the AI is told to state it — reliability is communicated, not hidden. Strong responders are rank-trustworthy.`);
+
+/* 9 — ELASTICITY */
+add(`
+<div class="kicker">Service 3 · Analytics</div>
+<h2>Price Elasticity + Scenario</h2>
+<div class="fill"><div class="flow" style="gap:28px;align-items:stretch">
+ <svg viewBox="0 0 380 230" style="width:380px">
+   <text x="4" y="16" fill="#79838f" font-family="var(--mono)" font-size="11">demand vs price (log-log)</text>
+   <path d="M20,40 C90,70 150,150 350,205" stroke="#4d9bff" stroke-width="2.5" fill="none" class="draw" pathLength="1"/>
+   ${Array.from({length:14}).map(()=>{const x=20+Math.random()*330,y=40+Math.pow((x-20)/330,.7)*165+(Math.random()*30-15);return `<circle cx="${x}" cy="${y}" r="3" fill="#79838f" opacity=".6"/>`}).join('')}
+ </svg>
+ <div class="grid" style="grid-template-columns:1fr;gap:11px;flex:1">
+   <div class="flow" style="gap:10px">
+     <div class="card" style="flex:1"><div class="t">Fitted</div><div class="v"><span data-c="44">0</span>/44</div></div>
+     <div class="card k" style="flex:1"><div class="t">Median β</div><div class="v">−<span data-c="1.44" data-dec="2">0</span></div></div>
+     <div class="card" style="flex:1"><div class="t">Elastic</div><div class="v"><span data-c="29">0</span></div></div>
+   </div>
+   <div class="card"><div class="t">Scenario Simulator — projection</div>
+     <pre class="mono" style="font-size:12px;color:var(--accent);margin-top:10px;line-height:1.7">demand% ≈ β · price%
+revenue% = (1+price%)·(1+demand%) − 1</pre>
+     <div class="s">→ revenue waterfall: baseline → price → volume → projected</div>
+   </div>
+ </div>
+</div></div>`,
+`Per-SKU log-log OLS, promo-controlled, CIs from SEs. Module 5 is the payoff of Module 4 — chained services, not a new model. Caveats (endogeneity, observational) stated in-product.`);
+
+/* 10 — LLM CLIENT */
+add(`
+<div class="kicker">AI Layer</div>
+<h2>One client, any backend</h2>
+<div class="fill"><div class="flow" style="gap:34px;align-items:center">
+ <div class="grid" style="gap:10px;flex:1">
+  ${[['1','OLLAMA_API_KEY','Ollama Cloud · gpt-oss:120b','on'],
+     ['2','ANTHROPIC_API_KEY','Claude',''],
+     ['3','OPENAI_API_KEY','OpenAI',''],
+     ['4','transformers','local open model · CPU/ZeroGPU',''],
+     ['5','else','offline grounded extractor','warn']]
+   .map(r=>`<div class="card" style="display:flex;align-items:center;gap:16px;padding:12px 16px;
+     border-left:2px solid ${r[3]=='on'?'var(--accent)':r[3]=='warn'?'var(--amber)':'var(--border)'}">
+     <span class="mono ${r[3]=='on'?'ac':'mut'}" style="font-size:13px">${r[0]}</span>
+     <span class="mono" style="font-size:12px;color:var(--muted);width:175px">${r[1]}</span>
+     <span class="arrow">→</span><span style="font-size:13px">${r[2]}</span></div>`).join('')}
+ </div>
+ <div class="card k" style="width:260px">
+  <div class="t">Guarantee</div>
+  <div class="s" style="font-size:13px;line-height:1.8;margin-top:10px">
+  <span class="ac">generate() never raises</span> — failures degrade down the chain.
+  Stub echoes only supplied numbers → <b>cannot hallucinate</b>.</div>
+ </div>
+</div></div>`,
+`Portability + scalability story: same code runs free in a Space or fast on a paid key, with a guaranteed safe fallback. .env auto-loaded; Space secrets override.`);
+
+/* 11 — GROUNDING */
+add(`
+<div class="kicker">AI Layer · Anti-Hallucination #1</div>
+<h2>Grounded in our own numbers</h2>
+<div class="fill"><div class="flow" style="justify-content:space-between;gap:16px">
+ ${[['User prompt','plain English question'],
+    ['+ CONTEXT JSON','explicit figures from model outputs only'],
+    ['System prompt','cite ONLY context · else "no data"'],
+    ['LLM','Ollama Cloud']]
+  .map((s,i)=>`<div class="card" style="flex:1"><div class="t">${i+1}</div>
+   <div style="font:600 15px/1.2 var(--head);margin-top:10px">${s[0]}</div>
+   <div class="s">${s[1]}</div></div>${i<3?'<div class="arrow">→</div>':''}`).join('')}
+</div>
+<div class="chip" style="align-self:center;margin-top:26px;border-color:var(--line)">
+  every reply ends with <span class="ac mono">&nbsp;[Data-grounded]&nbsp;</span> or <span class="mono mut">&nbsp;[General inference]&nbsp;</span></div>
+<div class="sub" style="text-align:center;align-self:center">Prompts are versioned files in <span class="mono">ai/prompts/</span> — never inline.</div>
+</div>`,
+`Grounding is anti-hallucination strategy #1: give the model only the numbers and forbid anything else, including the "I don't have data" escape hatch.`);
+
+/* 12 — GUARDRAILS */
+add(`
+<div class="kicker">AI Layer · Anti-Hallucination #2</div>
+<h2>Every answer is verified</h2>
+<div class="fill"><div class="flow" style="justify-content:space-between;gap:18px">
+ <div class="card" style="flex:1"><div class="big ac">01</div>
+   <div style="font:600 16px var(--head);margin-top:8px">Numeric check</div>
+   <div class="s">each number matched to context (rounding-tolerant)</div></div>
+ <div class="arrow">→</div>
+ <div class="card" style="flex:1"><div class="big ac">02</div>
+   <div style="font:600 16px var(--head);margin-top:8px">Label enforced</div>
+   <div class="s">grounded/inference derived, not trusted from model</div></div>
+ <div class="arrow">→</div>
+ <div class="card" style="flex:1"><div class="big am">03</div>
+   <div style="font:600 16px var(--head);margin-top:8px">Failure logged</div>
+   <div class="s">flagged → failure_log.jsonl → Module 9 live</div></div>
+</div>
+<div class="sub" style="align-self:center;margin-top:26px">Defence in depth — grounding <span class="ac">prevents</span>, guardrail <span class="ac">verifies</span>, Module 9 <span class="ac">evidences</span>.</div>
+</div>`,
+`guardrail.py post-processes every response. The label is derived from the numeric check, not what the model claims. Flagged outputs are evidenced live in Critical Reflection — great for the marker.`);
+
+/* 13 — GENAI FEATURES */
+add(`
+<div class="kicker">AI Layer · Module 8</div>
+<h2>Three grounded GenAI features</h2>
+<div class="fill"><div class="grid" style="grid-template-columns:repeat(3,1fr);gap:18px">
+ ${[['8a','Chat','Persistent Q&amp;A · scope-limited grounding · auto-categorised'],
+    ['8b','Click-to-summarise','One-click narrative on any chart'],
+    ['8c','Multi-select briefing','Combine modules → one executive memo']]
+  .map(c=>`<div class="card k" style="padding:24px 18px">
+   <div class="mono ac" style="font-size:13px">${c[0]}</div>
+   <div style="font:700 20px/1.2 var(--head);margin:12px 0 10px">${c[1]}</div>
+   <div class="s" style="font-size:13px;line-height:1.7">${c[2]}</div></div>`).join('')}
+</div>
+<div class="chip" style="align-self:center;margin-top:26px"><span class="c">1</span>
+ orchestrator — prompt → context → LLMClient → guardrail → telemetry</div>
+</div>`,
+`One code path powers chat, summaries and the Module-7 narrative — consistency, and one place to harden. narrative_service.py is that orchestrator.`);
+
+/* 14 — AI ANALYTICS */
+add(`
+<div class="kicker">AI Observability</div>
+<h2>We instrument our own AI</h2>
+<div class="fill"><div class="flow" style="gap:26px;align-items:center">
+ ${[['TTFT','1.7','s','time to first token'],['TPS','215','','tokens / sec'],['Success','100','%','non-fallback']]
+  .map(g=>`<div class="card k" style="flex:1;text-align:center;padding:26px 14px">
+   <div class="lbl">${g[0]}</div>
+   <div class="big" style="margin:14px 0 4px"><span data-c="${g[1]}" data-dec="${g[1].includes('.')?1:0}">0</span><span class="u">${g[2]}</span></div>
+   <div class="s">${g[3]}</div></div>`).join('')}
+ <svg viewBox="0 0 200 200" style="width:190px">
+  <circle cx="100" cy="100" r="70" fill="none" stroke="#1d2430" stroke-width="22"/>
+  <circle cx="100" cy="100" r="70" fill="none" stroke="#4d9bff" stroke-width="22"
+    stroke-dasharray="${2*Math.PI*70}" stroke-dashoffset="${2*Math.PI*70*.42}"
+    transform="rotate(-90 100 100)" class="draw" pathLength="${2*Math.PI*70}"/>
+  <text x="100" y="96" fill="#d7dde6" font-family="var(--mono)" font-size="15" text-anchor="middle">prompt</text>
+  <text x="100" y="116" fill="#79838f" font-family="var(--mono)" font-size="11" text-anchor="middle">categories</text>
+ </svg>
+</div>
+<div class="sub" style="align-self:center;margin-top:20px">Streamed Ollama responses → measured TTFT/TPS · every call logged & categorised.</div>
+</div>`,
+`This is the "how it scales / how we'd operate it" slide. Telemetry categorises prompts and measures performance by streaming — production-grade observability of our own GenAI.`);
+
+/* 15 — UI/UX */
+add(`
+<div class="kicker">UI / UX</div>
+<h2>Palantir-style, systematic theming</h2>
+<div class="fill"><div class="flow" style="gap:24px;align-items:stretch">
+ <div class="card" style="flex:1;background:#0a0d13"><div class="t">Dark (default)</div>
+   <div style="display:flex;gap:8px;margin-top:16px">
+   ${['#0a0d13','#11151d','#1d2430','#d7dde6','#4d9bff'].map(c=>`<div style="width:42px;height:42px;border-radius:4px;background:${c};border:1px solid #1d2430"></div>`).join('')}</div>
+   <div class="s mono" style="margin-top:14px">canvas · panel · border · text · accent</div></div>
+ <div class="card" style="flex:1;background:#f5f7fa;color:#1b2430;border-color:#dde2ea">
+   <div class="t" style="color:#5a6675">Light (toggle)</div>
+   <div style="display:flex;gap:8px;margin-top:16px">
+   ${['#f5f7fa','#ffffff','#dde2ea','#1b2430','#2f6fed'].map(c=>`<div style="width:42px;height:42px;border-radius:4px;background:${c};border:1px solid #dde2ea"></div>`).join('')}</div>
+   <div class="s mono" style="margin-top:14px;color:#5a6675">persisted in localStorage</div></div>
+ <div class="card" style="flex:1"><div class="t">Systematic</div>
+   <div class="s" style="font-size:13px;line-height:1.9;margin-top:12px">
+   CSS token system<br>Gradio-variable bridge<br><span class="ac">sidebar = real router</span><br>reusable theme-aware components</div></div>
+</div></div>`,
+`Looks like an internal data product, not a class demo. Theming is a token system, not hardcoded — and a JS bridge remaps Gradio's own variables so all chrome stays readable in both modes.`);
+
+/* 16 — DEPLOY */
+add(`
+<div class="kicker">Deployment</div>
+<h2>Free, light, and offloaded</h2>
+<div class="fill"><div class="flow" style="justify-content:center;gap:40px;align-items:center">
+ <div class="card" style="width:280px;text-align:center;padding:30px 20px">
+   <div class="lbl">App</div>
+   <div style="font:700 22px var(--head);margin:14px 0 6px">HF Spaces</div>
+   <div class="s">free CPU tier · no GPU<br>stateless · instant cold start</div>
+   <div class="chip" style="margin-top:16px;justify-content:center"><span class="c">app.py</span> → demo</div>
+ </div>
+ <div style="text-align:center"><div class="arrow" style="font-size:26px">⇄</div>
+   <div class="mono" style="font-size:10px;color:var(--dim);margin-top:6px">secret key</div></div>
+ <div class="card k" style="width:280px;text-align:center;padding:30px 20px">
+   <div class="lbl">LLM</div>
+   <div style="font:700 22px var(--head);margin:14px 0 6px">Ollama Cloud</div>
+   <div class="s">gpt-oss:120b · zero local compute<br>OLLAMA_API_KEY = Space secret</div>
+   <div class="chip" style="margin-top:16px;justify-content:center;border-color:var(--line)">120B model · free</div>
+ </div>
+</div></div>`,
+`Deliberate: offload the heavy 120B model to Ollama Cloud so a free CPU Space stays light and reliable. Secrets never committed; .env.example + deploy.md are the runbook.`);
+
+/* 17 — SCALE */
+add(`
+<div class="kicker">Scale &amp; Reliability</div>
+<h2>The slow part is external &amp; elastic</h2>
+<div class="fill"><div class="flow" style="gap:22px;align-items:stretch">
+ ${[['Compute-light','UI reads precomputed files — no training, no weights in app'],
+    ['LLM scales alone','swap one env var; cloud absorbs concurrency'],
+    ['Graceful degradation','backend chain ends in offline extractor — never hard-fails'],
+    ['Contract-driven','new model/SKU = a conformant file; new AI scope = 1 registry line'],
+    ['Observable','telemetry + failure log make AI measurable']]
+  .map((c,i)=>`<div class="card ${i==2?'k':''}" style="flex:1;padding:20px 14px">
+   <div class="big ac" style="font-size:30px">0${i+1}</div>
+   <div style="font:600 14px/1.25 var(--head);margin:12px 0 8px">${c[0]}</div>
+   <div class="s" style="font-size:11.5px;line-height:1.6">${c[1]}</div></div>`).join('')}
+</div></div>`,
+`Scaling = the slow part (the 120B model) is external and elastic; the app itself is stateless, cheap, and never hard-fails on AI.`);
+
+/* 18 — QUALITY */
+add(`
+<div class="kicker">Engineering Quality</div>
+<h2>Reproducible by construction</h2>
+<div class="fill"><div class="flow" style="gap:30px;align-items:stretch">
+ <div class="card" style="flex:1"><div class="t">Repo mirrors architecture</div>
+ <pre class="mono" style="font-size:12px;color:var(--muted);margin-top:12px;line-height:1.8">ml/                models (offline)
+dashboard/analytics  loaders + contracts
+dashboard/modules    11 tabs
+ai/services          client·guard·telemetry
+ai/prompts           versioned prompts
+docs/ · deploy.md    runbook</pre></div>
+ <div class="grid" style="grid-template-columns:1fr;gap:12px;flex:1">
+  ${[['Pinned, install-verified requirements','fixed phantom versions'],
+     ['Every output regenerates from ml/','deterministic'],
+     ['PR flow · team logs · deploy runbook','reviewed'],
+     ['Bugs found &amp; fixed','tab-crash · dark contrast · empty-LLM']]
+   .map(c=>`<div class="card" style="padding:14px 16px"><div style="font:600 13px var(--head)">${c[0]}</div><div class="s">${c[1]}</div></div>`).join('')}
+ </div>
+</div></div>`,
+`Mention the bug discipline explicitly — we found and fixed the double-tab frontend crash, the dark-mode contrast, and the dotenv/empty-LLM issue. Quality is demonstrated, not claimed.`);
+
+/* 19 — LIMITATIONS */
+add(`
+<div class="kicker">Critical Reflection</div>
+<h2>Honest about the edges</h2>
+<div class="fill"><div class="grid" style="grid-template-columns:1fr 1fr;gap:14px">
+ ${[['Backtests, observational','forecast & lift not causal · lift R² 0.215'],
+    ['Elasticity ≠ causal','price endogeneity acknowledged'],
+    ['Guardrail scope','catches fake figures, not flawed reasoning'],
+    ['Free LLM < frontier','stub safe but extractive · M4/5 constant-elasticity']]
+  .map(c=>`<div class="card" style="border-left:2px solid var(--amber);padding:18px 16px">
+   <div style="font:600 15px var(--head)">${c[0]}</div><div class="s">${c[1]}</div></div>`).join('')}
+</div>
+<div class="chip" style="align-self:center;margin-top:24px;border-color:var(--amber)">
+ all surfaced <span class="ac">&nbsp;in-product&nbsp;</span> — Module 9 · disclosed, not hidden</div>
+</div>`,
+`This slide wins marks: we critique our own system, and the product itself tells the user where to be cautious. Limitations are disclosed in Module 9, not buried.`);
+
+/* 20 — CLOSE */
+add(`
+<div class="title-hero" style="background:radial-gradient(900px 480px at 75% 35%,rgba(77,155,255,.10),transparent 60%)">
+ <div class="kicker">Roadmap &amp; Close</div>
+ <div class="flow" style="gap:0;margin:10px 0 34px">
+  ${['True forward forecasting','Causal promo / elasticity','Theme-refactor legacy tabs','Automated test suite']
+   .map((r,i)=>`<div style="display:flex;align-items:center">
+   <div class="card" style="padding:12px 16px"><span class="mono ac" style="font-size:11px">0${i+1}</span>
+   <div style="font-size:12.5px;margin-top:6px">${r}</div></div>${i<3?'<div class="arrow" style="margin:0 12px">→</div>':''}</div>`).join('')}
+ </div>
+ <h1 style="font-size:38px;line-height:1.2;max-width:24ch">From one CSV to a manager-ready<br><span class="ac">decision console.</span></h1>
+ <div class="sub" style="font-size:16px;margin-top:18px">Deployed · grounded · observable.</div>
+</div>`,
+`Closing line verbatim: "We delivered a deployed, grounded, observable AI analytics product — from one CSV to a manager-ready decision console." Then invite questions.`);
+
+/* 21 — APPENDIX A */
+add(`
+<div class="kicker">Appendix A</div>
+<h2>Key file map</h2>
+<div class="fill"><div class="grid" style="grid-template-columns:1fr 1fr;gap:9px;font-size:12.5px">
+ ${[['App / theme / nav','app.py · dashboard/app/main.py'],
+    ['Contracts','analytics/common/schemas.py'],
+    ['Loaders','common/{data,forecast,promotion,elasticity}_loader.py'],
+    ['ML forecast','ml/ml_forecasting/forecasting.ipynb'],
+    ['ML promo lift','ml/promotions/promotion_lift_model.ipynb'],
+    ['Elasticity','ml/pricing/price_elasticity_model.py'],
+    ['AI client / orch.','ai/services/llm_client.py · narrative_service.py'],
+    ['AI safety','context_builder.py · guardrail.py'],
+    ['AI observability','telemetry.py · modules/ai_analytics.py'],
+    ['Deploy','app.py · deploy.md · .env.example']]
+  .map(r=>`<div class="card" style="padding:12px 15px;display:flex;justify-content:space-between;gap:14px">
+   <span class="mut">${r[0]}</span><span class="mono ac" style="font-size:11px;text-align:right">${r[1]}</span></div>`).join('')}
+</div></div>`,
+`Reference slide — only show if asked. The repo layout mirrors the architecture exactly.`);
+
+/* 22 — APPENDIX B */
+add(`
+<div class="kicker">Appendix B</div>
+<h2>Headline metrics</h2>
+<div class="fill"><div class="grid" style="grid-template-columns:1fr;gap:11px">
+ ${[['Demand Forecasting','Test MAE 58.7 · MAPE 61.4% · 95% coverage 93.5%'],
+    ['Promotion Lift','OOS MAE 65.3 · R² 0.215 · median lift ≈21% · 43 SKUs'],
+    ['Price Elasticity','44/44 fitted · median β ≈ −1.44 · 29 elastic'],
+    ['AI (Ollama Cloud)','TTFT ≈ 1.5–2 s · ≈215 TPS · grounded + labelled'],
+    ['Footprint','44 SKUs × 100 wks · 11 views · free CPU Space']]
+  .map((r,i)=>`<div class="card ${i==3?'k':''}" style="display:flex;align-items:center;gap:24px;padding:16px 20px">
+   <span class="lbl" style="width:200px;color:${i==3?'var(--accent)':'var(--muted)'}">${r[0]}</span>
+   <span class="mono" style="font-size:13px">${r[1]}</span></div>`).join('')}
+</div></div>`,
+`Reference slide. These are the shipped numbers — all reproducible from ml/.`);
+
+/* ============================================================ ENGINE */
+const deck=document.getElementById('deck'), bar=document.getElementById('bar'),
+      idx=document.getElementById('idx'), notesEl=document.getElementById('notes');
+let cur=0;
+S.forEach((s,i)=>{
+  const el=document.createElement('section');
+  el.className='slide'; el.dataset.i=i;
+  el.innerHTML=s.html+`<div class="foot"><span><span class="dot"></span>Retail Analytics · AI Console</span><span>Imperial College · Retail &amp; Marketing Analytics</span></div>`;
+  deck.appendChild(el);
+});
+const slides=[...document.querySelectorAll('.slide')];
+
+function animateCounts(el){
+  el.querySelectorAll('[data-c]').forEach(n=>{
+    const target=parseFloat(n.dataset.c), dec=+(n.dataset.dec||0);
+    let t0=null, dur=900;
+    function step(ts){ t0=t0||ts; const p=Math.min((ts-t0)/dur,1);
+      const e=1-Math.pow(1-p,3);
+      n.textContent=(target*e).toFixed(dec);
+      if(p<1) requestAnimationFrame(step); else n.textContent=target.toFixed(dec); }
+    n.textContent=(0).toFixed(dec); requestAnimationFrame(step);
+  });
+}
+function show(i){
+  cur=Math.max(0,Math.min(S.length-1,i));
+  slides.forEach((s,k)=>s.classList.toggle('active',k===cur));
+  bar.style.width=((cur+1)/S.length*100)+'%';
+  idx.innerHTML=`<b>${String(cur+1).padStart(2,'0')}</b> / ${S.length}`;
+  notesEl.innerHTML=`<b>Speaker Notes — ${cur+1}/${S.length}</b>${S[cur].notes}`;
+  animateCounts(slides[cur]);
+}
+function go(d){ show(cur+d); }
+addEventListener('keydown',e=>{
+  if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();go(1);}
+  else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();go(-1);}
+  else if(e.key==='Home')show(0); else if(e.key==='End')show(S.length-1);
+  else if(e.key.toLowerCase()==='n')notesEl.classList.toggle('show');
+  else if(e.key.toLowerCase()==='f'){ document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen(); }
+});
+let sx=0; addEventListener('touchstart',e=>sx=e.touches[0].clientX);
+addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx; if(Math.abs(dx)>50)go(dx<0?1:-1);});
+addEventListener('click',e=>{ if(e.target.closest('#notes'))return;
+  go(e.clientX < innerWidth*0.32 ? -1 : 1); });
+show(0);
+</script>
+</body>
+</html>

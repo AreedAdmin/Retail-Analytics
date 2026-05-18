@@ -9,10 +9,11 @@ This document defines the technical stack for the AI-augmented retail analytics 
 - Language: Python 3.11+
 - App Framework: Gradio
 - Visualization: Plotly
-- LLM Runtime: Ollama (local) plus API providers (OpenAI/Anthropic)
+- LLM Runtime: Ollama Cloud (`gpt-oss:120b-cloud`) primary, OpenAI/Anthropic API fallback, offline grounded extractor if none configured
 - Data Source: CSV/parquet files from `data/`
-- Version Management: `requirements.txt` in repository root
-- Secrets Management: GitHub Repository Secrets (no local secret files committed)
+- Version Management: `requirements.txt` in repository root (pinned to the validated environment)
+- Hosting: Hugging Face Spaces (free CPU) — Gradio app + in-process ML models; see `deploy.md`
+- Secrets Management: GitHub Repository / Hugging Face Space secrets (no local secret files committed)
 
 ## Baseline Python Packages
 
@@ -36,7 +37,7 @@ Use pinned versions in `requirements.txt` once agreed by the team.
 
 - scikit-learn
 - statsmodels
-- xgboost (optional, if memory budget allows)
+- xgboost (optional)
 
 ### Evaluation and Explainability
 
@@ -224,7 +225,9 @@ To keep modules independent and scalable, preserve these contracts:
 ## Non-Functional Constraints
 
 - All code follows snake_case naming.
-- Models must run within 8 GB RAM.
+- Models are lightweight and CPU-only (the forecasting model is a few MB,
+  sub-second inference) — the app runs on a free Hugging Face Spaces CPU
+  instance; no GPU is required.
 - AI responses must avoid fabricated figures and label grounded vs inferred content.
 - Every team updates `team_log.md` in their folder as work progresses.
 
