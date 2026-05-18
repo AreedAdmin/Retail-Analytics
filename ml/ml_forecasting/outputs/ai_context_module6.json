@@ -1,0 +1,15 @@
+{
+  "module_name": "module_6_demand_forecast",
+  "chart_id": "forecast_summary",
+  "metrics": {
+    "horizon_weeks": 4,
+    "num_skus_forecast": 44,
+    "holdout_mape_pct": 147.71,
+    "model_name": "linear_trend_baseline"
+  },
+  "key_findings": [
+    "Forecasts generated for 44 SKUs over 4 weeks",
+    "Holdout MAPE (8-week): 147.71%",
+    "SKUs with declining recent demand: [1, 3, 4, 7, 8, 9, 12, 13, 14, 19]"
+  ]
+}

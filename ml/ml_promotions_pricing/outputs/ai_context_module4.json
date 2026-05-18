@@ -1,0 +1,17 @@
+{
+  "module_name": "module_4_price_elasticity",
+  "chart_id": "elasticity_summary",
+  "metrics": {
+    "num_skus": 44,
+    "avg_elasticity": -1.694,
+    "median_elasticity": -1.632,
+    "num_elastic_skus": 34,
+    "num_inelastic_skus": 10
+  },
+  "key_findings": [
+    "34 SKUs are price-elastic (elasticity < -1)",
+    "10 SKUs are relatively inelastic",
+    "Most elastic SKU: 19 (elasticity -4.281)",
+    "Least elastic SKU: 10 (elasticity 0.204)"
+  ]
+}

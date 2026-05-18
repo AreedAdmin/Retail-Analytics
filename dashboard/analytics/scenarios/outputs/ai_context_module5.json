@@ -1,0 +1,15 @@
+{
+  "module_name": "module_5_scenarios",
+  "chart_id": "scenario_summary",
+  "metrics": {
+    "scenarios_computed": 8,
+    "best_revenue_scenario_pct": -30,
+    "best_revenue_change_pct": 14.81,
+    "worst_revenue_scenario_pct": 30,
+    "worst_revenue_change_pct": -53.21
+  },
+  "key_findings": [
+    "Best portfolio revenue scenario: -30% price change \u2192 14.81% revenue",
+    "Worst portfolio revenue scenario: 30% price change \u2192 -53.21% revenue"
+  ]
+}

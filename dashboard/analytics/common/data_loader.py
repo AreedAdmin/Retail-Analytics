@@ -101,7 +101,15 @@ class DataLoader:
         }
         
         df_normalized = df.rename(columns=rename_map)
-        
+
+        # week/period column holds ISO dates — map to numeric period index
+        if 'period' in df_normalized.columns:
+            df_normalized['week_date'] = pd.to_datetime(df_normalized['period'])
+            df_normalized = df_normalized.sort_values(['sku_id', 'week_date']).reset_index(drop=True)
+            unique_weeks = df_normalized['week_date'].drop_duplicates().sort_values()
+            week_to_period = {w: i + 1 for i, w in enumerate(unique_weeks)}
+            df_normalized['period'] = df_normalized['week_date'].map(week_to_period).astype(int)
+
         # Validate expected columns exist
         expected_cols = {
             'period', 'sku_id', 'weekly_sales', 'feat_main_page',
@@ -113,8 +121,7 @@ class DataLoader:
                 f"Missing expected columns: {missing}\n"
                 f"Available columns: {set(df_normalized.columns)}"
             )
-        
-        # Rename 'weekly_sales' to standard name if needed
+
         if 'weekly_sales' in df_normalized.columns:
             df_normalized = df_normalized.rename(columns={'weekly_sales': 'demand_units'})
         
