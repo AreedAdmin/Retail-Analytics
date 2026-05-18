@@ -215,6 +215,25 @@ add(`
 </div></div>`,
 `Stress it's one product, not 11 scripts — shared data contracts, shared Palantir theme, one AI layer every module calls. The two highlighted tiles (AI Assistant, AI Analytics) are the GenAI core.`);
 
+/* 3a — DASHBOARD TOUR */
+add(`
+<div class="kicker">The Product · Live</div>
+<h2>Dashboard walkthrough</h2>
+<div class="fill" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+ ${[['screenshots/data-explorer.png','02 · Data Explorer','4,400 records · 44 SKUs · filter by SKU · per-SKU stats'],
+    ['screenshots/forecast.png','06 · Demand Forecasting','HistGBR · actual vs forecast · 95% CI band'],
+    ['screenshots/scenario.png','05 · Scenario Simulator','β × Δprice · revenue waterfall · AI pricing memo'],
+    ['screenshots/ai-assistant.png','08 · AI Assistant','grounded chat · click-to-summarise · integrated briefing'],
+   ].map(s=>`<div style="border-radius:8px;overflow:hidden;border:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,.35)">
+   <img src="${s[0]}" style="width:100%;height:148px;object-fit:cover;object-position:top left;display:block">
+   <div style="padding:8px 12px;background:var(--panel);border-top:1px solid var(--border)">
+     <div class="mono" style="font-size:11px;color:var(--accent)">${s[1]}</div>
+     <div style="font-size:11px;color:var(--muted);margin-top:3px">${s[2]}</div>
+   </div>
+ </div>`).join('')}
+</div>`,
+`30-second visual grounding. Point out the Palantir theme, sidebar nav, module numbering, and the consistent KPI-card layout. Every module follows the same pattern — KPIs at top, chart below, AI action at far right.`);
+
 /* 3b — ANALYTICS SUITE */
 add(`
 <div class="kicker">Analytics Suite</div>
@@ -426,6 +445,41 @@ add(`
 </div>`,
 `Assignment allows regression OR neural nets — we benchmarked in the notebook and selected HistGBR. True forward forecast needs assumed future price/promo (stated in README). Features are all trailing — no leakage.`);
 
+/* 7c — FORECAST RESULTS */
+add(`
+<div class="kicker">Forecasting · Results</div>
+<h2>Model backtest — held-out test weeks</h2>
+<div class="fill" style="display:grid;grid-template-columns:1fr 1.45fr;gap:18px;align-items:start">
+ <div style="display:flex;flex-direction:column;gap:12px">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+   ${[['TEST MAE','58.7','mean abs error','#4d9bff'],
+      ['TEST RMSE','312.9','penalises spikes','#4d9bff'],
+      ['TEST MAPE','61.4%','pct error','#f59e0b'],
+      ['95% COVERAGE','93.5%','target ~95','#22c55e']].map(m=>`<div class="card" style="padding:14px 16px;border-top:2px solid ${m[3]}">
+    <div class="lbl">${m[0]}</div>
+    <div style="font:700 22px/1 var(--head);margin:8px 0 4px;color:${m[3]}">${m[1]}</div>
+    <div class="s">${m[2]}</div>
+   </div>`).join('')}
+  </div>
+  <div class="card" style="padding:12px 16px">
+   <div class="lbl" style="margin-bottom:8px;color:var(--amber)">Worst SKUs by MAE (test)</div>
+   ${[['SKU 25','1,125','1,680','45%'],['SKU 27','270','836','62%'],['SKU 30','240','537','688%'],
+      ['SKU 15','211','621','30%'],['SKU 7','85','185','46%']].map(r=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+     <span class="mono" style="font-size:11px;width:48px;color:var(--accent)">${r[0]}</span>
+     <span class="s">MAE <b style="color:var(--text)">${r[1]}</b></span>
+     <span class="s" style="margin-left:auto;color:var(--amber)">MAPE ${r[3]}</span>
+   </div>`).join('')}
+  </div>
+ </div>
+ <div style="border-radius:8px;overflow:hidden;border:1px solid var(--border);box-shadow:0 4px 24px rgba(0,0,0,.4)">
+  <div style="background:var(--panel);padding:6px 12px;border-bottom:1px solid var(--border)">
+   <span class="mono" style="font-size:10px;color:var(--muted)">Module 6 · Demand Forecasting — live dashboard</span>
+  </div>
+  <img src="screenshots/forecast.png" style="width:100%;display:block;object-fit:cover;object-position:top left">
+ </div>
+</div>`,
+`Coverage 93.5% ≈ target 95 is the headline — intervals are calibrated. High MAPE on SKU 30 is a near-zero baseline (tiny denominator), stated openly in Module 9. MAE of 58.7 units on 44 SKUs over 572 test rows.`);
+
 /* 8 — PROMO LIFT */
 add(`
 <div class="kicker">Service 2 · ML</div>
@@ -466,6 +520,45 @@ lift% = incremental / counterfactual</pre>
 <div class="sub" style="margin-top:14px">Same goal — isolate promo lift — more flexible for sparse promos; weaker causal claim (stated in Module 9)</div>
 </div>`,
 `Name SCAN*PRO explicitly. Course allows alternative approach. Walk counterfactual formula. Mention SHAP in notebook for feature attribution. Modest R² shown in-product.`);
+
+/* 8c — PROMO + PRICING RESULTS */
+add(`
+<div class="kicker">Promo · Elasticity · Results</div>
+<h2>What the models found</h2>
+<div class="fill" style="display:grid;grid-template-columns:1fr 1.45fr;gap:18px;align-items:start">
+ <div style="display:flex;flex-direction:column;gap:12px">
+  <div class="lbl" style="margin-bottom:2px">Promotion Lift — XGBoost 5-fold CV</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+   ${[['Median lift','21%','across 43 SKUs','#22c55e'],
+      ['Top SKU','91.8%','SKU 11','#4d9bff'],
+      ['OOS R²','0.215','modest, disclosed','#f59e0b'],
+      ['Promo obs','1,502','total SKU-weeks','#4d9bff']].map(m=>`<div class="card" style="padding:12px 14px;border-top:2px solid ${m[3]}">
+    <div class="lbl">${m[0]}</div>
+    <div style="font:700 20px/1 var(--head);margin:6px 0 3px;color:${m[3]}">${m[1]}</div>
+    <div class="s">${m[2]}</div>
+   </div>`).join('')}
+  </div>
+  <div class="lbl" style="margin-top:4px;margin-bottom:2px">Price Elasticity — log-log OLS per SKU</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+   ${[['SKUs modelled','44','min 12 wk obs','#4d9bff'],
+      ['β range','−4.1 → 0','own-price sensitivity','#4d9bff'],
+      ['Max R²','0.655','SKU 19','#22c55e'],
+      ['Low evidence','2 SKUs','R² < 0.05 flagged','#f59e0b']].map(m=>`<div class="card" style="padding:12px 14px">
+    <div class="lbl">${m[0]}</div>
+    <div style="font:700 18px/1 var(--head);margin:6px 0 3px;color:${m[3]}">${m[1]}</div>
+    <div class="s">${m[2]}</div>
+   </div>`).join('')}
+  </div>
+  <div class="chip" style="align-self:flex-start;font-size:11px"><span class="c">HONEST</span> R² &lt; 0.05 flagged in-product, not hidden</div>
+ </div>
+ <div style="border-radius:8px;overflow:hidden;border:1px solid var(--border);box-shadow:0 4px 24px rgba(0,0,0,.4)">
+  <div style="background:var(--panel);padding:6px 12px;border-bottom:1px solid var(--border)">
+   <span class="mono" style="font-size:10px;color:var(--muted)">Module 5 · Scenario Simulator — live dashboard</span>
+  </div>
+  <img src="screenshots/scenario.png" style="width:100%;display:block;object-fit:cover;object-position:top left">
+ </div>
+</div>`,
+`Weak R² is real — frame it as transparency, not failure. The Scenario Simulator translates β into concrete revenue impact: +10% price on SKU 1 cuts demand 12.9%, drops weekly revenue 533→510. That is exactly what the brief asks for.`);
 
 /* 9 — ELASTICITY */
 add(`
