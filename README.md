@@ -1,3 +1,14 @@
+---
+title: Retail Analytics Dashboard
+emoji: 📊
+colorFrom: blue
+colorTo: green
+sdk: gradio
+sdk_version: 4.41.0
+app_file: app.py
+pinned: false
+---
+
 # AI-Augmented Retail Analytics Dashboard
 
 Imperial College Retail & Marketing Analytics group project — an interactive Python (Gradio) dashboard combining ML outputs, statistical analytics, and a grounded GenAI layer.
