@@ -261,18 +261,25 @@ def call_chart_summary(chart_id: str, chart_data: dict) -> str:
 
 
 # ── Gradio Tab Builder ────────────────────────────────────────────────────────
+# NOTE: CSS is defined in dashboard/app/main.py (APP_CSS) for consistency
+# All classes used: .module7-btn, .module7-card, .module7-summary, .module7-dropdown,
+# .module7-badge, .module7-download-btn, etc.
 
 def build_module_7_tab():
     lift_df, sku_summary, ai_context, load_error = load_outputs()
 
     with gr.Tab("7 · Promotion Lift Model"):
 
-        gr.Markdown("## Module 7 — Promotion Lift Model")
+        # ── Header with styling ──
         gr.Markdown(
-            "Estimates causal incremental sales lift from front-page promotions "
-            "using a counterfactual XGBoost model with SHAP explainability. "
-            "The model predicts baseline demand *without* the promotion — "
-            "lift = actual sales − counterfactual baseline."
+            '<div class="module7-section-title">Module 7 — Promotion Lift Model</div>',
+            visible=False  # Hide the title div, use our own styling
+        )
+        gr.Markdown("## 📊 Promotion Lift Model — Causal Impact Analysis")
+        gr.Markdown(
+            "**Methodology:** Counterfactual XGBoost with SHAP explainability. "
+            "The model estimates what sales would have been *without* the promotion, "
+            "then calculates lift = (actual sales − counterfactual baseline) / baseline × 100%."
         )
 
         if load_error:
@@ -303,21 +310,34 @@ def build_module_7_tab():
 
         # ── Key findings banner ──
         kf = ai_context["key_findings"]
-        gr.Markdown(
-            f"> **Key findings:** "
-            f"{kf['high_performers_n']} SKUs with lift >20% &nbsp;|&nbsp; "
-            f"{kf['moderate_lift_n']} SKUs moderate (5-20%) &nbsp;|&nbsp; "
-            f"{kf['negligible_lift_n']} SKU negligible (<5%) &nbsp;|&nbsp; "
-            f"Low-evidence SKUs (< 3 promo weeks): {kf['low_evidence_skus']}"
-        )
+        findings_html = f"""
+<div class="module7-card">
+    <strong style="color: #00d4aa; font-size: 14px;">🎯 Key Findings</strong><br><br>
+    <span class="module7-badge">{kf['high_performers_n']} High performers (lift >20%)</span>
+    <span class="module7-badge">{kf['moderate_lift_n']} Moderate lift (5–20%)</span>
+    <span class="module7-badge">{kf['negligible_lift_n']} Negligible (<5%)</span>
+    <span class="module7-badge">⚠️ {kf['low_evidence_skus']} Low evidence (<3 promo weeks)</span>
+</div>
+        """
+        gr.HTML(findings_html)
 
         # ── OOS Metrics ──
         gr.Markdown("### Out-of-Sample Performance Metrics")
         gr.Plot(value=build_metrics_panel(ai_context))
 
         with gr.Row():
-            summarise_metrics_btn = gr.Button("Summarise metrics", size="sm", variant="secondary")
-        metrics_summary_box = gr.Textbox(label="AI Summary", visible=False, lines=4)
+            summarise_metrics_btn = gr.Button(
+                "📝 Summarise metrics",
+                size="sm",
+                variant="secondary",
+                elem_classes="module7-btn"
+            )
+        metrics_summary_box = gr.Textbox(
+            label="AI Summary",
+            visible=False,
+            lines=4,
+            elem_classes="module7-summary"
+        )
 
         def on_summarise_metrics():
             summary = call_chart_summary("oos_metrics", ai_context["metrics"])
@@ -326,12 +346,23 @@ def build_module_7_tab():
         summarise_metrics_btn.click(on_summarise_metrics, outputs=metrics_summary_box)
 
         # ── Incremental sales bar ──
-        gr.Markdown("### Incremental Sales per SKU (with 90% Bootstrap CI)")
+        gr.Markdown("### 💰 Incremental Sales per SKU")
+        gr.Markdown("*With 90% Bootstrap Confidence Intervals*", visible=True)
         gr.Plot(value=build_lift_bar(sku_summary))
 
         with gr.Row():
-            summarise_lift_btn = gr.Button("Summarise this chart", size="sm", variant="secondary")
-        lift_summary_box = gr.Textbox(label="AI Summary", visible=False, lines=4)
+            summarise_lift_btn = gr.Button(
+                "📝 Summarise this chart",
+                size="sm",
+                variant="secondary",
+                elem_classes="module7-btn"
+            )
+        lift_summary_box = gr.Textbox(
+            label="AI Summary",
+            visible=False,
+            lines=4,
+            elem_classes="module7-summary"
+        )
 
         def on_summarise_lift():
             data = sku_summary[
@@ -345,12 +376,23 @@ def build_module_7_tab():
         summarise_lift_btn.click(on_summarise_lift, outputs=lift_summary_box)
 
         # ── Lift % bar ──
-        gr.Markdown("### Promotion Lift % per SKU")
+        gr.Markdown("### 📈 Promotion Lift %")
+        gr.Markdown("*Percentage increase in sales due to promotion*", visible=True)
         gr.Plot(value=build_lift_pct_bar(sku_summary))
 
         with gr.Row():
-            summarise_pct_btn = gr.Button("Summarise this chart", size="sm", variant="secondary")
-        pct_summary_box = gr.Textbox(label="AI Summary", visible=False, lines=4)
+            summarise_pct_btn = gr.Button(
+                "📝 Summarise this chart",
+                size="sm",
+                variant="secondary",
+                elem_classes="module7-btn"
+            )
+        pct_summary_box = gr.Textbox(
+            label="AI Summary",
+            visible=False,
+            lines=4,
+            elem_classes="module7-summary"
+        )
 
         def on_summarise_pct():
             data = sku_summary[
@@ -364,12 +406,23 @@ def build_module_7_tab():
         summarise_pct_btn.click(on_summarise_pct, outputs=pct_summary_box)
 
         # ── Heatmap ──
-        gr.Markdown("### Lift % Heatmap — SKU × Week")
+        gr.Markdown("### 🔥 Lift % Heatmap — SKU × Week")
+        gr.Markdown("*Darker = Higher lift; Gray = No promotion that week*", visible=True)
         gr.Plot(value=build_heatmap(lift_df, sku_summary))
 
         with gr.Row():
-            summarise_heat_btn = gr.Button("Summarise this chart", size="sm", variant="secondary")
-        heat_summary_box = gr.Textbox(label="AI Summary", visible=False, lines=4)
+            summarise_heat_btn = gr.Button(
+                "📝 Summarise this chart",
+                size="sm",
+                variant="secondary",
+                elem_classes="module7-btn"
+            )
+        heat_summary_box = gr.Textbox(
+            label="AI Summary",
+            visible=False,
+            lines=4,
+            elem_classes="module7-summary"
+        )
 
         def on_summarise_heat():
             rich = sku_summary[sku_summary["n_promo_weeks"] >= 4]
@@ -382,19 +435,30 @@ def build_module_7_tab():
         summarise_heat_btn.click(on_summarise_heat, outputs=heat_summary_box)
 
         # ── SKU drill-down ──
-        gr.Markdown("### SKU Drill-Down — Lift % and Incremental Sales")
+        gr.Markdown("### 🔎 SKU Drill-Down Analysis")
         sku_ids = sorted(lift_df["sku_id"].unique().tolist())
 
         sku_selector = gr.Dropdown(
             choices = [str(s) for s in sku_ids],
             value   = str(sku_ids[0]),
-            label   = "Select SKU",
+            label   = "Select SKU to explore",
+            elem_classes="module7-dropdown"
         )
         sku_plot = gr.Plot(value=build_sku_detail(lift_df, sku_ids[0]))
 
         with gr.Row():
-            summarise_sku_btn = gr.Button("Summarise this chart", size="sm", variant="secondary")
-        sku_summary_box = gr.Textbox(label="AI Summary", visible=False, lines=4)
+            summarise_sku_btn = gr.Button(
+                "📝 Summarise this chart",
+                size="sm",
+                variant="secondary",
+                elem_classes="module7-btn"
+            )
+        sku_summary_box = gr.Textbox(
+            label="AI Summary",
+            visible=False,
+            lines=4,
+            elem_classes="module7-summary"
+        )
 
         def on_sku_change(sku_str):
             return build_sku_detail(lift_df, int(sku_str))
@@ -419,10 +483,9 @@ def build_module_7_tab():
         summarise_sku_btn.click(on_summarise_sku, inputs=sku_selector, outputs=sku_summary_box)
 
         # ── Exportable table ──
-        gr.Markdown("### Exportable Model Output Table")
+        gr.Markdown("### 📊 Exportable Model Output")
         gr.Markdown(
-            "Full incremental sales estimates per SKU — integration contract format "
-            "consumed by Module 3 (Promotion Effectiveness)."
+            "Full incremental sales estimates per SKU — consumed by Module 3 (Promotion Effectiveness)."
         )
         gr.Dataframe(
             value   = sku_summary.round(2),
@@ -430,24 +493,30 @@ def build_module_7_tab():
             label   = "SKU Lift Summary",
         )
         gr.DownloadButton(
-            label = "Download promotion_output.csv",
+            label = "📥 Download promotion_output.csv",
             value = str(OUTPUTS_PATH / "promotion_output.csv"),
+            elem_classes="module7-download-btn"
         )
 
         # ── AI Narrative ──
         gr.Markdown("---")
-        gr.Markdown("### AI Model Narrative")
+        gr.Markdown("### 🤖 AI Model Narrative")
         gr.Markdown(
-            "Generates a plain-English interpretation of the full model output. "
-            "Responses are labelled `[Data-grounded]` (traceable to a specific figure) "
-            "or `[General inference]` (reasoning beyond supplied data)."
+            "Generates a plain-English interpretation. Responses are labelled "
+            "`[Data-grounded]` (traceable to a chart) or `[General inference]` (model reasoning)."
         )
 
-        generate_btn = gr.Button("Generate AI Narrative", variant="primary", size="lg")
+        generate_btn = gr.Button(
+            "✨ Generate AI Narrative",
+            variant="primary",
+            size="lg",
+            elem_classes="module7-btn"
+        )
         narrative_box = gr.Textbox(
             label       = "AI Narrative",
             lines       = 10,
             interactive = False,
+            elem_classes="module7-summary",
             placeholder = "Click 'Generate AI Narrative' to produce the model summary...",
         )
         gr.Markdown(

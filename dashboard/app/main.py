@@ -126,6 +126,142 @@ body, .gradio-container, .main, .wrap, .gap {
 ::-webkit-scrollbar-thumb:hover { background: #3a5a7a; }
 
 footer { display: none !important; }
+
+/* ── Module 7 Styling ── */
+/* ── Buttons: hover effects ── */
+.module7-btn {
+    background: linear-gradient(135deg, #1e4d3f 0%, #0a1520 100%) !important;
+    border: 1px solid rgba(0, 212, 170, 0.2) !important;
+    color: #e8edf5 !important;
+    border-radius: 6px !important;
+    padding: 10px 20px !important;
+    font-weight: 500 !important;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    box-shadow: 0 2px 8px rgba(0, 212, 170, 0.1) !important;
+}
+
+.module7-btn:hover {
+    background: linear-gradient(135deg, #00d4aa 0%, #1e4d3f 100%) !important;
+    border-color: #00d4aa !important;
+    color: #0d1b2a !important;
+    box-shadow: 0 8px 20px rgba(0, 212, 170, 0.25) !important;
+    transform: translateY(-2px) !important;
+}
+
+.module7-btn:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 4px 10px rgba(0, 212, 170, 0.15) !important;
+}
+
+/* ── Card containers ── */
+.module7-card {
+    background: linear-gradient(135deg, #0a1520 0%, #0d2235 100%) !important;
+    border: 1px solid #1e3048 !important;
+    border-radius: 8px !important;
+    padding: 20px !important;
+    margin: 10px 0 !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+.module7-card:hover {
+    border-color: rgba(0, 212, 170, 0.3) !important;
+    box-shadow: 0 8px 20px rgba(0, 212, 170, 0.1) !important;
+    background: linear-gradient(135deg, #0d2235 0%, #0a3a4a 100%) !important;
+}
+
+/* ── Textbox/Summary styling ── */
+.module7-summary {
+    background: #081120 !important;
+    border: 1px solid #1e4d3f !important;
+    border-left: 3px solid #00d4aa !important;
+    color: #d0d8e0 !important;
+    border-radius: 4px !important;
+    padding: 12px 16px !important;
+    line-height: 1.6 !important;
+    font-size: 13px !important;
+}
+
+/* ── Dropdown styling ── */
+.module7-dropdown {
+    background: #0a1520 !important;
+    border: 1px solid #1e3048 !important;
+    color: #e8edf5 !important;
+    border-radius: 6px !important;
+}
+
+.module7-dropdown:hover {
+    border-color: #00d4aa !important;
+    box-shadow: 0 4px 12px rgba(0, 212, 170, 0.1) !important;
+}
+
+/* ── Tags/Badges ── */
+.module7-badge {
+    display: inline-block;
+    background: rgba(0, 212, 170, 0.1) !important;
+    border: 1px solid rgba(0, 212, 170, 0.3) !important;
+    color: #00d4aa !important;
+    padding: 4px 12px !important;
+    border-radius: 20px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    margin: 2px 4px !important;
+    transition: all 0.2s ease !important;
+}
+
+.module7-badge:hover {
+    background: rgba(0, 212, 170, 0.2) !important;
+    border-color: #00d4aa !important;
+    transform: scale(1.05) !important;
+}
+
+/* ── Section headers ── */
+.module7-section-title {
+    color: #00d4aa !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    margin-top: 24px !important;
+    margin-bottom: 12px !important;
+    border-bottom: 2px solid rgba(0, 212, 170, 0.2) !important;
+    padding-bottom: 8px !important;
+}
+
+/* ── Download button (primary) ── */
+.module7-download-btn {
+    background: linear-gradient(135deg, #00d4aa 0%, #00a885 100%) !important;
+    border: none !important;
+    color: #0d1b2a !important;
+    border-radius: 6px !important;
+    padding: 12px 24px !important;
+    font-weight: 600 !important;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    box-shadow: 0 4px 12px rgba(0, 212, 170, 0.25) !important;
+}
+
+.module7-download-btn:hover {
+    background: linear-gradient(135deg, #00e6bb 0%, #00d4aa 100%) !important;
+    box-shadow: 0 8px 24px rgba(0, 212, 170, 0.35) !important;
+    transform: translateY(-3px) !important;
+}
+
+/* ── Prose/text color fixes ── */
+.module7-card .prose,
+.module7-card p,
+.module7-card h3,
+.module7-card h4 {
+    color: #d0d8e0 !important;
+}
+
+.module7-card strong {
+    color: #00d4aa !important;
+}
+
+.module7-card code {
+    background: rgba(0, 212, 170, 0.08) !important;
+    color: #00d4aa !important;
+    padding: 2px 6px !important;
+    border-radius: 3px !important;
+}
 """
 
 # ─────────────────────────────────────────────────────────────
