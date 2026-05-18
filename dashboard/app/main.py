@@ -211,6 +211,20 @@ body.sb-wired .tab-nav { display: none !important; }
 ::-webkit-scrollbar-thumb:hover { background: var(--scroll-thumb-h); }
 
 footer { display: none !important; }
+
+/* ── Gradio 6 white-gap fix ──────────────────────────────────────────
+   Gradio 6 renamed/restructured its DOM, so the dark rules above miss
+   several structural wrappers and the default white shows through in
+   the gaps between cards. Paint only the LAYOUT containers (not widgets
+   or charts) with the theme background; var(--bg) still flips for the
+   light theme. */
+html, gradio-app, .gradio-container,
+.gradio-container .main, .main, .wrap, .contain, .app, .fillable,
+.tabs, .tabitem, .tab-container, .tabitem > .gap,
+.column, .row, .gap {
+    background-color: var(--bg) !important;
+}
+.gradio-container { max-width: 100% !important; }
 """
 
 # ─────────────────────────────────────────────────────────────
