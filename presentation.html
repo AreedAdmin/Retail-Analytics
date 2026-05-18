@@ -215,43 +215,6 @@ add(`
 </div></div>`,
 `Stress it's one product, not 11 scripts — shared data contracts, shared Palantir theme, one AI layer every module calls. The two highlighted tiles (AI Assistant, AI Analytics) are the GenAI core.`);
 
-/* 3a — DASHBOARD TOUR */
-add(`
-<div class="kicker">The Product · Live</div>
-<h2>Dashboard walkthrough</h2>
-<div class="fill" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
- ${[['screenshots/data-explorer.png','02 · Data Explorer','4,400 records · 44 SKUs · filter by SKU · per-SKU stats'],
-    ['screenshots/forecast.png','06 · Demand Forecasting','HistGBR · actual vs forecast · 95% CI band'],
-    ['screenshots/scenario.png','05 · Scenario Simulator','β × Δprice · revenue waterfall · AI pricing memo'],
-    ['screenshots/ai-assistant.png','08 · AI Assistant','grounded chat · click-to-summarise · integrated briefing'],
-   ].map(s=>`<div style="border-radius:8px;overflow:hidden;border:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,.35)">
-   <img src="${s[0]}" style="width:100%;height:148px;object-fit:cover;object-position:top left;display:block">
-   <div style="padding:8px 12px;background:var(--panel);border-top:1px solid var(--border)">
-     <div class="mono" style="font-size:11px;color:var(--accent)">${s[1]}</div>
-     <div style="font-size:11px;color:var(--muted);margin-top:3px">${s[2]}</div>
-   </div>
- </div>`).join('')}
-</div>`,
-`30-second visual grounding. Point out the Palantir theme, sidebar nav, module numbering, and the consistent KPI-card layout. Every module follows the same pattern — KPIs at top, chart below, AI action at far right.`);
-
-/* 3b — ANALYTICS SUITE */
-add(`
-<div class="kicker">Analytics Suite</div>
-<h2>Three engines, one dashboard</h2>
-<div class="fill"><div class="grid" style="grid-template-columns:repeat(3,1fr);gap:14px">
- ${[['Promotion lift','XGBoost counterfactual<br>+ matched control','Incremental units &amp; lift %','Modules 3 · 7'],
-    ['Price elasticity','Log–log OLS per SKU<br>β = own-price sensitivity','Demand curves · rankings','Module 4'],
-    ['Scenario simulator','Chains elasticity<br>constant-elasticity what-if','±5/10/20/30% · waterfall','Module 5']]
-  .map(c=>`<div class="card k" style="padding:20px 16px">
-   <div class="t ac">${c[0]}</div>
-   <div style="font:600 14px/1.3 var(--head);margin:12px 0 8px">${c[1]}</div>
-   <div class="s">${c[2]}</div>
-   <div class="chip" style="margin-top:12px;font-size:11px"><span class="c">→</span> ${c[3]}</div></div>`).join('')}
-</div>
-<div class="sub" style="margin-top:14px;align-self:center">+ <span class="ac">Module 6</span> demand forecasting (HistGBR) — separate ML track</div>
-</div></div>`,
-`Three distinct statistical engines — not one generic ML block. Module 5 does not retrain; it projects from Module 4. Module 3 = business view; Module 7 = model diagnostics.`);
-
 /* 3c — RUBRIC */
 add(`
 <div class="kicker">Assessment</div>
@@ -277,82 +240,6 @@ add(`
    </div></div>`).join('')}
 </div></div>`,
 `Optional for markers — points to evidence not claims. Skip in a 10-min demo if short on time.`);
-
-/* 4 — STACK */
-add(`
-<div class="kicker">Tech Stack</div>
-<h2>Layered &amp; deliberate</h2>
-<div class="fill"><div class="grid" style="gap:11px">
- ${[['UI / APP','Gradio 6.9 · custom Palantir CSS · Plotly'],
-    ['DATA','pandas · numpy · pyarrow · cached loaders'],
-    ['ML / STATS','scikit-learn HistGBR · XGBoost · statsmodels OLS'],
-    ['GENAI','Ollama Cloud gpt-oss:120b · Anthropic/OpenAI/local fallback'],
-    ['CONFIG','python-dotenv · HF Space secrets'],
-    ['DEPLOY','Hugging Face Spaces — free CPU tier']]
-  .map((r,i)=>`<div class="card" style="display:flex;align-items:center;gap:20px;padding:13px 18px;border-left:2px solid ${i==3?'var(--accent)':'var(--border)'}">
-    <span class="lbl" style="width:120px;color:${i==3?'var(--accent)':'var(--muted)'}">${r[0]}</span>
-    <span style="font-size:14px">${r[1]}</span></div>`).join('')}
- <div class="chip" style="align-self:flex-start;margin-top:6px"><span class="c">RULE</span> the dashboard never trains a model — it consumes validated outputs</div>
-</div></div>`,
-`Design rule is the punchline: models are produced offline in ml/, the app is a pure consumer. We also fixed phantom version pins that would have broken the Space build.`);
-
-/* 5 — ARCHITECTURE */
-add(`
-<div class="kicker">Architecture</div>
-<h2>Contract-driven, layered, decoupled</h2>
-<div class="fill">
-<svg viewBox="0 0 1180 430" font-family="var(--mono)">
- <defs><marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
-   <path d="M0,0 L7,3 L0,6 Z" fill="#4d9bff"/></marker></defs>
- ${[['data_raw.csv',40,30,200,46,'#1d2430'],
-    ['OFFLINE ml/  ·  HistGBR · XGBoost · OLS',40,120,360,58,'#1d2430'],
-    ['Contracts  schemas.py',470,120,300,58,'#4d9bff'],
-    ['Loaders  (validated · cached)',40,235,730,52,'#1d2430'],
-    ['dashboard/modules/*  —  11 Gradio tabs',40,330,470,60,'#1d2430'],
-    ['AI LAYER  ai/services',560,330,210,60,'#4d9bff'],
-    ['Ollama Cloud  (streamed)',830,330,310,60,'#1d2430']]
-  .map(b=>`<g><rect x="${b[1]}" y="${b[2]}" width="${b[3]}" height="${b[4]}" rx="5"
-     fill="#11151d" stroke="${b[5]}"/><text x="${b[1]+b[3]/2}" y="${b[2]+b[4]/2+4}"
-     fill="#d7dde6" font-size="14" text-anchor="middle">${b[0]}</text></g>`).join('')}
- ${[['M140 76 L140 120'],['M220 178 L470 178'],['M220 178 L300 235'],
-    ['M620 178 L620 235'],['M300 287 L260 330'],['M620 287 L650 330'],
-    ['M770 360 L830 360']].map(p=>`<path class="draw" d="${p[0]}" stroke="#4d9bff"
-    stroke-width="1.6" fill="none" marker-end="url(#ar)"
-    pathLength="1" style="animation-delay:${Math.random()*.5}s"/>`).join('')}
-</svg>
-<div class="sub" style="margin-top:8px">Data is fixed input → models run offline → <span class="ac">contracts</span> decouple ML from UI → the AI layer is a sidecar every module can call.</div>
-</div>`,
-`Walk it left→right as the connectors draw in. The contracts box is the backbone — ML, analytics, UI and AI teams integrate only through frozen dataclass contracts, enabling parallel work and safe refactors.`);
-
-/* 6 — CONTRACTS */
-add(`
-<div class="kicker">Data Foundation</div>
-<h2>Frozen contracts, validating loaders</h2>
-<div class="fill"><div class="flow" style="justify-content:space-between;gap:24px">
- <div class="card" style="flex:1">
-  <div class="t">schemas.py — contract</div>
-  <pre class="mono" style="font-size:12px;color:var(--muted);margin-top:12px;line-height:1.7">@dataclass
-ForecastOutput:
-  sku_id · period
-  y_true · y_pred
-  y_lower · y_upper
-  model_name</pre>
- </div>
- <div class="arrow">→</div>
- <div class="card" style="flex:1">
-  <div class="t">*_loader.py</div>
-  <div class="s" style="font-size:13px;margin-top:12px;line-height:1.8">
-  validates required columns<br>caches as singleton<br>
-  <span class="am">fails loudly</span> → "run the notebook"</div>
- </div>
- <div class="arrow">→</div>
- <div class="card k" style="flex:1">
-  <div class="t">module / AI</div>
-  <div class="s" style="font-size:13px;margin-top:12px;line-height:1.8">
-  charts · KPIs · tables<br>grounding context<br>no hidden coupling</div>
- </div>
-</div></div>`,
-`The architectural backbone. Loaders raise a clear "run the notebook" error rather than silently breaking — integration is safe and parallelisable.`);
 
 /* 6.5 — ARCHITECTURE: LAYERED CAKE */
 add(`
@@ -403,6 +290,52 @@ add(`
 </div>`,
 `The mental model before we drill in: a layered cake — Client on top, Services in the middle, Data at the base, integrated only through frozen contracts. Note the two deployment boundaries: the whole stack ships on a free Hugging Face Space with models running in‑process, while the AI layer is a remote sidecar on Ollama Cloud, callable from any layer. The next slides go one service deep.`);
 
+/* 5 — ARCHITECTURE */
+add(`
+<div class="kicker">Architecture</div>
+<h2>Contract-driven, layered, decoupled</h2>
+<div class="fill">
+<svg viewBox="0 0 1180 430" font-family="var(--mono)">
+ <defs><marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+   <path d="M0,0 L7,3 L0,6 Z" fill="#4d9bff"/></marker></defs>
+ ${[['data_raw.csv',40,30,200,46,'#1d2430'],
+    ['OFFLINE ml/  ·  HistGBR · XGBoost · OLS',40,120,360,58,'#1d2430'],
+    ['Contracts  schemas.py',470,120,300,58,'#4d9bff'],
+    ['Loaders  (validated · cached)',40,235,730,52,'#1d2430'],
+    ['dashboard/modules/*  —  11 Gradio tabs',40,330,470,60,'#1d2430'],
+    ['AI LAYER  ai/services',560,330,210,60,'#4d9bff'],
+    ['Ollama Cloud  (streamed)',830,330,310,60,'#1d2430']]
+  .map(b=>`<g><rect x="${b[1]}" y="${b[2]}" width="${b[3]}" height="${b[4]}" rx="5"
+     fill="#11151d" stroke="${b[5]}"/><text x="${b[1]+b[3]/2}" y="${b[2]+b[4]/2+4}"
+     fill="#d7dde6" font-size="14" text-anchor="middle">${b[0]}</text></g>`).join('')}
+ ${[['M140 76 L140 120'],['M220 178 L470 178'],['M220 178 L300 235'],
+    ['M620 178 L620 235'],['M300 287 L260 330'],['M620 287 L650 330'],
+    ['M770 360 L830 360']].map(p=>`<path class="draw" d="${p[0]}" stroke="#4d9bff"
+    stroke-width="1.6" fill="none" marker-end="url(#ar)"
+    pathLength="1" style="animation-delay:${Math.random()*.5}s"/>`).join('')}
+</svg>
+<div class="sub" style="margin-top:8px">Data is fixed input → models run offline → <span class="ac">contracts</span> decouple ML from UI → the AI layer is a sidecar every module can call.</div>
+</div>`,
+`Walk it left→right as the connectors draw in. The contracts box is the backbone — ML, analytics, UI and AI teams integrate only through frozen dataclass contracts, enabling parallel work and safe refactors.`);
+
+/* 3b — ANALYTICS SUITE */
+add(`
+<div class="kicker">Analytics Suite</div>
+<h2>Three engines, one dashboard</h2>
+<div class="fill"><div class="grid" style="grid-template-columns:repeat(3,1fr);gap:14px">
+ ${[['Promotion lift','XGBoost counterfactual<br>+ matched control','Incremental units &amp; lift %','Modules 3 · 7'],
+    ['Price elasticity','Log–log OLS per SKU<br>β = own-price sensitivity','Demand curves · rankings','Module 4'],
+    ['Scenario simulator','Chains elasticity<br>constant-elasticity what-if','±5/10/20/30% · waterfall','Module 5']]
+  .map(c=>`<div class="card k" style="padding:20px 16px">
+   <div class="t ac">${c[0]}</div>
+   <div style="font:600 14px/1.3 var(--head);margin:12px 0 8px">${c[1]}</div>
+   <div class="s">${c[2]}</div>
+   <div class="chip" style="margin-top:12px;font-size:11px"><span class="c">→</span> ${c[3]}</div></div>`).join('')}
+</div>
+<div class="sub" style="margin-top:14px;align-self:center">+ <span class="ac">Module 6</span> demand forecasting (HistGBR) — separate ML track</div>
+</div></div>`,
+`Three distinct statistical engines — not one generic ML block. Module 5 does not retrain; it projects from Module 4. Module 3 = business view; Module 7 = model diagnostics.`);
+
 /* 7 — FORECAST */
 add(`
 <div class="kicker">Service 1 · ML</div>
@@ -424,26 +357,21 @@ add(`
    <div class="card g"><div class="t">95% Coverage</div><div class="v"><span data-c="93.5">0</span><span class="mut" style="font-size:16px">%</span></div></div>
    <div class="card"><div class="t">Horizon</div><div class="v" style="font-size:18px">13-wk val + test</div></div>
  </div>
-</div></div>`,
-`HistGradientBoostingRegressor on log1p sales, past-only features, chronological split, residual-quantile intervals. Beats naive materially, intervals well-calibrated. Honest: it's a backtest, not a live forecast.`);
-
-/* 7b — FORECAST METHODOLOGY */
-add(`
-<div class="kicker">Forecasting · Method</div>
-<h2>HistGBR pipeline</h2>
-<div class="fill"><div class="flow" style="gap:12px;align-items:stretch">
- ${[['Features','lags · rolling stats · promo history · calendar · price shape · past-only'],
-    ['Models','<span style="color:var(--muted)">Naive · Ridge ·</span> <span style="color:var(--accent);font-weight:700">HistGBR ✓</span><span style="color:var(--muted)"> · ARIMA</span><br><span style="display:inline-block;margin-top:8px;font:600 9px/1 var(--mono);letter-spacing:.14em;background:var(--soft);border:1px solid var(--line);border-radius:20px;padding:3px 9px;color:var(--accent)">SELECTED</span>'],
+</div>
+<div class="lbl" style="align-self:center;margin-top:14px">HistGBR pipeline — method</div>
+<div class="flow" style="gap:8px;align-items:stretch;margin-top:8px">
+ ${[['Features','lags · rolling · promo · calendar · price · past-only'],
+    ['Models','Naive · Ridge · <span class="ac" style="font-weight:700">HistGBR ✓</span> · ARIMA'],
     ['Target','log1p(weekly_sales)'],
     ['Split','13-wk val + 13-wk test'],
     ['Intervals','residual quantiles → 95% band']]
-  .map((s,i)=>`<div class="card ${i===1?'k':''}" style="flex:1;padding:14px">
-   <div class="t">${s[0]}</div><div class="s" style="margin-top:8px;font-size:12px;line-height:1.6">${s[1]}</div></div>
-   ${i<4?'<div class="arrow">→</div>':''}`).join('')}
+  .map((s,i)=>`<div class="card ${i===1?'k':''}" style="flex:1;padding:10px 12px">
+   <div class="t" style="font-size:9px">${s[0]}</div>
+   <div class="s" style="margin-top:5px;font-size:10.5px;line-height:1.45">${s[1]}</div></div>${i<4?'<div class="arrow" style="font-size:13px">→</div>':''}`).join('')}
 </div>
-<div class="chip" style="align-self:center;margin-top:16px"><span class="c">RAM</span> HistGBR fits 8 GB rule — no neural net required</div>
+<div class="chip" style="align-self:center;margin-top:10px"><span class="c">RAM</span> HistGBR fits 8 GB rule — no neural net required</div>
 </div>`,
-`Assignment allows regression OR neural nets — we benchmarked in the notebook and selected HistGBR. True forward forecast needs assumed future price/promo (stated in README). Features are all trailing — no leakage.`);
+`HistGradientBoostingRegressor on log1p sales, past-only features, chronological split, residual-quantile intervals. Beats naive materially, intervals well-calibrated; it's a backtest, not a live forecast. Bottom strip = methodology: we benchmarked Naive / Ridge / HistGBR / ARIMA in the notebook and selected HistGBR (fits the 8 GB RAM rule, no neural net needed, all features trailing → no leakage). True forward forecast would need assumed future price/promo paths (stated in README).`);
 
 /* 7c — FORECAST RESULTS */
 add(`
@@ -521,6 +449,31 @@ lift% = incremental / counterfactual</pre>
 </div>`,
 `Name SCAN*PRO explicitly. Course allows alternative approach. Walk counterfactual formula. Mention SHAP in notebook for feature attribution. Modest R² shown in-product.`);
 
+/* 9 — ELASTICITY */
+add(`
+<div class="kicker">Service 3 · Analytics</div>
+<h2>Price Elasticity + Scenario</h2>
+<div class="fill"><div class="flow" style="gap:28px;align-items:stretch">
+ <svg viewBox="0 0 380 230" style="width:380px">
+   <text x="4" y="16" fill="#79838f" font-family="var(--mono)" font-size="11">demand vs price (log-log)</text>
+   <path d="M20,40 C90,70 150,150 350,205" stroke="#4d9bff" stroke-width="2.5" fill="none" class="draw" pathLength="1"/>
+   ${Array.from({length:14}).map(()=>{const x=20+Math.random()*330,y=40+Math.pow((x-20)/330,.7)*165+(Math.random()*30-15);return `<circle cx="${x}" cy="${y}" r="3" fill="#79838f" opacity=".6"/>`}).join('')}
+ </svg>
+ <div class="grid" style="grid-template-columns:1fr;gap:11px;flex:1">
+   <div class="flow" style="gap:10px">
+     <div class="card" style="flex:1"><div class="t">Fitted</div><div class="v"><span data-c="44">0</span>/44</div></div>
+     <div class="card k" style="flex:1"><div class="t">Median β</div><div class="v">−<span data-c="1.44" data-dec="2">0</span></div></div>
+     <div class="card" style="flex:1"><div class="t">Elastic</div><div class="v"><span data-c="29">0</span></div></div>
+   </div>
+   <div class="card"><div class="t">Scenario Simulator — projection</div>
+     <pre class="mono" style="font-size:12px;color:var(--accent);margin-top:10px;line-height:1.7">demand% ≈ β · price%
+revenue% = (1+price%)·(1+demand%) − 1</pre>
+     <div class="s">→ revenue waterfall: baseline → price → volume → projected</div>
+   </div>
+ </div>
+</div></div>`,
+`Per-SKU log-log OLS, promo-controlled, CIs from SEs. Module 5 is the payoff of Module 4 — chained services, not a new model. Caveats (endogeneity, observational) stated in-product.`);
+
 /* 8c — PROMO + PRICING RESULTS */
 add(`
 <div class="kicker">Promo · Elasticity · Results</div>
@@ -560,30 +513,23 @@ add(`
 </div>`,
 `Weak R² is real — frame it as transparency, not failure. The Scenario Simulator translates β into concrete revenue impact: +10% price on SKU 1 cuts demand 12.9%, drops weekly revenue 533→510. That is exactly what the brief asks for.`);
 
-/* 9 — ELASTICITY */
+/* 13 — GENAI FEATURES */
 add(`
-<div class="kicker">Service 3 · Analytics</div>
-<h2>Price Elasticity + Scenario</h2>
-<div class="fill"><div class="flow" style="gap:28px;align-items:stretch">
- <svg viewBox="0 0 380 230" style="width:380px">
-   <text x="4" y="16" fill="#79838f" font-family="var(--mono)" font-size="11">demand vs price (log-log)</text>
-   <path d="M20,40 C90,70 150,150 350,205" stroke="#4d9bff" stroke-width="2.5" fill="none" class="draw" pathLength="1"/>
-   ${Array.from({length:14}).map(()=>{const x=20+Math.random()*330,y=40+Math.pow((x-20)/330,.7)*165+(Math.random()*30-15);return `<circle cx="${x}" cy="${y}" r="3" fill="#79838f" opacity=".6"/>`}).join('')}
- </svg>
- <div class="grid" style="grid-template-columns:1fr;gap:11px;flex:1">
-   <div class="flow" style="gap:10px">
-     <div class="card" style="flex:1"><div class="t">Fitted</div><div class="v"><span data-c="44">0</span>/44</div></div>
-     <div class="card k" style="flex:1"><div class="t">Median β</div><div class="v">−<span data-c="1.44" data-dec="2">0</span></div></div>
-     <div class="card" style="flex:1"><div class="t">Elastic</div><div class="v"><span data-c="29">0</span></div></div>
-   </div>
-   <div class="card"><div class="t">Scenario Simulator — projection</div>
-     <pre class="mono" style="font-size:12px;color:var(--accent);margin-top:10px;line-height:1.7">demand% ≈ β · price%
-revenue% = (1+price%)·(1+demand%) − 1</pre>
-     <div class="s">→ revenue waterfall: baseline → price → volume → projected</div>
-   </div>
- </div>
-</div></div>`,
-`Per-SKU log-log OLS, promo-controlled, CIs from SEs. Module 5 is the payoff of Module 4 — chained services, not a new model. Caveats (endogeneity, observational) stated in-product.`);
+<div class="kicker kicker-ai">AI Layer · Module 8</div>
+<h2>Three grounded GenAI features</h2>
+<div class="fill"><div class="grid" style="grid-template-columns:repeat(3,1fr);gap:18px">
+ ${[['8a','Chat','Persistent Q&amp;A · scope-limited grounding · auto-categorised'],
+    ['8b','Click-to-summarise','One-click narrative on any chart'],
+    ['8c','Multi-select briefing','Combine modules → one executive memo']]
+  .map(c=>`<div class="card k" style="padding:24px 18px">
+   <div class="mono ac" style="font-size:13px">${c[0]}</div>
+   <div style="font:700 20px/1.2 var(--head);margin:12px 0 10px">${c[1]}</div>
+   <div class="s" style="font-size:13px;line-height:1.7">${c[2]}</div></div>`).join('')}
+</div>
+<div class="chip" style="align-self:center;margin-top:26px"><span class="c">1</span>
+ orchestrator — prompt → context → LLMClient → guardrail → telemetry</div>
+</div>`,
+`One code path powers chat, summaries and the Module-7 narrative — consistency, and one place to harden. narrative_service.py is that orchestrator.`);
 
 /* 9.5 — AI INTEGRATION: CRITICAL EVALUATION */
 add(`
@@ -618,7 +564,7 @@ add(`
  ${[['RAG architecture','grounds answers in our data → fewer hallucinations'],
     ['System prompts','enforced discipline → fewer hallucinations'],
     ['Guardrails','no override · on-purpose only · secure'],
-    ['Open-source LLM','zero marginal cost · no cashflow stress'],
+    ['Open-source LLM','zero marginal cost · no cashflow stress · data sovereignty retained'],
     ['Fast TTFT · 215 TPS','no queue under concurrent demand']]
   .map(m=>`<div class="card k" style="padding:13px 12px">
    <div style="font:600 12px/1.25 var(--head)">${m[0]}</div>
@@ -702,23 +648,28 @@ add(`
 </div>`,
 `guardrail.py post-processes every response. The label is derived from the numeric check, not what the model claims. Flagged outputs are evidenced live in Critical Reflection — great for the marker.`);
 
-/* 13 — GENAI FEATURES */
+/* 14 — AI ANALYTICS */
 add(`
-<div class="kicker kicker-ai">AI Layer · Module 8</div>
-<h2>Three grounded GenAI features</h2>
-<div class="fill"><div class="grid" style="grid-template-columns:repeat(3,1fr);gap:18px">
- ${[['8a','Chat','Persistent Q&amp;A · scope-limited grounding · auto-categorised'],
-    ['8b','Click-to-summarise','One-click narrative on any chart'],
-    ['8c','Multi-select briefing','Combine modules → one executive memo']]
-  .map(c=>`<div class="card k" style="padding:24px 18px">
-   <div class="mono ac" style="font-size:13px">${c[0]}</div>
-   <div style="font:700 20px/1.2 var(--head);margin:12px 0 10px">${c[1]}</div>
-   <div class="s" style="font-size:13px;line-height:1.7">${c[2]}</div></div>`).join('')}
+<div class="kicker kicker-ai">AI Observability</div>
+<h2>We instrument our own AI</h2>
+<div class="fill"><div class="flow" style="gap:26px;align-items:center">
+ ${[['TTFT','1.7','s','time to first token'],['TPS','215','','tokens / sec'],['Success','100','%','non-fallback']]
+  .map((g,gi)=>`<div class="card ${gi===2?'g':'k'}" style="flex:1;text-align:center;padding:26px 14px">
+   <div class="lbl">${g[0]}</div>
+   <div class="big" style="margin:14px 0 4px"><span data-c="${g[1]}" data-dec="${g[1].includes('.')?1:0}">0</span><span class="u">${g[2]}</span></div>
+   <div class="s">${g[3]}</div></div>`).join('')}
+ <svg viewBox="0 0 200 200" style="width:190px">
+  <circle cx="100" cy="100" r="70" fill="none" stroke="#1d2430" stroke-width="22"/>
+  <circle cx="100" cy="100" r="70" fill="none" stroke="#4d9bff" stroke-width="22"
+    stroke-dasharray="${2*Math.PI*70}" stroke-dashoffset="${2*Math.PI*70*.42}"
+    transform="rotate(-90 100 100)" class="draw" pathLength="${2*Math.PI*70}"/>
+  <text x="100" y="96" fill="#d7dde6" font-family="var(--mono)" font-size="15" text-anchor="middle">prompt</text>
+  <text x="100" y="116" fill="#79838f" font-family="var(--mono)" font-size="11" text-anchor="middle">categories</text>
+ </svg>
 </div>
-<div class="chip" style="align-self:center;margin-top:26px"><span class="c">1</span>
- orchestrator — prompt → context → LLMClient → guardrail → telemetry</div>
+<div class="sub" style="align-self:center;margin-top:20px">Streamed Ollama responses → measured TTFT/TPS · every call logged & categorised.</div>
 </div>`,
-`One code path powers chat, summaries and the Module-7 narrative — consistency, and one place to harden. narrative_service.py is that orchestrator.`);
+`This is the "how it scales / how we'd operate it" slide. Telemetry categorises prompts and measures performance by streaming — production-grade observability of our own GenAI.`);
 
 /* 13b — AI CHART SUMMARY */
 add(`
@@ -767,49 +718,6 @@ add(`
  </div>
 </div></div>`,
 `This is "AI Insight Narration" from the brief — distinct from free-form chat. Two modes: surgical per-chart and strategic cross-module. Same guardrail path as Module 8a.`);
-
-/* 14 — AI ANALYTICS */
-add(`
-<div class="kicker kicker-ai">AI Observability</div>
-<h2>We instrument our own AI</h2>
-<div class="fill"><div class="flow" style="gap:26px;align-items:center">
- ${[['TTFT','1.7','s','time to first token'],['TPS','215','','tokens / sec'],['Success','100','%','non-fallback']]
-  .map((g,gi)=>`<div class="card ${gi===2?'g':'k'}" style="flex:1;text-align:center;padding:26px 14px">
-   <div class="lbl">${g[0]}</div>
-   <div class="big" style="margin:14px 0 4px"><span data-c="${g[1]}" data-dec="${g[1].includes('.')?1:0}">0</span><span class="u">${g[2]}</span></div>
-   <div class="s">${g[3]}</div></div>`).join('')}
- <svg viewBox="0 0 200 200" style="width:190px">
-  <circle cx="100" cy="100" r="70" fill="none" stroke="#1d2430" stroke-width="22"/>
-  <circle cx="100" cy="100" r="70" fill="none" stroke="#4d9bff" stroke-width="22"
-    stroke-dasharray="${2*Math.PI*70}" stroke-dashoffset="${2*Math.PI*70*.42}"
-    transform="rotate(-90 100 100)" class="draw" pathLength="${2*Math.PI*70}"/>
-  <text x="100" y="96" fill="#d7dde6" font-family="var(--mono)" font-size="15" text-anchor="middle">prompt</text>
-  <text x="100" y="116" fill="#79838f" font-family="var(--mono)" font-size="11" text-anchor="middle">categories</text>
- </svg>
-</div>
-<div class="sub" style="align-self:center;margin-top:20px">Streamed Ollama responses → measured TTFT/TPS · every call logged & categorised.</div>
-</div>`,
-`This is the "how it scales / how we'd operate it" slide. Telemetry categorises prompts and measures performance by streaming — production-grade observability of our own GenAI.`);
-
-/* 15 — UI/UX */
-add(`
-<div class="kicker">UI / UX</div>
-<h2>Palantir-style, systematic theming</h2>
-<div class="fill"><div class="flow" style="gap:24px;align-items:stretch">
- <div class="card" style="flex:1;background:#0a0d13"><div class="t">Dark (default)</div>
-   <div style="display:flex;gap:8px;margin-top:16px">
-   ${['#0a0d13','#11151d','#1d2430','#d7dde6','#4d9bff'].map(c=>`<div style="width:42px;height:42px;border-radius:4px;background:${c};border:1px solid #1d2430"></div>`).join('')}</div>
-   <div class="s mono" style="margin-top:14px">canvas · panel · border · text · accent</div></div>
- <div class="card" style="flex:1;background:#f5f7fa;color:#1b2430;border-color:#dde2ea">
-   <div class="t" style="color:#5a6675">Light (toggle)</div>
-   <div style="display:flex;gap:8px;margin-top:16px">
-   ${['#f5f7fa','#ffffff','#dde2ea','#1b2430','#2f6fed'].map(c=>`<div style="width:42px;height:42px;border-radius:4px;background:${c};border:1px solid #dde2ea"></div>`).join('')}</div>
-   <div class="s mono" style="margin-top:14px;color:#5a6675">persisted in localStorage</div></div>
- <div class="card" style="flex:1"><div class="t">Systematic</div>
-   <div class="s" style="font-size:13px;line-height:1.9;margin-top:12px">
-   CSS token system<br>Gradio-variable bridge<br><span class="ac">sidebar = real router</span><br>reusable theme-aware components</div></div>
-</div></div>`,
-`Looks like an internal data product, not a class demo. Theming is a token system, not hardcoded — and a JS bridge remaps Gradio's own variables so all chrome stays readable in both modes.`);
 
 /* 16 — DEPLOY */
 add(`
@@ -876,28 +784,6 @@ add(`
 </div></div>`,
 `Three-tier scalability: HF app reads precomputed files (cheap, stateless). Models retrain offline in ml/. LLM on Ollama Cloud with offline stub — never hard-fails. More users = duplicate Spaces; more SKUs = new CSV outputs.`);
 
-/* 18 — QUALITY */
-add(`
-<div class="kicker">Engineering Quality</div>
-<h2>Reproducible by construction</h2>
-<div class="fill"><div class="flow" style="gap:30px;align-items:stretch">
- <div class="card" style="flex:1"><div class="t">Repo mirrors architecture</div>
- <pre class="mono" style="font-size:12px;color:var(--muted);margin-top:12px;line-height:1.8">ml/                models (offline)
-dashboard/analytics  loaders + contracts
-dashboard/modules    11 tabs
-ai/services          client·guard·telemetry
-ai/prompts           versioned prompts
-docs/ · deploy.md    runbook</pre></div>
- <div class="grid" style="grid-template-columns:1fr;gap:12px;flex:1">
-  ${[['Pinned, install-verified requirements','fixed phantom versions'],
-     ['Every output regenerates from ml/','deterministic'],
-     ['PR flow · team logs · deploy runbook','reviewed'],
-     ['Bugs found &amp; fixed','tab-crash · dark contrast · empty-LLM']]
-   .map(c=>`<div class="card" style="padding:14px 16px"><div style="font:600 13px var(--head)">${c[0]}</div><div class="s">${c[1]}</div></div>`).join('')}
- </div>
-</div></div>`,
-`Mention the bug discipline explicitly — we found and fixed the double-tab frontend crash, the dark-mode contrast, and the dotenv/empty-LLM issue. Quality is demonstrated, not claimed.`);
-
 /* 19 — LIMITATIONS */
 add(`
 <div class="kicker">Critical Reflection</div>
@@ -915,6 +801,25 @@ add(`
 </div>`,
 `This slide wins marks: we critique our own system, and the product itself tells the user where to be cautious. Limitations are disclosed in Module 9, not buried.`);
 
+/* 3a — DASHBOARD TOUR */
+add(`
+<div class="kicker">The Product · Live</div>
+<h2>Dashboard walkthrough</h2>
+<div class="fill" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+ ${[['screenshots/data-explorer.png','02 · Data Explorer','4,400 records · 44 SKUs · filter by SKU · per-SKU stats'],
+    ['screenshots/forecast.png','06 · Demand Forecasting','HistGBR · actual vs forecast · 95% CI band'],
+    ['screenshots/scenario.png','05 · Scenario Simulator','β × Δprice · revenue waterfall · AI pricing memo'],
+    ['screenshots/ai-assistant.png','08 · AI Assistant','grounded chat · click-to-summarise · integrated briefing'],
+   ].map(s=>`<div style="border-radius:8px;overflow:hidden;border:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,.35)">
+   <img src="${s[0]}" style="width:100%;height:148px;object-fit:cover;object-position:top left;display:block">
+   <div style="padding:8px 12px;background:var(--panel);border-top:1px solid var(--border)">
+     <div class="mono" style="font-size:11px;color:var(--accent)">${s[1]}</div>
+     <div style="font-size:11px;color:var(--muted);margin-top:3px">${s[2]}</div>
+   </div>
+ </div>`).join('')}
+</div>`,
+`30-second visual grounding. Point out the Palantir theme, sidebar nav, module numbering, and the consistent KPI-card layout. Every module follows the same pattern — KPIs at top, chart below, AI action at far right.`);
+
 /* 20 — CLOSE */
 add(`
 <div class="title-hero" style="background:radial-gradient(900px 480px at 75% 35%,rgba(77,155,255,.10),transparent 60%)">
@@ -929,42 +834,6 @@ add(`
  <div class="sub" style="font-size:16px;margin-top:18px">Deployed · grounded · observable.</div>
 </div>`,
 `Closing: we answered all four manager questions, critiqued GenAI honestly (Module 9), and shipped a live demo. Invite questions. Mention HF Space URL if hosted.`);
-
-/* 21 — APPENDIX A */
-add(`
-<div class="kicker">Appendix A</div>
-<h2>Key file map</h2>
-<div class="fill"><div class="grid" style="grid-template-columns:1fr 1fr;gap:9px;font-size:12.5px">
- ${[['App / theme / nav','app.py · dashboard/app/main.py'],
-    ['Contracts','analytics/common/schemas.py'],
-    ['Loaders','common/{data,forecast,promotion,elasticity}_loader.py'],
-    ['ML forecast','ml/ml_forecasting/forecasting.ipynb'],
-    ['ML promo lift','ml/promotions/promotion_lift_model.ipynb'],
-    ['Elasticity','ml/pricing/price_elasticity_model.py'],
-    ['AI client / orch.','ai/services/llm_client.py · narrative_service.py'],
-    ['AI safety','context_builder.py · guardrail.py'],
-    ['AI observability','telemetry.py · modules/ai_analytics.py'],
-    ['Deploy','app.py · deploy.md · .env.example']]
-  .map(r=>`<div class="card" style="padding:12px 15px;display:flex;justify-content:space-between;gap:14px">
-   <span class="mut">${r[0]}</span><span class="mono ac" style="font-size:11px;text-align:right">${r[1]}</span></div>`).join('')}
-</div></div>`,
-`Reference slide — only show if asked. The repo layout mirrors the architecture exactly.`);
-
-/* 22 — APPENDIX B */
-add(`
-<div class="kicker">Appendix B</div>
-<h2>Headline metrics</h2>
-<div class="fill"><div class="grid" style="grid-template-columns:1fr;gap:11px">
- ${[['Demand Forecasting','Test MAE 58.7 · MAPE 61.4% · 95% coverage 93.5%'],
-    ['Promotion Lift','OOS MAE 65.3 · R² 0.215 · median lift ≈21% · 43 SKUs'],
-    ['Price Elasticity','44/44 fitted · median β ≈ −1.44 · 29 elastic'],
-    ['AI (Ollama Cloud)','TTFT ≈ 1.5–2 s · ≈215 TPS · grounded + labelled'],
-    ['Footprint','44 SKUs × 100 wks · 11 views · free CPU Space']]
-  .map((r,i)=>`<div class="card ${i==3?'k':''}" style="display:flex;align-items:center;gap:24px;padding:16px 20px">
-   <span class="lbl" style="width:200px;color:${i==3?'var(--accent)':'var(--muted)'}">${r[0]}</span>
-   <span class="mono" style="font-size:13px">${r[1]}</span></div>`).join('')}
-</div></div>`,
-`Reference slide. These are the shipped numbers — all reproducible from ml/.`);
 
 /* ============================================================ ENGINE */
 const deck=document.getElementById('deck'), bar=document.getElementById('bar'),

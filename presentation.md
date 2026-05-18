@@ -62,7 +62,6 @@ using the Speaker notes.
 | 13 GenAI feats | 3 device‑style cards (chat / summarise / multi) |
 | 13b AI summary | Chart click → context JSON → narrative flow (8b/8c) |
 | 14 AI Analytics | TTFT/TPS gauges + category donut, live‑log ticker |
-| 15 UI/UX | Side‑by‑side dark/light product mock, palette swatches |
 | 16 Deploy | HF Space ⇄ Ollama Cloud topology, "free" badge |
 | 17 Scale | Stateless app vs elastic LLM diagram, degradation ladder |
 | 18 Quality | Repo tree + PR/CI flow ribbon |
@@ -146,26 +145,6 @@ shared contracts, shared theme, shared AI layer.
 
 ---
 
-## Slide 3b — Analytics Suite (Three Engines)
-
-The dashboard analytics are **three distinct statistical engines**, not one
-generic "ML block":
-
-| Engine | Method | Question answered | Modules |
-|--------|--------|-------------------|---------|
-| **Promotion lift** | XGBoost counterfactual + matched control (SCAN*PRO‑style decomposition) | Incremental units & % lift per SKU | 3, 7 |
-| **Price elasticity** | Log–log OLS per SKU (`log Q ~ log P + promo`) | Own‑price sensitivity β | 4 |
-| **Scenario projection** | Constant‑elasticity what‑if (chains Module 4) | Revenue impact at ±5/10/20/30% | 5 |
-
-Plus **demand forecasting** (HistGBR, separate ML track) in Module 6.
-
-**Speaker notes:** Markers often conflate "analytics" — we separate *causal‑style
-promo lift*, *descriptive elasticity*, and *forward scenario math*. Module 5
-does not retrain; it projects from Module 4. Module 3 shows business rankings;
-Module 7 shows model diagnostics (R², residuals, SHAP in notebook).
-
----
-
 ## Slide 3c — Grading Criteria → Our Evidence
 
 | Criterion (pts) | How we demonstrate it |
@@ -178,76 +157,6 @@ Module 7 shows model diagnostics (R², residuals, SHAP in notebook).
 
 **Speaker notes:** Optional slide — use if the audience includes the marker.
 Otherwise fold into the close. Points to *evidence*, not claims.
-
----
-
-## Slide 4 — Tech Stack
-
-| Layer | Technology |
-|-------|------------|
-| UI / App | **Gradio 6.9**, custom Palantir CSS theme, Plotly |
-| Data | pandas, numpy, pyarrow |
-| ML / Stats | scikit‑learn (HistGBR), XGBoost, **statsmodels** (OLS) |
-| GenAI | **Ollama Cloud** (`gpt-oss:120b-cloud`); pluggable Anthropic / OpenAI / local HF / offline |
-| Config | python‑dotenv (`.env` → env), HF Space secrets |
-| Deploy | **Hugging Face Spaces** (Gradio SDK, free CPU tier) |
-| Quality | pytest, ruff, black; pinned `requirements.txt` |
-
-Design rule: **the dashboard never trains a model.** Models are produced
-offline in `ml/`; the app is a pure consumer of validated output files.
-
-**Speaker notes:** The pin discipline matters — we caught and fixed
-non‑existent version pins that would have broken the Space build.
-
----
-
-## Slide 5 — Architecture (Layered)
-
-```
-        ┌─────────────────────────── data/data_raw.csv ───────────────────────────┐
-        │                                                                          │
-   ┌────▼─────┐   OFFLINE (ml/)                ┌────────────────────────────────┐  │
-   │ Forecast │  HistGBR  → forecast.csv       │  Contracts (schemas.py)        │  │
-   │ Promo    │  XGBoost  → promotion_output   │  ForecastOutput / Promotion    │  │
-   │ Elastic. │  OLS      → elasticity_output  │  Elasticity / Scenario / AICtx │  │
-   └────┬─────┘                                └────────────────────────────────┘  │
-        │  CSV / JSON contracts                                                     │
-   ┌────▼───────────────── dashboard/analytics/common/*_loader.py ───────────────┐ │
-   │  contract‑validated, cached loaders (Forecast / Promotion / Elasticity / Data)│ │
-   └────┬──────────────────────────────────────────────────────────────────────┘ │
-        │                                                                          │
-   ┌────▼──── dashboard/modules/*  (11 Gradio tabs) ──────────┐   ┌───────────────┐│
-   │  charts + KPIs + tables   ── click‑to‑summarise / chat ──┼──▶│  AI LAYER     ││
-   └──────────────────────────────────────────────────────────┘   │ ai/services/ ││
-                                                                    │ context →   ││
-                                                                    │ LLMClient → ││
-                                                                    │ guardrail → ││
-                                                                    │ telemetry   ││
-                                                                    └──────┬──────┘│
-                                                                           ▼       │
-                                                            Ollama Cloud (stream)  │
-```
-
-**Speaker notes:** Walk left→right: data is fixed input; models run offline;
-contracts decouple ML from UI; the AI layer is a sidecar every module can call.
-
----
-
-## Slide 6 — Data Foundation & Contracts
-
-- **`DataLoader`** normalises the raw CSV to a snake_case schema
-  (`week→period`, `sku→sku_id`, `weekly_sales→demand_units`), cached singleton.
-- **`schemas.py`** defines dataclass *contracts*: `ForecastOutput`,
-  `PromotionOutput`, `ElasticityOutput`, `ScenarioOutput`, `AIContextPayload`.
-- Every model writes a CSV/JSON that **matches a contract**; every loader
-  **validates** required columns on load and fails loudly if a notebook
-  wasn't run.
-
-**Why it matters:** ML, analytics, UI and AI teams integrate through frozen
-data contracts — no hidden coupling, parallel workstreams, safe refactors.
-
-**Speaker notes:** This is the architectural backbone — call out that the
-loaders raise a clear "run the notebook" error rather than silently breaking.
 
 ---
 
@@ -292,6 +201,58 @@ contracts, data is the fixed foundation. The next slides go one service deep.
 
 ---
 
+## Slide 5 — Architecture (Layered)
+
+```
+        ┌─────────────────────────── data/data_raw.csv ───────────────────────────┐
+        │                                                                          │
+   ┌────▼─────┐   OFFLINE (ml/)                ┌────────────────────────────────┐  │
+   │ Forecast │  HistGBR  → forecast.csv       │  Contracts (schemas.py)        │  │
+   │ Promo    │  XGBoost  → promotion_output   │  ForecastOutput / Promotion    │  │
+   │ Elastic. │  OLS      → elasticity_output  │  Elasticity / Scenario / AICtx │  │
+   └────┬─────┘                                └────────────────────────────────┘  │
+        │  CSV / JSON contracts                                                     │
+   ┌────▼───────────────── dashboard/analytics/common/*_loader.py ───────────────┐ │
+   │  contract‑validated, cached loaders (Forecast / Promotion / Elasticity / Data)│ │
+   └────┬──────────────────────────────────────────────────────────────────────┘ │
+        │                                                                          │
+   ┌────▼──── dashboard/modules/*  (11 Gradio tabs) ──────────┐   ┌───────────────┐│
+   │  charts + KPIs + tables   ── click‑to‑summarise / chat ──┼──▶│  AI LAYER     ││
+   └──────────────────────────────────────────────────────────┘   │ ai/services/ ││
+                                                                    │ context →   ││
+                                                                    │ LLMClient → ││
+                                                                    │ guardrail → ││
+                                                                    │ telemetry   ││
+                                                                    └──────┬──────┘│
+                                                                           ▼       │
+                                                            Ollama Cloud (stream)  │
+```
+
+**Speaker notes:** Walk left→right: data is fixed input; models run offline;
+contracts decouple ML from UI; the AI layer is a sidecar every module can call.
+
+---
+
+## Slide 3b — Analytics Suite (Three Engines)
+
+The dashboard analytics are **three distinct statistical engines**, not one
+generic "ML block":
+
+| Engine | Method | Question answered | Modules |
+|--------|--------|-------------------|---------|
+| **Promotion lift** | XGBoost counterfactual + matched control (SCAN*PRO‑style decomposition) | Incremental units & % lift per SKU | 3, 7 |
+| **Price elasticity** | Log–log OLS per SKU (`log Q ~ log P + promo`) | Own‑price sensitivity β | 4 |
+| **Scenario projection** | Constant‑elasticity what‑if (chains Module 4) | Revenue impact at ±5/10/20/30% | 5 |
+
+Plus **demand forecasting** (HistGBR, separate ML track) in Module 6.
+
+**Speaker notes:** Markers often conflate "analytics" — we separate *causal‑style
+promo lift*, *descriptive elasticity*, and *forward scenario math*. Module 5
+does not retrain; it projects from Module 4. Module 3 shows business rankings;
+Module 7 shows model diagnostics (R², residuals, SHAP in notebook).
+
+---
+
 ## Slide 7 — Service 1: Demand Forecasting (ML)
 
 **Goal:** weekly demand per SKU with uncertainty.
@@ -308,31 +269,18 @@ MAE **58.7** · RMSE 312.9 · MAPE 61.4% · 95%‑interval coverage **93.5%** ·
 - Output → `ml/ml_forecasting/outputs/{forecast,per_sku_metrics,test_summary}.csv`
 - Consumed by `ForecastLoader` → Module 6 (per‑SKU actual vs predicted + band).
 
-**Speaker notes:** Honest framing — it beats the naive baseline materially
-and the intervals are well‑calibrated; it is a *backtest*, not a live forecast.
+**Methodology (in depth — bottom strip of the slide):** Features = lags 1–4w,
+rolling mean/std, promo history, calendar, price shape — all *past‑only*.
+Candidates = Naive · Ridge · **HistGBR ✓** · per‑SKU ARIMA, selected on
+validation MAE. Target = `log1p(weekly_sales)`. Intervals = residual quantiles
+→ 95% band. HistGBR chosen over a neural net: fits the **8 GB RAM** rule,
+strong on tabular panel data, faster iteration for 44 SKUs × 100 weeks.
 
----
-
-## Slide 7b — Forecasting Methodology (In Depth)
-
-**Problem:** predict weekly `demand_units` per SKU with uncertainty.
-
-**Pipeline (all past‑only — no leakage):**
-1. **Features:** lags 1–4w, rolling mean/std, promo history, calendar
-   (week-of-year, quarter), price shape (log price, vs-SKU mean, discount flag).
-2. **Candidates:** Naive, Ridge, **HistGradientBoostingRegressor** (+ CV‑tuned),
-   per-SKU ARIMA — selected on validation MAE.
-3. **Target:** `log1p(weekly_sales)` — stabilises variance across SKUs.
-4. **Split:** chronological — 13‑week validation, 13‑week test (panel).
-5. **Intervals:** residual quantiles in log space → 95% band in `forecast.csv`.
-
-**Why HistGBR (not a neural net):** fits the **8 GB RAM** rule; strong on tabular
-panel data; faster iteration than deep learning for 44 SKUs × 100 weeks.
-
-**Speaker notes:** The assignment asks for regression *or* neural nets — we chose
-HistGBR as the production model after benchmarking in the notebook. Be explicit:
-delivered file is a **backtest** on held-out weeks; true forward forecast would
-need assumed future price/promo paths (stated in Module 6 / README).
+**Speaker notes:** Honest framing — it beats the naive baseline materially and
+the intervals are well‑calibrated; it is a *backtest*, not a live forecast.
+The assignment allows regression *or* neural nets — we benchmarked in the
+notebook and selected HistGBR. True forward forecast would need assumed future
+price/promo paths (stated in Module 6 / README).
 
 ---
 
@@ -407,6 +355,24 @@ not a new model. Caveats (endogeneity, observational) stated in‑product.
 
 ---
 
+## Slide 13 — The AI Layer: 3 GenAI Features
+
+Module 8 — all grounded, all guardrailed:
+
+- **8a Chat** — persistent Q&A; scope selector limits grounding to one
+  module or "all"; prompt auto‑categorised.
+- **8b Click‑to‑summarise** — one‑click narrative on Promotion, Elasticity,
+  Forecasting, Scenario charts (`summarise_scope` / `summarise_payload`).
+- **8c Multi‑select briefing** — combine modules into one executive memo.
+
+`narrative_service.py` is the single orchestrator: prompt → context →
+LLMClient → guardrail → telemetry.
+
+**Speaker notes:** One code path powers chat, summaries and the Module‑7
+narrative — consistency and one place to harden.
+
+---
+
 ## Slide 9b — AI Integration: Critical Evaluation
 
 *(Placed deliberately **before** the AI‑layer deep‑dives — it states the
@@ -437,7 +403,8 @@ how each shortcoming is mitigated.)*
 3. **Guardrails** — secure: no prompt‑override, usable *only* for its
    purpose, not as a free general‑purpose LLM.
 4. **Open‑source LLM** (`gpt-oss:120b` via Ollama Cloud) — no expensive
-   end‑of‑month bill, no cashflow stress, no extra cost for this intelligence.
+   end‑of‑month bill, no cashflow stress, no extra cost for this intelligence,
+   **data sovereignty retained**.
 5. **Fast TTFT (~1.7 s) · ~215 TPS** — snappy responses so concurrent users
    are not stuck in a request queue.
 
@@ -516,21 +483,22 @@ is given the numbers and told to use nothing else.
 
 ---
 
-## Slide 13 — The AI Layer: 3 GenAI Features
+## Slide 14 — AI Observability (AI Analytics module)
 
-Module 8 — all grounded, all guardrailed:
+`ai/services/telemetry.py` + the **AI Analytics** tab:
 
-- **8a Chat** — persistent Q&A; scope selector limits grounding to one
-  module or "all"; prompt auto‑categorised.
-- **8b Click‑to‑summarise** — one‑click narrative on Promotion, Elasticity,
-  Forecasting, Scenario charts (`summarise_scope` / `summarise_payload`).
-- **8c Multi‑select briefing** — combine modules into one executive memo.
+- **Prompt categorisation** — deterministic intent buckets (Pricing &
+  Elasticity, Scenario, Promotion, Forecasting, Model Reliability,
+  Overview, Other).
+- **Performance metrics** — measured by *streaming* the Ollama response:
+  - **TTFT** ≈ 1.5–2 s (time to first token)
+  - **TPS** ≈ 215 tokens/sec
+  - end‑to‑end latency, token counts, success rate, backend.
+- Every AI call logs one JSONL event → live dashboards by
+  category / backend / source.
 
-`narrative_service.py` is the single orchestrator: prompt → context →
-LLMClient → guardrail → telemetry.
-
-**Speaker notes:** One code path powers chat, summaries and the Module‑7
-narrative — consistency and one place to harden.
+**Speaker notes:** We instrument our own AI like a production system —
+this is the "how it scales / how we'd operate it" slide.
 
 ---
 
@@ -563,42 +531,6 @@ metrics from `ml/*/outputs/` and analytics loaders.
 Contrast with Module 8a chat (free-form Q&A). Emphasise we built *two* narration
 modes — surgical (one chart) and strategic (multi-module). Both use the same
 guardrail path as chat.
-
----
-
-## Slide 14 — AI Observability (AI Analytics module)
-
-`ai/services/telemetry.py` + the **AI Analytics** tab:
-
-- **Prompt categorisation** — deterministic intent buckets (Pricing &
-  Elasticity, Scenario, Promotion, Forecasting, Model Reliability,
-  Overview, Other).
-- **Performance metrics** — measured by *streaming* the Ollama response:
-  - **TTFT** ≈ 1.5–2 s (time to first token)
-  - **TPS** ≈ 215 tokens/sec
-  - end‑to‑end latency, token counts, success rate, backend.
-- Every AI call logs one JSONL event → live dashboards by
-  category / backend / source.
-
-**Speaker notes:** We instrument our own AI like a production system —
-this is the "how it scales / how we'd operate it" slide.
-
----
-
-## Slide 15 — UI / UX
-
-- **Palantir‑style** dark‑first theme: near‑black canvas, single steel‑blue
-  accent, mono microtype, sharp 4px radius.
-- **CSS token system** + light/dark toggle (persisted in `localStorage`);
-  a *Gradio‑variable bridge* remaps Gradio's internal theme vars so all
-  chrome stays readable.
-- **Sidebar = real router**: JS maps each rail item to its tab; native tab
-  bar hidden once wired; active state synced both ways.
-- Reusable theme‑aware components (`components/ui.py`): KPI cards, panels,
-  transparent Plotly layouts.
-
-**Speaker notes:** Looks like an internal data product, not a class demo —
-and the theming is systematic, not hardcoded.
 
 ---
 
@@ -642,19 +574,6 @@ externally. The bottleneck is never the Gradio layer.
 
 ---
 
-## Slide 18 — Engineering Quality & Reproducibility
-
-- Repo layout mirrors the architecture: `ml/`, `dashboard/analytics`,
-  `dashboard/modules`, `ai/services`, `ai/prompts`, `docs/`.
-- Pinned, **install‑verified** `requirements.txt` (fixed phantom versions).
-- Every output regenerates from `ml/` notebooks/scripts.
-- Reviewed via PRs (feature branch → PR), team logs, `deploy.md` runbook.
-
-**Speaker notes:** Mention the bug discipline — we found and fixed the
-double‑tab crash, the dark‑mode contrast, the dotenv/empty‑LLM issues.
-
----
-
 ## Slide 19 — Limitations & Critical Reflection
 
 - Forecast & lift models: backtests on observational data — moderate lift R²
@@ -689,28 +608,3 @@ End with the four manager questions answered, GenAI critiqued, and a live demo l
 
 ---
 
-## Appendix A — Key File Map
-
-| Concern | Path |
-|---|---|
-| App entry / theme / nav | `app.py`, `dashboard/app/main.py` |
-| Contracts | `dashboard/analytics/common/schemas.py` |
-| Loaders | `dashboard/analytics/common/{data,forecast,promotion,elasticity}_loader.py` |
-| ML — forecast | `ml/ml_forecasting/forecasting.ipynb` → `outputs/` |
-| ML — promo lift | `ml/promotions/promotion_lift_model.ipynb` |
-| Analytics — elasticity | `ml/pricing/price_elasticity_model.py` |
-| AI client / orchestrator | `ai/services/llm_client.py`, `narrative_service.py` |
-| AI grounding / safety | `ai/services/context_builder.py`, `guardrail.py` |
-| AI observability | `ai/services/telemetry.py`, `dashboard/modules/ai_analytics.py` |
-| Prompts | `ai/prompts/*.txt` |
-| Deploy | `app.py`, `deploy.md`, `.env.example` |
-
-## Appendix B — Headline Metrics
-
-| Service | Metric |
-|---|---|
-| Demand Forecasting | Test MAE 58.7 · MAPE 61.4% · 95% coverage 93.5% |
-| Promotion Lift | OOS MAE 65.3 · R² 0.215 · median lift ≈21% (43 SKUs) |
-| Price Elasticity | 44/44 fitted · median β ≈ −1.44 · 29 elastic |
-| AI (Ollama Cloud) | TTFT ≈ 1.5–2 s · ≈215 TPS · grounded + labelled |
-| Footprint | 44 SKUs × 100 wks · 11 views · free CPU Space |
