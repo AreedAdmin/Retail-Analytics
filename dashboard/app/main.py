@@ -306,7 +306,7 @@ SIDEBAR_HTML = """
 
   <div class="sb-foot">
     <div><span class="dot"></span><b>System Online</b></div>
-    <div>44 SKUs &middot; 10/10 Modules</div>
+    <div>43 SKUs &middot; 10/10 Modules</div>
     <div>Build v1.0 &middot; AI Grounded</div>
   </div>
 </div>
