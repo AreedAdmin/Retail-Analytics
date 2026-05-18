@@ -1,0 +1,59 @@
+sku
+demand
+forecast
+forecasting
+promotion
+lift
+elasticity
+price
+pricing
+revenue
+scenario
+kpi
+vendor
+functionality
+seasonality
+confidence interval
+bootstrap
+MAE
+RMSE
+R²
+R2
+incremental sales
+incremental
+baseline
+counterfactual
+feature importance
+SHAP
+model
+out-of-sample
+cross-validation
+time series
+weekly sales
+sales
+units
+product
+category
+dashboard
+analytics
+marketing
+retail
+e-commerce
+campaign
+discount
+markup
+margin
+profit
+inventory
+stock
+quarter
+period
+week
+trend
+outlier
+anomaly
+distribution
+variance
+sensitivity
+coefficient
+regression
