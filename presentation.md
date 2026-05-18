@@ -50,6 +50,7 @@ using the Speaker notes.
 | 7 Forecast | Mini actual‑vs‑predicted line + CI band + 3 metric counters |
 | 8 Promo Lift | Horizontal lift bar chart (top SKUs) + R²/MAE gauges |
 | 9 Elasticity | Demand curve + elasticity histogram split at β=−1 |
+| 9b AI eval | Benefit ↔ limitation ledger + 5-tile "how we close every gap" row |
 | 10 LLM client | Backend fallback ladder, animated "resolve" path |
 | 11 Grounding | Prompt → CONTEXT JSON → answer flow, "[Data‑grounded]" stamp |
 | 12 Guardrails | 3‑step pipeline icons (check → label → log), red‑flag node |
@@ -292,6 +293,56 @@ revenue% = (1+price%)·(1+demand%) − 1
 
 **Speaker notes:** Module 5 is the payoff of Module 4 — chained services,
 not a new model. Caveats (endogeneity, observational) stated in‑product.
+
+---
+
+## Slide 9b — AI Integration: Critical Evaluation
+
+*(Placed deliberately **before** the AI‑layer deep‑dives — it states the
+honest case for and against a GenAI layer, then the next three slides show
+how each shortcoming is mitigated.)*
+
+**Benefits — why we integrated GenAI:**
+- **Plain‑English access** — a non‑technical manager queries the models
+  directly instead of reading charts and tables.
+- **Instant synthesis** — auto‑narratives across forecast, lift and
+  elasticity in one memo.
+- **Decision‑speed** — every chart explained on demand, in its own context.
+- **One layer, many uses** — chat, click‑to‑summarise, executive briefing
+  all share the same path.
+
+**Limitations — what LLM integration gets wrong:**
+- **Hallucination** — fabricated figures and unsupported claims.
+- **No ground truth** — the base model does not know our dataset.
+- **Off‑purpose / jailbreak** — prompt‑override; the assistant used for
+  anything but its job.
+- **Cost & throughput** — API bills; a request queue under concurrent demand.
+
+**How we close every gap (the next slides):**
+1. **RAG architecture** — grounds every answer in our own model outputs and
+   gives the LLM relevant context to pull from → fewer hallucinations.
+2. **System prompts** — enforced discipline (cite only context, declare
+   uncertainty) → fewer hallucinations.
+3. **Guardrails** — secure: no prompt‑override, usable *only* for its
+   purpose, not as a free general‑purpose LLM.
+4. **Open‑source LLM** (`gpt-oss:120b` via Ollama Cloud) — no expensive
+   end‑of‑month bill, no cashflow stress, no extra cost for this intelligence.
+5. **Fast TTFT (~1.7 s) · ~215 TPS** — snappy responses so concurrent users
+   are not stuck in a request queue.
+
+**Speaker notes:** The framing slide that wins credibility — we *name* the
+risks of bolting an LLM onto an analytics product before we show the
+architecture. Benefits are real: natural‑language access turns our models
+into something a manager can actually use. But LLMs hallucinate, don't know
+our data, can be pushed off‑purpose or jailbroken, and carry cost/throughput
+risk. The bottom row is the promise: we did *not* just add a chatbot — every
+gap is deliberately closed. Cautionary example for the guardrail point: the
+Chipotle customer‑service bot that users jailbroke into writing a
+reverse‑linked‑list — an assistant with no guardrail becomes a free
+general‑purpose LLM running on the company's bill and brand. Make it explicit:
+*"watch how each of these five mitigations closes a specific risk"* — this
+sets up the LLM‑client, grounding and guardrail slides as answers, not
+features.
 
 ---
 
