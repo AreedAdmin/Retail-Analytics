@@ -23,6 +23,7 @@ from dashboard.modules import (
     demand_forecasting,
     promotion_lift_model,
     chat_interface,
+    ai_analytics,
     critical_reflection,
     appendix_export,
 )
@@ -299,14 +300,15 @@ SIDEBAR_HTML = """
 
   <div class="sb-sect"><span>Intelligence</span><hr></div>
   <a class="sb-item" data-idx="7"><span class="sb-idx">08</span><span class="sb-label">AI Assistant</span></a>
+  <a class="sb-item" data-idx="8"><span class="sb-idx">AI</span><span class="sb-label">AI Analytics</span></a>
 
   <div class="sb-sect"><span>System</span><hr></div>
-  <a class="sb-item" data-idx="8"><span class="sb-idx">09</span><span class="sb-label">Critical Reflection</span></a>
-  <a class="sb-item" data-idx="9"><span class="sb-idx">10</span><span class="sb-label">Appendix &amp; Export</span></a>
+  <a class="sb-item" data-idx="9"><span class="sb-idx">09</span><span class="sb-label">Critical Reflection</span></a>
+  <a class="sb-item" data-idx="10"><span class="sb-idx">10</span><span class="sb-label">Appendix &amp; Export</span></a>
 
   <div class="sb-foot">
     <div><span class="dot"></span><b>System Online</b></div>
-    <div>44 SKUs &middot; 10/10 Modules</div>
+    <div>44 SKUs &middot; 10 Modules + AI Ops</div>
     <div>Build v1.0 &middot; AI Grounded</div>
   </div>
 </div>
@@ -405,6 +407,7 @@ def build_app() -> gr.Blocks:
                     demand_forecasting.build_demand_forecasting_tab()
                     promotion_lift_model.build_promotion_lift_model_tab()
                     chat_interface.build_chat_tab()
+                    ai_analytics.build_ai_analytics_tab()
                     critical_reflection.build_critical_reflection_tab()
                     appendix_export.build_appendix_export_tab()
 

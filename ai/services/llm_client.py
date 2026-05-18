@@ -33,9 +33,21 @@ import os
 import re
 import json
 import logging
+from pathlib import Path
 from typing import Optional
 
 logger = logging.getLogger(__name__)
+
+# Load the repo-root .env so OLLAMA_API_KEY / API keys are picked up without
+# exporting them manually. Best-effort — python-dotenv is optional and this
+# must run BEFORE resolve_backend() reads os.environ. Existing env vars win
+# (override=False) so HF Spaces secrets are never clobbered.
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(Path(__file__).resolve().parents[2] / ".env", override=False)
+except Exception:  # pragma: no cover - dotenv optional
+    pass
 
 DEFAULT_LOCAL_MODEL = os.environ.get("LLM_MODEL_ID", "Qwen/Qwen2.5-7B-Instruct")
 
@@ -78,7 +90,38 @@ class LLMClient:
         self.backend = (backend or resolve_backend()).lower()
         self.model_id = model_id or DEFAULT_LOCAL_MODEL
         self._pipe = None  # lazily-built transformers pipeline
+        self._native = None        # native timing dict set by _gen_ollama
+        self.last_metrics = {}     # populated after every generate() call
         logger.info("LLMClient backend=%s model=%s", self.backend, self.model_id)
+
+    @staticmethod
+    def _est_tokens(text: str) -> int:
+        """Cheap token estimate (~4 chars/token) for backends without counts."""
+        return max(1, round(len(text or "") / 4))
+
+    def _build_metrics(self, backend: str, ok: bool, wall_ms: float,
+                       user: str, text: str) -> dict:
+        nat = self._native or {}
+        if nat:
+            pt = nat.get("prompt_tokens")
+            ct = nat.get("completion_tokens")
+            total_ms = nat.get("total_ms", wall_ms)
+            ttft_ms = nat.get("ttft_ms")
+            tps = nat.get("tps")
+        else:
+            pt, ct = self._est_tokens(user), self._est_tokens(text)
+            total_ms, ttft_ms = wall_ms, None
+            tps = (ct / (wall_ms / 1000.0)) if wall_ms > 0 else None
+        return {
+            "backend": backend,
+            "success": bool(ok),
+            "ttft_ms": None if ttft_ms is None else round(float(ttft_ms), 1),
+            "tps": None if tps is None else round(float(tps), 2),
+            "total_ms": round(float(total_ms), 1),
+            "prompt_tokens": pt,
+            "completion_tokens": ct,
+            "native_timing": bool(nat),
+        }
 
     # -- public ---------------------------------------------------------------
 
@@ -118,21 +161,42 @@ class LLMClient:
         return chain
 
     def generate(self, system: str, user: str, max_tokens: int = 600) -> str:
+        import time
+
+        self._native = None
+        t0 = time.perf_counter()
+        backend_used, ok = self.backend, True
         try:
-            return self._dispatch(self.backend, system, user, max_tokens)
+            text = self._dispatch(self.backend, system, user, max_tokens)
         except Exception as e:  # never crash the dashboard
             logger.exception("LLM generation failed on backend=%s", self.backend)
+            text = None
             for fb in self._fallback_chain():
                 try:
                     logger.warning("falling back to backend=%s", fb)
-                    return self._dispatch(fb, system, user, max_tokens)
+                    self._native = None
+                    text = self._dispatch(fb, system, user, max_tokens)
+                    backend_used = fb
+                    break
                 except Exception:
                     logger.exception("fallback backend=%s failed", fb)
-            return (
-                f"⚠️ AI backend ({self.backend}) unavailable: {e}\n\n"
-                "Falling back to a grounded extract of the available data:\n\n"
-                f"{self._gen_stub(system, user)}"
-            )
+            if text is None:
+                ok, backend_used = False, "stub"
+                self._native = None
+                text = (
+                    f"⚠️ AI backend ({self.backend}) unavailable: {e}\n\n"
+                    "Falling back to a grounded extract of the available data:\n\n"
+                    f"{self._gen_stub(system, user)}"
+                )
+        wall_ms = (time.perf_counter() - t0) * 1000.0
+        try:
+            self.last_metrics = self._build_metrics(
+                backend_used, ok, wall_ms, user, text)
+        except Exception:  # metrics must never break generation
+            logger.exception("metric build failed")
+            self.last_metrics = {"backend": backend_used, "success": ok,
+                                 "total_ms": round(wall_ms, 1)}
+        return text
 
     # -- backends -------------------------------------------------------------
 
@@ -183,22 +247,58 @@ class LLMClient:
             headers={"Authorization": f"Bearer {api_key}"},
             timeout=timeout,
         )
+        # gpt-oss is a reasoning model: hidden reasoning consumes tokens, so
+        # give the visible answer real headroom or it can come back empty.
+        num_predict = max(int(max_tokens), 512)
         resp = client.chat(
             model=model,
             messages=[
                 {"role": "system", "content": system},
                 {"role": "user", "content": user},
             ],
-            options={"temperature": 0, "num_predict": max_tokens},
+            options={"temperature": 0, "num_predict": num_predict},
         )
         # ollama returns a ChatResponse (attr access) or a dict, by version
         msg = getattr(resp, "message", None)
         if msg is None:
             msg = resp["message"]
-        content = getattr(msg, "content", None)
-        if content is None:
-            content = msg["content"]
-        return content.strip()
+
+        def _get(field):
+            v = getattr(msg, field, None)
+            if v is None and isinstance(msg, dict):
+                v = msg.get(field)
+            return (v or "").strip()
+
+        content = _get("content") or _get("thinking")
+        if not content:
+            # Don't return a silent blank — let generate() fall back.
+            raise RuntimeError("Ollama returned an empty response")
+
+        # Native timing (nanoseconds) → real TTFT / TPS, no streaming needed.
+        def _rf(field):
+            v = getattr(resp, field, None)
+            if v is None and isinstance(resp, dict):
+                v = resp.get(field)
+            try:
+                return float(v) if v is not None else None
+            except (TypeError, ValueError):
+                return None
+
+        total_d = _rf("total_duration")
+        load_d = _rf("load_duration") or 0.0
+        pe_cnt = _rf("prompt_eval_count")
+        pe_dur = _rf("prompt_eval_duration") or 0.0
+        ev_cnt = _rf("eval_count")
+        ev_dur = _rf("eval_duration")
+        self._native = {
+            "total_ms": (total_d / 1e6) if total_d else None,
+            # time before the first generated token: model load + prompt eval
+            "ttft_ms": (load_d + pe_dur) / 1e6 if (load_d or pe_dur) else None,
+            "tps": (ev_cnt / (ev_dur / 1e9)) if (ev_cnt and ev_dur) else None,
+            "prompt_tokens": int(pe_cnt) if pe_cnt else None,
+            "completion_tokens": int(ev_cnt) if ev_cnt else None,
+        }
+        return content
 
     def _build_local_pipe(self):
         """Build the transformers pipeline once. ZeroGPU-aware."""
