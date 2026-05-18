@@ -280,7 +280,7 @@ def build_module_7_tab():
 | **Validation** | 5-fold TimeSeriesSplit — no future→past leakage |
 | **Explainability** | SHAP TreeExplainer — exact attributions (see notebook) |
 | **Uncertainty** | 90% bootstrap confidence intervals on all SKU lift estimates |
-| **RAM usage** | < 50MB — within 8GB constraint |
+| **RAM usage** | < 50MB (lightweight CPU-friendly footprint) |
 | **Features** | 16 features: price, time, lags, rolling stats, promo history, product attributes |
 | **Total promo weeks analysed** | {ai_context['metrics']['total_promo_weeks']:,} |
 | **Median lift across SKUs** | {ai_context['metrics']['median_lift_pct']}% |
