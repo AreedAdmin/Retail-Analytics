@@ -706,7 +706,9 @@ def build_overview_tab():
     snap     = compute_sku_snapshot(df, 8)
     fig_line = make_line_chart(df)
     fig_bar  = make_bar_chart(df)
-    fig_gau  = make_gauge(float(kpis['number_of_promotions'] / kpis['total_periods'] * 100))
+    # Promo percentage: out of all possible (sku × period) combinations
+    promo_pct = float(kpis['number_of_promotions'] / (kpis['total_skus'] * kpis['total_periods']) * 100)
+    fig_gau  = make_gauge(promo_pct)
 
     # Header + KPI row
     gr.HTML(value=build_header_html(kpis))

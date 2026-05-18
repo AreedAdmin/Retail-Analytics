@@ -17,86 +17,148 @@ gradio dashboard/app/main.py
 The app will be available at `http://localhost:7860` (or 7861+ if ports are in use)
 
 ### Status
-- ✅ **Module 1 (Overview)**: COMPLETE - Professional dark BI dashboard with KPI cards, charts, tables, and collapsible sections (Project Description, Key Findings, Key Assumptions)
-- ✅ **Data Integration**: Real data from `data/data_raw.csv` (44 SKUs, 104 weeks ~1.9 years) with automatic date-to-period conversion
-- ✅ **Data Pipeline**: Period indexing fixed - dates converted to numeric week numbers (1-104) automatically on load
-- ⏳ **Modules 2-10**: To be implemented (Data Explorer, Analytics, ML, AI, Export)
-- ✨ **Features**: Responsive collapsible sections, professional dark theme, all KPIs calculated from real data
+- ✅ **Module 1 (Overview)**: COMPLETE - Professional dark BI dashboard with KPI cards, charts, tables
+  - Real data: 44 SKUs, **100 weeks (~1.9 years)** (FIXED from 104)
+  - All KPIs dynamically calculated from CSV data
+  - Weekly Sales Trend, Top Performers, Promo Score (36%), Status Snapshot
+  
+- ✅ **Module 7 (Promotion Lift Model)**: COMPLETE - XGBoost counterfactual model with SHAP explainability
+  - Modern design with gradient buttons, hover effects, emerald accents
+  - OOS Performance metrics, Lift %, Incremental Sales, Heatmap, SKU drill-down
+  - AI narrative generation with [Data-grounded] labels
+  - Download CSV button with professional styling
+  - Full 90% bootstrap confidence intervals on all estimates
+  
+- ⏳ **Modules 2-6, 8-10**: Placeholder navigation (not yet implemented)
 
 ---
 
 ## Architecture Overview
 
-### Module 1 - Overview (Implemented)
+### Module 1 - Overview (✅ Complete)
 
-**KPI Cards:**
-- Total SKUs: 44 unique products analyzed
-- Data Periods: 104 weeks (1.9 years)
-- Average Price: Calculated from all SKUs
-- Promotions Run: Total promotion instances in dataset
+**KPI Cards (All Real Data):**
+- **Total SKUs**: 44 unique products
+- **Data Periods**: **100 weeks** (1.9 years) ← Fixed from 104
+- **Average Price**: $44.43 (calculated from data)
+- **Promotions Run**: 1,575 total instances
 
 **Visualizations:**
-- Weekly Sales Trend: Line chart (Teal + Orange promoted sales)
-- Top Performers: Ranked list with gold/silver/bronze badges
-- Promo Score: Half-doughnut gauge (% promo instances per week)
-- Sales by Functionality: Horizontal bar chart
-- SKU Status Snapshot: Table with 8 SKUs (Online/Active/Low status)
-
-**Documentation Sections (Collapsible):**
-- 📋 Project Description & Navigation: Sidebar guide
-- ⭐ Key Findings: Auto-populated from Module 3-7 outputs
-- ✓ Key Assumptions: 6 documented assumptions (data, causality, stationarity, etc.)
+- Weekly Sales Trend: Line + area chart (Teal total, Orange promoted)
+- Top Performers: SKU 25 (100,839 sales), SKU 30, SKU 15, etc.
+- Promo Score: **36% gauge** (was 1575%, FIXED)
+  - Calculation: (1575 promos) / (44 SKUs × 100 weeks) × 100 = 36%
+- Sales by Functionality: Bar chart by product category
+- SKU Status Snapshot: 8-row table with AVG SALES, PRICE, PROMO%, STATUS
 
 **Styling:**
-- Professional dark theme (Navy #0d1b2a, Teal #00d4aa, Blue #3b82f6)
-- All text in white (#ffffff)
-- Interactive collapsible sections with blue text
-- SKU 25 highlighted in green, SKU 42 in orange
-- Smooth animations (0.25s cubic-bezier)
+- Dark theme: Navy #0d1b2a, Teal #00d4aa, Emerald accents
+- Cleaner sidebar: Logo/description removed for minimalism
+- All KPIs are **100% real data** (no placeholders)
 
 ---
 
-### Three Main Components
+### Module 7 - Promotion Lift Model (✅ Complete)
 
-#### 1. **Dashboard** (`dashboard/`)
+**Model Overview:**
+- Algorithm: XGBoost Gradient Boosted Trees + SHAP
+- Target: `log1p(weekly_sales)` (stabilized across 44 SKUs)
+- Ensemble: 60% ML + 40% matched control (±8 weeks)
+- Validation: 5-fold TimeSeriesSplit (no future→past leakage)
+- Uncertainty: 90% bootstrap confidence intervals
+
+**UI Components:**
+- **Model Architecture** section: Expandable table with all specs
+- **Key Findings badges**: High performers (>20%), Moderate (5-20%), Negligible (<5%), Low evidence
+- **OOS Metrics panel**: Model performance KPIs
+- **Incremental Sales bar chart**: Per-SKU estimates with CI bands
+- **Lift % bar chart**: Percentage increase due to promo
+- **Heatmap**: SKU × Week lift visualization
+- **SKU drill-down**: Interactive dropdown + time-series detail chart
+- **Download button**: Export CSV with full results
+
+**Design (Modern & Polished):**
+- ✨ Gradient buttons with emerald (#00d4aa) + hover effects
+- 🎨 Card containers with subtle gradients + border accents
+- 💚 Emerald badges with scale animations on hover
+- 📝 Teal-accented summary textboxes with left border
+- 🔽 Styled dropdowns + emoji icons on section titles
+- ⚡ Smooth transitions (0.3s cubic-bezier) + shadow effects
+
+**Data Source:**
+- `ml/ml_promotions_pricing/outputs/promotion_output.csv` (1,575 rows)
+- `ml/ml_promotions_pricing/outputs/sku_lift_summary.csv` (44 SKUs with stats)
+- `ml/ml_promotions_pricing/outputs/ai_context_module7.json` (metrics + findings)
+
+---
+
+## Three Main Components
+
+### 1. **Dashboard** (`dashboard/`)
 The user-facing Gradio application with persistent sidebar navigation.
 
 ```
 dashboard/
-├── app/main.py          # Gradio entry point - sidebar + module routing
-├── modules/             # 10 module implementations
-│   ├── overview.py              # Module 1: Overview
-│   ├── data_explorer.py         # Module 2: Data Explorer
-│   ├── promotion_effectiveness.py   # Module 3
-│   ├── price_elasticity.py      # Module 4
-│   ├── scenario_simulator.py    # Module 5
-│   ├── demand_forecasting.py    # Module 6 (ML output)
-│   ├── promotion_lift_model.py  # Module 7 (ML output)
-│   ├── chat_interface.py        # Module 8 (AI output)
-│   ├── critical_reflection.py   # Module 9
-│   └── appendix_export.py       # Module 10
+├── app/main.py          # Gradio entry point - dark theme + modules
+├── modules/             # Module implementations
+│   ├── overview.py              # Module 1: Overview (COMPLETE)
+│   ├── module_7.py              # Module 7: Promotion Lift (COMPLETE)
+│   └── module_8_chat.py         # Module 8: Chat Interface (placeholder)
+├── analytics/           # Analytics layer
+│   ├── common/              
+│   │   ├── schemas.py           # Integration contracts
+│   │   ├── kpi_definitions.py   # KPI registry
+│   │   ├── data_loader.py       # Load & normalize CSV
+│   │   └── kpi_calculator.py    # Compute KPIs
+│   ├── promotions/
+│   ├── pricing/
+│   └── scenarios/
 └── components/          # Reusable UI components
-    ├── kpi_cards.py             # KPI metric cards
-    ├── plotly_charts.py         # Plotly wrapper components
-    ├── data_tables.py           # Paginated data tables
-    └── ai_narratives.py         # AI summary pop-ups
-└── analytics/           # Analytics layer (consolidated under dashboard)
-    ├── common/              # Shared utilities
-    │   ├── schemas.py           # Integration contracts (ForecastOutput, etc.)
-    │   ├── kpi_definitions.py   # KPI registry and thresholds
-    │   ├── data_loader.py       # Load & normalize raw CSV
-    │   └── kpi_calculator.py    # Compute KPI values (TBD)
-    ├── promotions/          # Promotion lift analysis
-    ├── pricing/             # Price elasticity & scenarios
-    └── scenarios/           # Scenario simulator
 ```
 
-**Responsibilities:**
-- User interface and routing
-- Visualization layout
-- Click-to-summarise event handlers
-- Multi-select functionality
-- State management
+**Sidebar Navigation (Clean):**
+- Overview (active)
+- Analytics: Promotions, Price Elasticity, Scenarios
+- Machine Learning: Forecasting, Promo Lift
+- AI: Chat Interface, Reflection, Export
+
+**All KPIs:**
+- Calculated dynamically from `data/data_raw.csv`
+- **NO hardcoded placeholders** — everything is real data
+- Updated automatically if CSV changes
+
+---
+
+## Recent Changes (Session 6)
+
+### ✅ Data Corrections
+- Fixed data periods: `104 → 100 weeks` (1.9 years)
+- Fixed simulated data fallback: Now uses 100 periods instead of 104
+
+### ✅ Dashboard Styling
+- Removed logo/description from sidebar (cleaner UI)
+- Updated CSS for Module 7 with modern effects
+
+### ✅ Module 7 Redesign
+- Complete visual overhaul with emerald theme
+- Gradient buttons, hover effects, smooth animations
+- Better section organization with emojis
+- Professional badges and metric cards
+
+### ✅ PROMO SCORE Fix
+- **Before**: 1575% (incorrect calculation)
+- **After**: 36% (correct: 1575 / (44×100) × 100)
+- Calculation now uses actual SKU × period matrix
+
+### ✅ Data Validation
+- Confirmed: 44 SKUs, 100 weeks, all real data
+- No placeholders in any visualization
+- Top SKUs, Sales Trend, Promo Score all calculated from CSV
+
+### ✅ Deployment
+- GitHub (salomee branch): All changes committed
+- HF Spaces: Synced and deployed
+- Both environments consistent
 
 #### 2. **Analytics** (`dashboard/analytics/`)
 Analytical calculations and statistical models (consolidated under dashboard team).
