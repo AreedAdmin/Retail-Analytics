@@ -266,39 +266,49 @@ add(`
 <div class="kicker">Architecture</div>
 <h2>The stack — a <span class="ac">layered cake</span></h2>
 <div class="fill"><div style="display:flex;gap:18px;align-items:stretch">
- <div style="flex:1;display:flex;flex-direction:column;gap:12px">
-  <div style="background:var(--panel);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:10px;padding:18px 20px">
-   <div style="font:600 12px/1 var(--mono);letter-spacing:.18em;color:var(--text)">CLIENT · Presentation</div>
-   <div style="font-size:13px;color:var(--muted);margin-top:8px">Gradio app · 11 module tabs · charts · KPIs · click‑to‑summarise</div>
-  </div>
-  <div style="background:var(--panel);border:1px solid var(--border);border-top:3px solid #79838f;border-radius:10px;padding:18px 20px">
-   <div style="font:600 12px/1 var(--mono);letter-spacing:.18em;color:var(--text)">SERVICES · ML &amp; Analytics</div>
-   <div style="display:flex;gap:12px;margin-top:12px">
-    ${[
-      ['Demand Forecasting','HistGBR · ml/'],
-      ['Promotion Lift','XGBoost · ml/'],
-      ['Price Elasticity + Scenario','OLS · analytics/'],
-    ].map(s=>`<div style="flex:1;background:var(--elev);border:1px solid var(--border);
-       border-radius:8px;padding:13px 14px;text-align:center">
-       <div style="font:600 12px/1.3 var(--mono);color:var(--text)">${s[0]}</div>
-       <div style="font-size:11px;color:var(--muted);margin-top:6px">${s[1]}</div></div>`).join('')}
+ <div style="flex:1;display:flex;flex-direction:column;border:1.5px dashed var(--line);
+   border-radius:14px;padding:14px;background:rgba(77,155,255,.04)">
+  <div style="font:600 11px/1 var(--mono);letter-spacing:.2em;color:var(--accent);margin-bottom:12px">
+   🤗 DEPLOYED · HUGGING FACE SPACES — free CPU, in‑process</div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+   <div style="background:var(--panel);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:10px;padding:16px 20px">
+    <div style="font:600 12px/1 var(--mono);letter-spacing:.18em;color:var(--text)">CLIENT · Presentation</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:8px">Gradio app · 11 module tabs · charts · KPIs · click‑to‑summarise</div>
+   </div>
+   <div style="background:var(--panel);border:1px solid var(--border);border-top:3px solid #79838f;border-radius:10px;padding:16px 20px">
+    <div style="font:600 12px/1 var(--mono);letter-spacing:.18em;color:var(--text)">SERVICES · ML &amp; Analytics</div>
+    <div style="display:flex;gap:12px;margin-top:12px">
+     ${[
+       ['Demand Forecasting','HistGBR · ml/'],
+       ['Promotion Lift','XGBoost · ml/'],
+       ['Price Elasticity + Scenario','OLS · analytics/'],
+     ].map(s=>`<div style="flex:1;background:var(--elev);border:1px solid var(--border);
+        border-radius:8px;padding:13px 14px;text-align:center">
+        <div style="font:600 12px/1.3 var(--mono);color:var(--text)">${s[0]}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">${s[1]}</div></div>`).join('')}
+    </div>
+   </div>
+   <div style="background:var(--panel);border:1px solid var(--border);border-top:3px solid #79838f;border-radius:10px;padding:16px 20px">
+    <div style="font:600 12px/1 var(--mono);letter-spacing:.18em;color:var(--text)">DATA · Foundation</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:8px">data_raw.csv · schemas.py contracts · validated, cached loaders</div>
    </div>
   </div>
-  <div style="background:var(--panel);border:1px solid var(--border);border-top:3px solid #79838f;border-radius:10px;padding:18px 20px">
-   <div style="font:600 12px/1 var(--mono);letter-spacing:.18em;color:var(--text)">DATA · Foundation</div>
-   <div style="font-size:13px;color:var(--muted);margin-top:8px">data_raw.csv · schemas.py contracts · validated, cached loaders</div>
+ </div>
+ <div style="width:256px;display:flex;flex-direction:column;border:1.5px dashed var(--line);
+   border-radius:14px;padding:14px;background:var(--soft)">
+  <div style="font:600 11px/1 var(--mono);letter-spacing:.2em;color:var(--accent);margin-bottom:12px">
+   ☁ DEPLOYED · OLLAMA CLOUD</div>
+  <div style="flex:1;background:var(--panel);border:1px solid var(--border);border-radius:10px;
+    padding:16px;display:flex;flex-direction:column;justify-content:center;gap:10px">
+   <div style="font:600 12px/1 var(--mono);letter-spacing:.18em;color:var(--accent)">AI LAYER · sidecar</div>
+   <div style="font-size:12px;color:var(--muted);line-height:1.9">ai/services<br>context → LLMClient<br>→ guardrail → telemetry<br>→ <span class="ac">gpt‑oss:120b</span></div>
+   <div style="font-size:11px;color:var(--dim);margin-top:4px">callable from every layer</div>
   </div>
  </div>
- <div style="width:248px;background:var(--soft);border:1px solid var(--line);
-   border-radius:10px;padding:18px;display:flex;flex-direction:column;justify-content:center;gap:10px">
-   <div style="font:600 12px/1 var(--mono);letter-spacing:.18em;color:var(--accent)">AI LAYER · sidecar</div>
-   <div style="font-size:12px;color:var(--muted);line-height:1.9">ai/services<br>context → LLMClient<br>→ guardrail → telemetry<br>→ <span class="ac">Ollama Cloud</span></div>
-   <div style="font-size:11px;color:var(--dim);margin-top:4px">callable from every layer</div>
- </div>
 </div>
-<div class="sub" style="margin-top:14px">Each layer depends only on the one below via frozen contracts; the AI layer is a sidecar every layer can call.</div>
+<div class="sub" style="margin-top:14px">Two deployment targets: the Client / Services / Data stack runs on <span class="ac">Hugging Face Spaces</span> (free CPU, models in‑process); the AI layer is a remote sidecar on <span class="ac">Ollama Cloud</span>.</div>
 </div>`,
-`The mental model for the whole system before we drill in: a layered cake — Client on top, Services in the middle, Data foundation at the base, integrated only through frozen contracts, with the AI layer as a sidecar any layer can call. The next slides go one layer / service deep.`);
+`The mental model before we drill in: a layered cake — Client on top, Services in the middle, Data at the base, integrated only through frozen contracts. Note the two deployment boundaries: the whole stack ships on a free Hugging Face Space with models running in‑process, while the AI layer is a remote sidecar on Ollama Cloud, callable from any layer. The next slides go one service deep.`);
 
 /* 7 — FORECAST */
 add(`

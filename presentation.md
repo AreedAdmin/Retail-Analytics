@@ -197,33 +197,39 @@ loaders raise a clear "run the notebook" error rather than silently breaking.
 *(Placed before the per-service deep-dives — the one-glance mental model.)*
 
 ```
-   ┌────────────────────────────────────────────────────┐  ╔══════════════╗
-   │  CLIENT · Presentation                              │  ║  AI LAYER    ║
-   │  Gradio app · 11 tabs · charts · KPIs               │  ║  (sidecar)   ║
-   ├────────────────────────────────────────────────────┤  ║              ║
-   │  SERVICES · ML & Analytics                          │◀─║ ai/services  ║
-   │  ┌────────────┐ ┌────────────┐ ┌─────────────────┐  │  ║ context →    ║
-   │  │ Demand     │ │ Promotion  │ │ Price Elasticity │  │  ║ LLMClient →  ║
-   │  │ Forecasting│ │ Lift       │ │ + Scenario       │  │  ║ guardrail →  ║
-   │  │ HistGBR    │ │ XGBoost    │ │ OLS              │  │  ║ telemetry →  ║
-   │  └────────────┘ └────────────┘ └─────────────────┘  │  ║ Ollama Cloud ║
-   ├────────────────────────────────────────────────────┤  ║              ║
-   │  DATA · Foundation                                  │  ║              ║
-   │  data_raw.csv · schemas.py · cached loaders         │  ║              ║
-   └────────────────────────────────────────────────────┘  ╚══════════════╝
+ ╔══ DEPLOYED · HUGGING FACE SPACES (free CPU) ══════════╗  ╔═ DEPLOYED ═══╗
+ ║ ┌────────────────────────────────────────────────────┐ ║  ║ OLLAMA CLOUD ║
+ ║ │  CLIENT · Presentation                              │ ║  ╟──────────────╢
+ ║ │  Gradio app · 11 tabs · charts · KPIs               │ ║  ║  AI LAYER    ║
+ ║ ├────────────────────────────────────────────────────┤ ║  ║  (sidecar)   ║
+ ║ │  SERVICES · ML & Analytics                          │◀───║ ai/services  ║
+ ║ │  ┌────────────┐ ┌────────────┐ ┌─────────────────┐  │ ║  ║ context →    ║
+ ║ │  │ Demand     │ │ Promotion  │ │ Price Elasticity │  │ ║  ║ LLMClient →  ║
+ ║ │  │ Forecasting│ │ Lift       │ │ + Scenario       │  │ ║  ║ guardrail →  ║
+ ║ │  │ HistGBR    │ │ XGBoost    │ │ OLS              │  │ ║  ║ telemetry →  ║
+ ║ │  └────────────┘ └────────────┘ └─────────────────┘  │ ║  ║ gpt‑oss:120b ║
+ ║ ├────────────────────────────────────────────────────┤ ║  ╚══════════════╝
+ ║ │  DATA · Foundation                                  │ ║
+ ║ │  data_raw.csv · schemas.py · cached loaders         │ ║
+ ║ └────────────────────────────────────────────────────┘ ║
+ ╚════════════════════════════════════════════════════════╝
         each layer ⇄ the one below via frozen contracts
 ```
 
 **One hero visual:** a 3-tier cake — **Client** on top, **Services** in the
 middle, **Data** at the base — each tier depending only on the tier below
-through frozen contracts. The **AI layer** is a sidecar pillar callable from
+through frozen contracts. The whole stack sits inside one **deployment box:
+Hugging Face Spaces** (free CPU, models in-process). The **AI layer** is a
+separate deployment box — a sidecar on **Ollama Cloud** — callable from
 every tier.
 
-**Speaker notes:** Use this as the orientation slide before drilling into
-each service. Top-down: the client only consumes; services are produced
-offline and integrate via contracts; data is the fixed foundation; the AI
-layer is not a tier but a sidecar any layer can call. The next slides go one
-service deep.
+**Speaker notes:** Orientation slide before the service deep-dives. Two
+deployment boundaries are the headline: (1) Client/Services/Data ship
+together on a free Hugging Face Space with the ML/analytics models running
+in-process — no separate model server; (2) the AI layer is a remote sidecar
+on Ollama Cloud (gpt-oss:120b), called by any layer. Inside the HF box,
+top-down: client consumes, services are produced offline and integrate via
+contracts, data is the fixed foundation. The next slides go one service deep.
 
 ---
 
