@@ -197,16 +197,20 @@ loaders raise a clear "run the notebook" error rather than silently breaking.
 *(Placed before the per-service deep-dives — the one-glance mental model.)*
 
 ```
-   ┌──────────────────────────────────────────────┐    ╔══════════════╗
-   │  CLIENT · Presentation                        │    ║  AI LAYER    ║
-   │  Gradio app · 11 tabs · charts · KPIs         │    ║  (sidecar)   ║
-   ├──────────────────────────────────────────────┤    ║              ║
-   │  SERVICES · ML & Analytics                    │ ◀──║ ai/services  ║
-   │  Forecast · Promo Lift · Elasticity · Scenario│    ║ context →    ║
-   ├──────────────────────────────────────────────┤    ║ LLMClient →  ║
-   │  DATA · Foundation                            │    ║ guardrail →  ║
-   │  data_raw.csv · schemas.py · cached loaders   │    ║ Ollama Cloud ║
-   └──────────────────────────────────────────────┘    ╚══════════════╝
+   ┌────────────────────────────────────────────────────┐  ╔══════════════╗
+   │  CLIENT · Presentation                              │  ║  AI LAYER    ║
+   │  Gradio app · 11 tabs · charts · KPIs               │  ║  (sidecar)   ║
+   ├────────────────────────────────────────────────────┤  ║              ║
+   │  SERVICES · ML & Analytics                          │◀─║ ai/services  ║
+   │  ┌────────────┐ ┌────────────┐ ┌─────────────────┐  │  ║ context →    ║
+   │  │ Demand     │ │ Promotion  │ │ Price Elasticity │  │  ║ LLMClient →  ║
+   │  │ Forecasting│ │ Lift       │ │ + Scenario       │  │  ║ guardrail →  ║
+   │  │ HistGBR    │ │ XGBoost    │ │ OLS              │  │  ║ telemetry →  ║
+   │  └────────────┘ └────────────┘ └─────────────────┘  │  ║ Ollama Cloud ║
+   ├────────────────────────────────────────────────────┤  ║              ║
+   │  DATA · Foundation                                  │  ║              ║
+   │  data_raw.csv · schemas.py · cached loaders         │  ║              ║
+   └────────────────────────────────────────────────────┘  ╚══════════════╝
         each layer ⇄ the one below via frozen contracts
 ```
 
