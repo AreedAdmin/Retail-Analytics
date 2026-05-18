@@ -10,6 +10,10 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 
+# Runtime AI logs (regenerated on every run)
+ai/services/telemetry_log.jsonl
+ai/services/failure_log.jsonl
+
 # Notebooks
 .ipynb_checkpoints/
 
