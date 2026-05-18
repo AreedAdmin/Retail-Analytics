@@ -333,11 +333,27 @@ SIDEBAR_HTML = """
 # APP BUILDER
 # ─────────────────────────────────────────────────────────────
 
-# JS: flip the body class and remember the choice in localStorage.
+# JS: attach a real DOM click listener to the theme button. Run at
+# app.load (with retry, idempotent) because Gradio 6 / HF Spaces does not
+# reliably bind Button.click(js=...) for JS-only events.
 THEME_TOGGLE_JS = """
 () => {
-    const light = document.body.classList.toggle('light-theme');
-    localStorage.setItem('ra-theme', light ? 'light' : 'dark');
+    const bind = () => {
+        const btn = document.querySelector('.theme-toggle button');
+        if (!btn) return false;
+        if (btn.dataset.raThemeWired) return true;
+        btn.dataset.raThemeWired = '1';
+        btn.addEventListener('click', () => {
+            const light = document.body.classList.toggle('light-theme');
+            try { localStorage.setItem('ra-theme', light ? 'light' : 'dark'); }
+            catch (e) {}
+        });
+        return true;
+    };
+    if (!bind()) {
+        let n = 0;
+        const t = setInterval(() => { if (bind() || ++n > 50) clearInterval(t); }, 150);
+    }
 }
 """
 
@@ -398,12 +414,13 @@ def build_app() -> gr.Blocks:
             # ── SIDEBAR ──
             with gr.Column(scale=1, min_width=240, elem_classes=["sidebar-col"]):
                 gr.HTML(value=SIDEBAR_HTML)
-                theme_btn = gr.Button(
+                gr.Button(
                     "🌗  Light / Dark",
                     elem_classes=["theme-toggle"],
                     size="sm",
                 )
-                theme_btn.click(fn=None, inputs=None, outputs=None, js=THEME_TOGGLE_JS)
+                # Click handler is attached via THEME_TOGGLE_JS at app.load
+                # (robust DOM listener; see note on that constant).
 
             # ── MAIN CONTENT ──
             # One tab bar; each module owns its own gr.Tab (no double nesting).
@@ -427,6 +444,7 @@ def build_app() -> gr.Blocks:
 
         # Restore saved theme + wire the sidebar as the navigation.
         app.load(fn=None, inputs=None, outputs=None, js=THEME_RESTORE_JS)
+        app.load(fn=None, inputs=None, outputs=None, js=THEME_TOGGLE_JS)
         app.load(fn=None, inputs=None, outputs=None, js=SIDEBAR_NAV_JS)
 
     return app
