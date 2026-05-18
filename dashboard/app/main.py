@@ -23,6 +23,7 @@ from dashboard.modules import (
     demand_forecasting,
     promotion_lift_model,
     chat_interface,
+    ai_analytics,
     critical_reflection,
     appendix_export,
 )
@@ -210,6 +211,20 @@ body.sb-wired .tab-nav { display: none !important; }
 ::-webkit-scrollbar-thumb:hover { background: var(--scroll-thumb-h); }
 
 footer { display: none !important; }
+
+/* ── Gradio 6 white-gap fix ──────────────────────────────────────────
+   Gradio 6 renamed/restructured its DOM, so the dark rules above miss
+   several structural wrappers and the default white shows through in
+   the gaps between cards. Paint only the LAYOUT containers (not widgets
+   or charts) with the theme background; var(--bg) still flips for the
+   light theme. */
+html, gradio-app, .gradio-container,
+.gradio-container .main, .main, .wrap, .contain, .app, .fillable,
+.tabs, .tabitem, .tab-container, .tabitem > .gap,
+.column, .row, .gap {
+    background-color: var(--bg) !important;
+}
+.gradio-container { max-width: 100% !important; }
 """
 
 # ─────────────────────────────────────────────────────────────
@@ -299,14 +314,15 @@ SIDEBAR_HTML = """
 
   <div class="sb-sect"><span>Intelligence</span><hr></div>
   <a class="sb-item" data-idx="7"><span class="sb-idx">08</span><span class="sb-label">AI Assistant</span></a>
+  <a class="sb-item" data-idx="8"><span class="sb-idx">AI</span><span class="sb-label">AI Analytics</span></a>
 
   <div class="sb-sect"><span>System</span><hr></div>
-  <a class="sb-item" data-idx="8"><span class="sb-idx">09</span><span class="sb-label">Critical Reflection</span></a>
-  <a class="sb-item" data-idx="9"><span class="sb-idx">10</span><span class="sb-label">Appendix &amp; Export</span></a>
+  <a class="sb-item" data-idx="9"><span class="sb-idx">09</span><span class="sb-label">Critical Reflection</span></a>
+  <a class="sb-item" data-idx="10"><span class="sb-idx">10</span><span class="sb-label">Appendix &amp; Export</span></a>
 
   <div class="sb-foot">
     <div><span class="dot"></span><b>System Online</b></div>
-    <div>43 SKUs &middot; 10/10 Modules</div>
+    <div>44 SKUs &middot; 10 Modules + AI Ops</div>
     <div>Build v1.0 &middot; AI Grounded</div>
   </div>
 </div>
@@ -317,21 +333,35 @@ SIDEBAR_HTML = """
 # APP BUILDER
 # ─────────────────────────────────────────────────────────────
 
-# JS: flip the body class and remember the choice in localStorage.
+# JS: attach a real DOM click listener to the theme button. Run at
+# app.load (with retry, idempotent) because Gradio 6 / HF Spaces does not
+# reliably bind Button.click(js=...) for JS-only events.
 THEME_TOGGLE_JS = """
 () => {
-    const light = document.body.classList.toggle('light-theme');
-    localStorage.setItem('ra-theme', light ? 'light' : 'dark');
+    const bind = () => {
+        const btn = document.querySelector('.theme-toggle button');
+        if (!btn) return false;
+        if (btn.dataset.raThemeWired) return true;
+        btn.dataset.raThemeWired = '1';
+        btn.addEventListener('click', () => {
+            const light = document.body.classList.toggle('light-theme');
+            try { localStorage.setItem('ra-theme', light ? 'light' : 'dark'); }
+            catch (e) {}
+        });
+        return true;
+    };
+    if (!bind()) {
+        let n = 0;
+        const t = setInterval(() => { if (bind() || ++n > 50) clearInterval(t); }, 150);
+    }
 }
 """
 
-# JS: on first load, restore the saved theme (default dark).
+# Light-only app: always apply the light theme on load. (The dark theme /
+# toggle were removed — light matches Gradio's default surfaces, which
+# eliminates the white-gap mismatch.)
 THEME_RESTORE_JS = """
-() => {
-    if (localStorage.getItem('ra-theme') === 'light') {
-        document.body.classList.add('light-theme');
-    }
-}
+() => { document.body.classList.add('light-theme'); }
 """
 
 # JS: turn the static sidebar into real navigation. Sidebar item order
@@ -382,12 +412,7 @@ def build_app() -> gr.Blocks:
             # ── SIDEBAR ──
             with gr.Column(scale=1, min_width=240, elem_classes=["sidebar-col"]):
                 gr.HTML(value=SIDEBAR_HTML)
-                theme_btn = gr.Button(
-                    "🌗  Light / Dark",
-                    elem_classes=["theme-toggle"],
-                    size="sm",
-                )
-                theme_btn.click(fn=None, inputs=None, outputs=None, js=THEME_TOGGLE_JS)
+                # (Theme toggle removed — the app is light-only.)
 
             # ── MAIN CONTENT ──
             # One tab bar; each module owns its own gr.Tab (no double nesting).
@@ -405,6 +430,7 @@ def build_app() -> gr.Blocks:
                     demand_forecasting.build_demand_forecasting_tab()
                     promotion_lift_model.build_promotion_lift_model_tab()
                     chat_interface.build_chat_tab()
+                    ai_analytics.build_ai_analytics_tab()
                     critical_reflection.build_critical_reflection_tab()
                     appendix_export.build_appendix_export_tab()
 

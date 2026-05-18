@@ -24,11 +24,20 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 from ai.services.llm_client import get_llm_client
-from ai.services import context_builder, guardrail
+from ai.services import context_builder, guardrail, telemetry
 
 logger = logging.getLogger(__name__)
 
 PROMPT_DIR = Path(__file__).resolve().parents[1] / "prompts"
+
+
+def _generate(system: str, user: str, max_tokens: int,
+              source: str, category: str, excerpt: str = "") -> str:
+    """Run the LLM and record one telemetry event (best-effort)."""
+    client = get_llm_client()
+    raw = client.generate(system=system, user=user, max_tokens=max_tokens)
+    telemetry.record(source, category, client.last_metrics or {}, excerpt)
+    return raw
 
 
 def load_prompt(name: str) -> str:
@@ -64,7 +73,8 @@ def chat(message: str, history: List[Any], scope: str = "all") -> str:
         f"USER QUESTION: {message.strip()}"
     )
 
-    raw = get_llm_client().generate(system=system, user=user, max_tokens=500)
+    category = telemetry.categorize(message)
+    raw = _generate(system, user, 500, "chat", category, message.strip())
     safe, _ = guardrail.apply(raw, ctx, module=f"chat:{scope}", prompt=message)
     return safe
 
@@ -85,11 +95,11 @@ def summarise_payload(ctx: dict, module: str = "summarise:payload") -> str:
     template = load_prompt("click_to_summarise.txt")
     user = template.replace("{context_json}", json.dumps(ctx, indent=2))
 
-    raw = get_llm_client().generate(
-        system="You are a precise retail analytics summariser.",
-        user=user,
-        max_tokens=300,
-    )
+    scope = module.split(":")[-1]
+    category = telemetry.categorize_scope(scope, ctx.get("module_name", ""))
+    raw = _generate("You are a precise retail analytics summariser.", user,
+                    300, "summarise", category,
+                    excerpt=ctx.get("module_name", scope))
     safe, _ = guardrail.apply(raw, ctx, module=module, prompt=template)
     return safe
 
@@ -103,11 +113,9 @@ def multi_summary(scopes: List[str]) -> str:
     template = load_prompt("multi_select_summary.txt")
     user = template.replace("{context_json}", json.dumps(ctx, indent=2))
 
-    raw = get_llm_client().generate(
-        system="You are a precise retail analytics summariser.",
-        user=user,
-        max_tokens=500,
-    )
+    category = telemetry.categorize_scope("+".join(scopes), " ".join(scopes))
+    raw = _generate("You are a precise retail analytics summariser.", user,
+                    500, "multi", category, excerpt="+".join(scopes))
     safe, _ = guardrail.apply(
         raw, ctx, module=f"multi:{'+'.join(scopes)}", prompt=template
     )
@@ -126,10 +134,9 @@ def generate_lift_narrative(context_override: Dict[str, Any] | None = None) -> s
     prompt_body = template.replace("{context_json}", json.dumps(ctx, indent=2))
 
     # The module-7 template embeds its own SYSTEM section, so pass it as user.
-    raw = get_llm_client().generate(
-        system="You are an expert retail analytics assistant.",
-        user=prompt_body,
-        max_tokens=600,
-    )
+    raw = _generate("You are an expert retail analytics assistant.",
+                    prompt_body, 600, "narrative",
+                    telemetry.categorize_scope("module_7"),
+                    excerpt="module_7_lift_narrative")
     safe, _ = guardrail.apply(raw, ctx, module="module_7", prompt=prompt_body)
     return safe

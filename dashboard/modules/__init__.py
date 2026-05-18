@@ -25,6 +25,7 @@ __all__ = [
     "demand_forecasting",       # Module 6
     "promotion_lift_model",     # Module 7
     "chat_interface",           # Module 8
+    "ai_analytics",             # AI Ops (prompt mix + AI performance)
     "critical_reflection",      # Module 9
     "appendix_export",          # Module 10
 ]

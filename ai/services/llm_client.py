@@ -33,9 +33,21 @@ import os
 import re
 import json
 import logging
+from pathlib import Path
 from typing import Optional
 
 logger = logging.getLogger(__name__)
+
+# Load the repo-root .env so OLLAMA_API_KEY / API keys are picked up without
+# exporting them manually. Best-effort — python-dotenv is optional and this
+# must run BEFORE resolve_backend() reads os.environ. Existing env vars win
+# (override=False) so HF Spaces secrets are never clobbered.
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(Path(__file__).resolve().parents[2] / ".env", override=False)
+except Exception:  # pragma: no cover - dotenv optional
+    pass
 
 DEFAULT_LOCAL_MODEL = os.environ.get("LLM_MODEL_ID", "Qwen/Qwen2.5-7B-Instruct")
 
@@ -78,7 +90,38 @@ class LLMClient:
         self.backend = (backend or resolve_backend()).lower()
         self.model_id = model_id or DEFAULT_LOCAL_MODEL
         self._pipe = None  # lazily-built transformers pipeline
+        self._native = None        # native timing dict set by _gen_ollama
+        self.last_metrics = {}     # populated after every generate() call
         logger.info("LLMClient backend=%s model=%s", self.backend, self.model_id)
+
+    @staticmethod
+    def _est_tokens(text: str) -> int:
+        """Cheap token estimate (~4 chars/token) for backends without counts."""
+        return max(1, round(len(text or "") / 4))
+
+    def _build_metrics(self, backend: str, ok: bool, wall_ms: float,
+                       user: str, text: str) -> dict:
+        nat = self._native or {}
+        if nat:
+            pt = nat.get("prompt_tokens")
+            ct = nat.get("completion_tokens")
+            total_ms = nat.get("total_ms", wall_ms)
+            ttft_ms = nat.get("ttft_ms")
+            tps = nat.get("tps")
+        else:
+            pt, ct = self._est_tokens(user), self._est_tokens(text)
+            total_ms, ttft_ms = wall_ms, None
+            tps = (ct / (wall_ms / 1000.0)) if wall_ms > 0 else None
+        return {
+            "backend": backend,
+            "success": bool(ok),
+            "ttft_ms": None if ttft_ms is None else round(float(ttft_ms), 1),
+            "tps": None if tps is None else round(float(tps), 2),
+            "total_ms": round(float(total_ms), 1),
+            "prompt_tokens": pt,
+            "completion_tokens": ct,
+            "native_timing": bool(nat),
+        }
 
     # -- public ---------------------------------------------------------------
 
@@ -118,21 +161,42 @@ class LLMClient:
         return chain
 
     def generate(self, system: str, user: str, max_tokens: int = 600) -> str:
+        import time
+
+        self._native = None
+        t0 = time.perf_counter()
+        backend_used, ok = self.backend, True
         try:
-            return self._dispatch(self.backend, system, user, max_tokens)
+            text = self._dispatch(self.backend, system, user, max_tokens)
         except Exception as e:  # never crash the dashboard
             logger.exception("LLM generation failed on backend=%s", self.backend)
+            text = None
             for fb in self._fallback_chain():
                 try:
                     logger.warning("falling back to backend=%s", fb)
-                    return self._dispatch(fb, system, user, max_tokens)
+                    self._native = None
+                    text = self._dispatch(fb, system, user, max_tokens)
+                    backend_used = fb
+                    break
                 except Exception:
                     logger.exception("fallback backend=%s failed", fb)
-            return (
-                f"⚠️ AI backend ({self.backend}) unavailable: {e}\n\n"
-                "Falling back to a grounded extract of the available data:\n\n"
-                f"{self._gen_stub(system, user)}"
-            )
+            if text is None:
+                ok, backend_used = False, "stub"
+                self._native = None
+                text = (
+                    f"⚠️ AI backend ({self.backend}) unavailable: {e}\n\n"
+                    "Falling back to a grounded extract of the available data:\n\n"
+                    f"{self._gen_stub(system, user)}"
+                )
+        wall_ms = (time.perf_counter() - t0) * 1000.0
+        try:
+            self.last_metrics = self._build_metrics(
+                backend_used, ok, wall_ms, user, text)
+        except Exception:  # metrics must never break generation
+            logger.exception("metric build failed")
+            self.last_metrics = {"backend": backend_used, "success": ok,
+                                 "total_ms": round(wall_ms, 1)}
+        return text
 
     # -- backends -------------------------------------------------------------
 
@@ -183,22 +247,86 @@ class LLMClient:
             headers={"Authorization": f"Bearer {api_key}"},
             timeout=timeout,
         )
-        resp = client.chat(
+        # gpt-oss is a reasoning model: hidden reasoning consumes tokens, so
+        # give the visible answer real headroom or it can come back empty.
+        num_predict = max(int(max_tokens), 512)
+        import time as _t
+
+        # Stream so TTFT / TPS are measured directly — Ollama Cloud strips
+        # the native eval_duration fields, so wall-clock streaming is the
+        # only reliable source of these metrics.
+        stream = client.chat(
             model=model,
             messages=[
                 {"role": "system", "content": system},
                 {"role": "user", "content": user},
             ],
-            options={"temperature": 0, "num_predict": max_tokens},
+            options={"temperature": 0, "num_predict": num_predict},
+            stream=True,
         )
-        # ollama returns a ChatResponse (attr access) or a dict, by version
-        msg = getattr(resp, "message", None)
-        if msg is None:
-            msg = resp["message"]
-        content = getattr(msg, "content", None)
-        if content is None:
-            content = msg["content"]
-        return content.strip()
+
+        def _piece(chunk, field):
+            m = getattr(chunk, "message", None)
+            if m is None and isinstance(chunk, dict):
+                m = chunk.get("message")
+            if m is None:
+                return ""
+            v = getattr(m, field, None)
+            if v is None and isinstance(m, dict):
+                v = m.get(field)
+            return v or ""
+
+        t0 = _t.perf_counter()
+        first_t = last_t = None
+        content_parts, think_parts, n_tok = [], [], 0
+        final = None
+        for chunk in stream:
+            c, th = _piece(chunk, "content"), _piece(chunk, "thinking")
+            if c or th:
+                if first_t is None:
+                    first_t = _t.perf_counter()
+                last_t = _t.perf_counter()
+                n_tok += 1
+            if c:
+                content_parts.append(c)
+            elif th:
+                think_parts.append(th)
+            final = chunk
+
+        content = ("".join(content_parts).strip()
+                   or "".join(think_parts).strip())
+        if not content:
+            # Don't return a silent blank — let generate() fall back.
+            raise RuntimeError("Ollama returned an empty response")
+
+        now = _t.perf_counter()
+
+        def _rf(field):
+            v = getattr(final, field, None)
+            if v is None and isinstance(final, dict):
+                v = final.get(field)
+            try:
+                return float(v) if v is not None else None
+            except (TypeError, ValueError):
+                return None
+
+        ev_cnt = _rf("eval_count")
+        pe_cnt = _rf("prompt_eval_count")
+        gen_s = (last_t - first_t) if (first_t and last_t) else None
+        if ev_cnt and gen_s and gen_s > 0:
+            tps = ev_cnt / gen_s
+        elif gen_s and gen_s > 0:
+            tps = n_tok / gen_s
+        else:
+            tps = None
+        self._native = {
+            "total_ms": (now - t0) * 1000.0,
+            "ttft_ms": ((first_t - t0) * 1000.0) if first_t else None,
+            "tps": tps,
+            "prompt_tokens": int(pe_cnt) if pe_cnt else self._est_tokens(user),
+            "completion_tokens": int(ev_cnt) if ev_cnt else n_tok,
+        }
+        return content
 
     def _build_local_pipe(self):
         """Build the transformers pipeline once. ZeroGPU-aware."""

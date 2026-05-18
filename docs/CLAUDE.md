@@ -8,7 +8,7 @@ This is an Imperial College group assignment to build an **AI-augmented retail m
 
 **Before making any non-trivial change, read every `.md` file in `docs/`** to gather full context. The `docs/` folder is the canonical brief for this project — assignment scope, module spec, team rules, tech stack, and this `CLAUDE.md` itself all live there. New docs added to `docs/` should be treated as required reading too, so list the directory (`ls docs/`) and read whatever is present, not only the files named here.
 
-The repo is currently a scaffold: top-level folders (`ai/`, `analytics/`, `dashboard/`, `ml/`, `data/`) and their subfolders exist as empty placeholders. `requirements.txt` is empty. The only real content right now is `data/data_raw.csv` and the docs.
+The project is built and deployed. Implemented: the demand-forecasting pipeline (`ml/ml_forecasting/forecasting.ipynb` → contract CSVs in `ml/ml_forecasting/outputs/`), the Gradio dashboard (`dashboard/`, incl. Module 1 Overview and Module 6 Demand Forecasting), the AI narrative/chat layer (`ai/services/`) on **Ollama Cloud** with API/offline fallback, and Hugging Face Spaces deployment (`app.py`, `deploy.md`). `requirements.txt` is pinned to the validated environment. Other modules (price elasticity, scenario simulator, promo lift) are in progress under their teams' folders.
 
 ## Dataset
 
@@ -50,14 +50,14 @@ The AI layer is part of the grade, not a feature. When adding anything that call
 4. **Hallucination guardrails** — the prompt must instruct the model to say "I don't have data on this" when context is insufficient; the guardrail layer (`ai/guardrails/`) then validates numbers in the response against the context payload.
 5. **Failure logging** — bad AI outputs are captured for Module 9 (Critical Reflection). Don't silently fix prompts; log the failure case.
 
-LLM provider is Claude (Anthropic) or OpenAI via API. Local LLMs via Ollama are allowed within the 8 GB RAM cap. **API keys are GitHub Repository Secrets only** — never commit a `.env`, and read via `os.environ[...]`.
+The AI narrative layer runs on **Ollama Cloud** (`gpt-oss:120b-cloud`, primary) with OpenAI/Anthropic API fallback and an offline grounded extractor when no key is set (`ai/services/llm_client.py`). **API keys are GitHub Repository / Hugging Face Space secrets only** — never commit a `.env`, and read via `os.environ[...]`.
 
 ## Hard rules — these are non-negotiable
 
 From `docs/rules.md`:
 
 - **snake_case everywhere** — files, variables, functions, columns. Not camelCase, not PascalCase. The raw CSV happens to use snake_case already; keep it that way through processing.
-- **8 GB RAM cap** on every model. No model is allowed to break this — it must run on every team member's laptop. If you need XGBoost/LightGBM, fine. If you need a large neural net, quantise or drop it.
+- **Lightweight, CPU-only models.** The forecasting model is a few MB with sub-second inference and runs on a free Hugging Face Spaces CPU instance — no GPU. Gradient boosting (HistGBM/XGBoost/LightGBM) is fine; the LLM is not run in-process (Ollama Cloud handles it).
 - **`requirements.txt` is pinned, root-level, single file.** All teams contribute. Pin exact versions (`pandas==2.2.2`, not `pandas`). Update it in the same commit that introduces the import.
 - **Branching:** `ml`, `ai`, `analytics` branches → PR to `main`. Never push directly to `main`. The Dashboard/integration lead does the final merge.
 - **AI-generated code must carry `# AI-assisted: reviewed by [name]`** and be reviewed by a human before commit.
@@ -65,15 +65,12 @@ From `docs/rules.md`:
 
 ## Common commands
 
-The repo has no source files yet, so the conventional commands aren't wired up. Once code lands, expect:
-
 - Install deps: `pip install -r requirements.txt`
-- Run the app: `python -m dashboard.app` (or `gradio dashboard/app.py` — pick one and document it here when the entry point is created)
-- Lint/format: `ruff check .` and `black .` (both listed in `docs/tech_stack.md` as tooling)
-- Tests: `pytest` (per-module test runs: `pytest ml/forecasting/`)
-- Memory check before merging a model: profile with `memory_profiler` to confirm < 8 GB
-
-Update this section once the entry points actually exist.
+- Run the app: `python app.py` (or `python -m dashboard.app.main`) — same entrypoint Hugging Face Spaces uses
+- Regenerate forecasting outputs: run `ml/ml_forecasting/forecasting.ipynb` top-to-bottom (see `ml/ml_forecasting/README.md`)
+- Lint/format: `ruff check .` and `black .`
+- Tests: `pytest` (per-module: `pytest ml/...`)
+- Deploy: push to the Hugging Face Space `main` (see `deploy.md`)
 
 ## When working in this repo
 

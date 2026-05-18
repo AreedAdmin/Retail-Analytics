@@ -331,7 +331,7 @@ pytest dashboard/test_e2e.py  # Full workflow
 
 ### Performance Profiling
 ```bash
-# Ensure < 8 GB RAM usage
+# Optional: quick performance/footprint profile
 python -m memory_profiler dashboard/app/main.py
 ```
 

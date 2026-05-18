@@ -14,8 +14,8 @@ from typing import List, Tuple
 import plotly.graph_objects as go
 
 # Accent palette — readable on both light and dark panels.
-ACCENT = "#00b894"
-ACCENTS = ["#00b894", "#3b82f6", "#f59e0b", "#7c5cbf", "#ef4444"]
+ACCENT = "#00a888"
+ACCENTS = ["#00a888", "#2563eb", "#d97706", "#7c5cbf", "#dc2626"]
 
 CARD_CSS = """
 <style>
@@ -77,7 +77,7 @@ def plotly_layout(height: int = 360, **extra) -> dict:
     base = dict(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#8a9bb5", size=11),
+        font=dict(color="#51607a", size=11),
         margin=dict(l=12, r=12, t=12, b=12),
         height=height,
         xaxis=dict(gridcolor="rgba(128,140,165,0.22)",
@@ -87,7 +87,7 @@ def plotly_layout(height: int = 360, **extra) -> dict:
                    linecolor="rgba(128,140,165,0.35)",
                    tickfont=dict(size=10)),
         legend=dict(orientation="h", y=-0.18, x=0,
-                    font=dict(size=11, color="#8a9bb5"),
+                    font=dict(size=11, color="#51607a"),
                     bgcolor="rgba(0,0,0,0)"),
     )
     base.update(extra)
