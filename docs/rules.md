@@ -94,15 +94,20 @@ Retail-Group-Assignment/
 
 ---
 
-## 7. AI Model Memory Constraints
+## 7. Model Footprint & Hosting
 
-- Any ML or AI model used in the project must run within **8 GB of RAM maximum**.
-- This ensures the dashboard and models run on all team members' machines without hardware failures.
+- ML models are lightweight and **CPU-only** — the forecasting model is a
+  few MB with sub-second inference. The app deploys on a **free Hugging Face
+  Spaces CPU instance**; no GPU is used or required.
 - Guidelines:
-  - Prefer lightweight models: linear regression, gradient boosting (XGBoost/LightGBM), small neural networks.
-  - For LLM API calls , use API endpoints or run local LLMs but respect the memory wall we have in place.
-  - If a model exceeds 8 GB, it must be replaced or quantised before being merged.
-  - Test memory usage with `memory_profiler` or equivalent before submitting model code.
+  - Prefer lightweight models: linear regression, gradient boosting
+    (HistGBM/XGBoost/LightGBM), classical time series.
+  - The LLM is **not** run in-process: the AI narrative layer calls
+    **Ollama Cloud** (`gpt-oss:120b-cloud`) with OpenAI/Anthropic API
+    fallback and an offline grounded extractor — so model size never
+    constrains the dashboard.
+  - Keep `requirements.txt` pinned to the validated environment so the
+    Space build is reproducible.
 
 ---
 

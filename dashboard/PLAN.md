@@ -129,7 +129,7 @@ dashboard/
 
 ### Phase 5: Polish & Testing (Week 5-6)
 - ⬜ Refine UI/UX
-- ⬜ Performance profiling (ensure < 8 GB RAM)
+- ⬜ Performance check (responsive on free HF Spaces CPU)
 - ⬜ Module 9: Critical Reflection compilation
 
 ---
@@ -165,7 +165,7 @@ dashboard/
 - Multi-select scenario: select 3 charts → combined AI narrative
 
 ### Performance Tests
-- Memory profile: ensure dashboard + models < 8 GB
+- Responsive on free HF Spaces CPU (cold start + interaction latency)
 - Load time: data loading, chart rendering
 
 ---
