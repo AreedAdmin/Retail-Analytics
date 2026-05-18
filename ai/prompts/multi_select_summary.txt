@@ -1,0 +1,16 @@
+You are given combined CONTEXT from several dashboard modules.
+
+Write a single integrated executive briefing (120-180 words) for a marketing
+manager that connects the modules: what is working, what is weak, and the one
+action you would prioritise next.
+
+Rules:
+- Reference only figures present in the CONTEXT.
+- Explicitly attribute each figure to its module (the [Module] tags in the
+  findings indicate the source).
+- Plain English, paragraph form, no bullet points.
+- End with a final line of exactly [Data-grounded] or [General inference].
+
+CONTEXT
+-------
+{context_json}

@@ -1,38 +1,48 @@
-# Core dependencies (pinned versions)
+# Pinned to the VALIDATED environment (everything — notebook, dashboard,
+# Ollama client — was smoke-tested on these exact versions). The previous
+# pins included versions that do not exist on PyPI (pandas 3.0.3, numpy
+# 2.4.4, scikit-learn 1.8.0) and would fail `pip install` on HF Spaces.
+# Deployment path = Ollama Cloud for the AI layer (see deploy.md), so the
+# heavy local-LLM stack (torch/transformers) is OPTIONAL and commented out
+# to keep the free CPU Space build small and reliable.
 
 # Application and UI
-gradio==4.41.0
-plotly==6.7.0
-pydantic==2.6.4
+gradio==6.9.0
+plotly==5.24.1
+pydantic==2.12.3
 python-dotenv==1.0.0
 
 # Data Processing
-pandas==3.0.3
-numpy==2.4.4
-pyarrow==15.0.1
-scipy==1.12.0
+pandas==2.3.3
+numpy==2.0.2
+pyarrow==19.0.1
+scipy==1.15.1
 
 # Machine Learning and Forecasting
-scikit-learn==1.8.0
-statsmodels==0.14.0
-# xgboost==2.0.3  # Optional, if memory budget allows
-
-# Evaluation and Explainability
-# shap==0.44.0  # Optional
+scikit-learn==1.6.1          # MUST match the version the joblib artifact is trained with
+statsmodels==0.14.6
+# xgboost  # Optional, if memory budget allows
 
 # LLM and AI Integration
-ollama==0.2.1  # Local LLM runtime
-openai==1.28.1
-anthropic==0.28.0
-tiktoken==0.7.0  # Token estimation
+ollama==0.4.7                # used for Ollama Cloud (gpt-oss:120b-cloud) + local
+# Optional API fallbacks (only needed if you set the matching API key):
+# openai==1.28.1
+# anthropic==0.28.0
+# tiktoken==0.7.0
 
-# Quality and Tooling
+# Optional in-Space local open-model backend (NOT used on the Ollama Cloud
+# path; uncomment only for a ZeroGPU/CPU local-model deployment — torch is
+# large and the most common free-Space build failure):
+# transformers==4.44.2
+# torch==2.4.0
+# accelerate==0.33.0
+# spaces==0.30.2
+
+# Quality and Tooling (dev only)
 pytest==7.4.4
 ruff==0.3.7
 black==24.3.0
-# mypy==1.9.0  # Optional, if strict typing is adopted
 
 # Additional utilities
-requests==2.31.0
+requests==2.32.5
 python-dateutil==2.8.2
-

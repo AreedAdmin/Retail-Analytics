@@ -1,0 +1,12 @@
+Summarise the chart described by the CONTEXT block below in 2-4 plain-English
+sentences for a marketing manager.
+
+Rules:
+- Reference only figures present in the CONTEXT.
+- Lead with the single most decision-relevant takeaway.
+- No bullet points; short paragraph form.
+- End with a final line of exactly [Data-grounded] or [General inference].
+
+CONTEXT
+-------
+{context_json}
