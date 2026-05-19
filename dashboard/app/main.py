@@ -409,11 +409,6 @@ def build_app() -> gr.Blocks:
 
         with gr.Row(elem_classes=["full-row"]):
 
-            # ── SIDEBAR ──
-            with gr.Column(scale=1, min_width=240, elem_classes=["sidebar-col"]):
-                gr.HTML(value=SIDEBAR_HTML)
-                # (Theme toggle removed — the app is light-only.)
-
             # ── MAIN CONTENT ──
             # One tab bar; each module owns its own gr.Tab (no double nesting).
             # Modules 4 (Price Elasticity) & 5 (Scenario Simulator) pending.
@@ -434,9 +429,8 @@ def build_app() -> gr.Blocks:
                     critical_reflection.build_critical_reflection_tab()
                     appendix_export.build_appendix_export_tab()
 
-        # Restore saved theme + wire the sidebar as the navigation.
+        # Restore saved theme
         app.load(fn=None, inputs=None, outputs=None, js=THEME_RESTORE_JS)
-        app.load(fn=None, inputs=None, outputs=None, js=SIDEBAR_NAV_JS)
 
     return app
 
